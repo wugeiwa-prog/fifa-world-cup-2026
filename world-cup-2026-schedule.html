@@ -470,7 +470,7 @@ body:not(.locked) .access-gate{display:none}
   <section class="panel" id="notesPanel">
     <h2>说明</h2>
     <div class="status-grid">
-      <div class="status-card"><b>赛果进度</b><span>截至 2026年6月12日 20:30（Europe/Rome）：已录入 2 场赛果，剩余 102 场。</span></div>
+      <div class="status-card"><b>赛果进度</b><span id="resultSummary">截至 2026年6月12日 20:30（Europe/Rome）：已录入 2 场赛果，剩余 102 场。</span></div>
       <div class="status-card"><b>竞猜同步</b><span>云端同步已启用，未登录也可查看实时余额榜。</span></div>
       <div class="status-card"><b>竞猜开放</b><span>仅开放意大利时间今天和明天、且对阵已确定的未完赛比赛。</span></div>
       <div class="status-card"><b>排名来源</b><span>FIFA 男足世界排名官方更新时间：2026年6月11日；下一次：2026年7月20日。</span></div>
@@ -480,7 +480,7 @@ body:not(.locked) .access-gate{display:none}
       ② 每组前 2 名 + 8 个成绩最好的小组第 3 名晋级 32 强；淘汰赛"最佳第3"对手待小组赛结束后确定。<br>
       ③ 淘汰赛平局进行 2×15 分钟加时，仍平则点球决胜。<br>
       ④ 每场主时间为意大利时间 CEST（UTC+2），中国时间为北京时间 CST（UTC+8），本页按 +6 小时换算并自动标注次日。<br>
-      ⑤ 本页赛程与阵容为静态快照，不自动联网抓取；比分快照截至 2026年6月12日 20:30（Europe/Rome），已录入墨西哥 2-0 南非、韩国 2-1 捷克。后续比赛结束后，把最新官方比分写入内联赛程数据，页面会自动更新比分、赛事进度、剩余场次并结算相关竞猜。<br>
+      ⑤ 本页赛程与阵容为静态快照，不在浏览器内抓取 FIFA；比分快照截至 2026年6月12日 20:30（Europe/Rome），已录入墨西哥 2-0 南非、韩国 2-1 捷克。后续比赛结束后，只需把官方最终比分写入云端结果数据，页面会自动更新比分、赛事进度、剩余场次并结算相关竞猜。<br>
       ⑥ 强队阵容为官方名单中的核心球员摘录，完整名单请点击各队 FIFA 球队页核验。<br>
       ⑦ 世界排名依据 FIFA/Coca-Cola 男足世界排名，官方更新时间为 2026年6月11日，下一次官方更新为 2026年7月20日；48 支参赛队名次按 FIFA 官方页面与 ESPN 对 June 2026 排名转述核对。<br>
       ⑧ 中国大陆收看：中央广播电视总台持有 2026 世界杯独家全媒体转播权及分许可权利，CCTV-5、CCTV-5+、央视频、央视体育等提供赛事直播与内容服务；咪咕和小红书为官方持权转播合作方。<br>
@@ -760,15 +760,25 @@ function enrichMatch(m){
   return {...m,home,away,status:m.s?"done":"scheduled",score:m.s||"",importance,tags,stars,watchNote,searchText,sourceUpdatedAt:SNAPSHOT_AT};
 }
 const M=RAW_MATCHES.map(enrichMatch);
-const RESULTS=Object.fromEntries(M.filter(m=>m.score).map(m=>[matchId(m),m.score]));
+const STATIC_RESULTS=Object.fromEntries(M.filter(m=>m.score).map(m=>[matchId(m),{score:m.score,status:"final",source:"static",updatedAt:SNAPSHOT_AT}]));
+function resultScore(entry){
+  if(!entry)return "";
+  if(typeof entry==="string")return entry;
+  const status=String(entry.status||"").toLowerCase();
+  if(entry.score&&(status==="final"||status==="done"||status==="full-time"||status==="ft"))return entry.score;
+  return "";
+}
+function resultUpdatedAt(entry){
+  return typeof entry==="object"&&entry?entry.updatedAt||entry.sourceUpdatedAt||"":SNAPSHOT_AT;
+}
 function applyResults(){
   M.forEach(m=>{
-    const s=RESULTS[matchId(m)];
+    const id=matchId(m),entry=(DB?.results&&DB.results[id])||STATIC_RESULTS[id];
+    const s=resultScore(entry);
     if(!s)return;
-    m.s=s;m.score=s;m.status="done";
+    m.s=s;m.score=s;m.status="done";m.sourceUpdatedAt=resultUpdatedAt(entry)||SNAPSHOT_AT;
   });
 }
-applyResults();
 
 const WK=["周日","周一","周二","周三","周四","周五","周六"];
 const STAGE_NAME={group:"小组赛",r32:"32强",r16:"16强",qf:"1/4决赛",fin:"决赛阶段"};
@@ -805,6 +815,13 @@ function updateTournamentProgress(){
   document.getElementById("progressPct").textContent=`${pct}%`;
   document.getElementById("progressBar").style.width=`${pct}%`;
   document.getElementById("progressDetail").textContent=`已完成 ${done} 场 · 剩余 ${remain} 场`;
+}
+function updateResultSummary(){
+  const el=document.getElementById("resultSummary");
+  if(!el)return;
+  const total=M.length,done=M.filter(m=>m.status==="done"||m.score).length,remain=total-done;
+  const cloud=DB?.resultSync?.lastCheckedAt?`；官方结果最近核对：${DB.resultSync.lastCheckedAt}`:"";
+  el.textContent=`已录入 ${done} 场赛果，剩余 ${remain} 场${cloud}`;
 }
 
 function render(){
@@ -988,9 +1005,9 @@ const MID2M={};M.forEach(m=>MID2M[matchId(m)]=m);
 
 /* ---- 持久化 ---- */
 const DB_KEY="wc2026_betting_v1",USER_KEY="wc2026_user",MAX_USERS=11,INIT_BAL=1000,MIN_STAKE=10,MAX_PCT=0.5;
-let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{}},JSON.parse(localStorage.getItem(DB_KEY))||{});}
-  catch(e){return {users:{},bets:[],daily:{}};}})();
-DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};
+let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{}},JSON.parse(localStorage.getItem(DB_KEY))||{});}
+  catch(e){return {users:{},bets:[],daily:{},results:{},resultSync:{}};}})();
+DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};DB.results=DB.results||{};DB.resultSync=DB.resultSync||{};
 const DB_CHANNEL=typeof BroadcastChannel!=="undefined"?new BroadcastChannel("wc2026_betting_sync"):null;
 const REMOTE_SYNC={
   enabled:true,
@@ -1003,8 +1020,8 @@ const REMOTE_SYNC={
 let remotePulling=false,remotePushTimer=null,remoteLastWrite=0;
 let remoteStatus="已配置，正在连接";
 function normalizeDB(db){
-  db=Object.assign({users:{},bets:[],daily:{}},db||{});
-  db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};
+  db=Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{}},db||{});
+  db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};
   return db;
 }
 function publicDB(db){
@@ -1027,7 +1044,14 @@ function mergeDB(local,remote){
     const old=betsById[b.id];
     betsById[b.id]=!old||((b.updatedAt||b.settledAt||b.placedAt||0)>(old.updatedAt||old.settledAt||old.placedAt||0))?b:old;
   });
-  return normalizeDB({users,bets:Object.values(betsById).sort((a,b)=>(a.placedAt||0)-(b.placedAt||0)),daily:{...remote.daily,...local.daily}});
+  const results={...local.results};
+  Object.entries(remote.results).forEach(([id,rr])=>{
+    const lr=results[id];
+    const rt=Date.parse(resultUpdatedAt(rr))||0,lt=Date.parse(resultUpdatedAt(lr))||0;
+    results[id]=!lr||rt>=lt?rr:lr;
+  });
+  const resultSync={...local.resultSync,...remote.resultSync};
+  return normalizeDB({users,bets:Object.values(betsById).sort((a,b)=>(a.placedAt||0)-(b.placedAt||0)),daily:{...remote.daily,...local.daily},results,resultSync});
 }
 function remoteEnabled(){return REMOTE_SYNC.enabled&&REMOTE_SYNC.url&&REMOTE_SYNC.anonKey;}
 function remoteHeaders(extra={}){
@@ -1267,7 +1291,7 @@ function betButtonHtml(m){
   const src=o.source?`<span class="src">${esc(o.source)} 快照</span>`:`<span class="src">模型赔率</span>`;
   return `<div class="betline"><span class="odds"><span>主 <b>${o.h.toFixed(2)}</b></span><span>平 <b>${o.d.toFixed(2)}</b></span><span>客 <b>${o.a.toFixed(2)}</b></span>${src}</span><button class="bet-btn sm" data-bet="${matchId(m)}">竞猜</button></div>`;
 }
-function refreshAll(){settleBets();renderLoginBar();renderWallet();renderLeaderboard();updateTournamentProgress();render();emojify(document.body);}
+function refreshAll(){applyResults();settleBets();renderLoginBar();renderWallet();renderLeaderboard();updateTournamentProgress();updateResultSummary();render();emojify(document.body);}
 
 /* ---- 事件绑定（一次）---- */
 document.getElementById("loginGo").addEventListener("click",doLogin);
