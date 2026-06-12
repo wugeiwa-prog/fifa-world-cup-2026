@@ -72,8 +72,8 @@ async function getOfficialText(){
   const browser = await chromium.launch({ headless: true });
   try{
     const page = await browser.newPage({ userAgent: "Mozilla/5.0" });
-    await page.goto(FIFA_URL, { waitUntil: "networkidle", timeout: 60_000 });
-    await page.waitForTimeout(5000);
+    await page.goto(FIFA_URL, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await page.waitForTimeout(12_000);
     return await page.evaluate(() => document.body.innerText);
   }finally{
     await browser.close();
@@ -112,7 +112,15 @@ if(!candidates.length){
   process.exit(0);
 }
 
-const officialText = await getOfficialText();
+let officialText = "";
+try{
+  officialText = await getOfficialText();
+}catch(e){
+  console.warn(`FIFA page fetch failed: ${e.message}`);
+  state.resultSync = {source:"FIFA", mode:"post-match-only", lastCheckedAt:new Date().toISOString(), updated:0, warning:"fifa-fetch-failed"};
+  if(!DRY_RUN)await saveState(state);
+  process.exit(0);
+}
 let updated = 0;
 for(const m of candidates){
   const home = rawName(m.h), away = rawName(m.a);
