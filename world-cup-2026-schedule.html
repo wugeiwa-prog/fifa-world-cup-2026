@@ -183,7 +183,7 @@ body:not(.locked) .access-gate{display:none}
 .scard b{color:var(--ink)}
 .scard a{display:inline-flex;margin-top:8px;font-size:12px;color:var(--host-blue);font-weight:700;text-decoration:none}
 .scard a:hover{text-decoration:underline}
-.bcast{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bcast{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
 @media (max-width:620px){.bcast{grid-template-columns:1fr}}
 .bc{border:1px solid var(--line);border-radius:10px;padding:13px 15px;background:#FCFBF7}
 .bc b{font-size:15px}
@@ -439,8 +439,9 @@ body:not(.locked) .access-gate{display:none}
   </section>
 
   <section class="panel" id="broadcastPanel">
-    <h2>意大利收看渠道</h2>
+    <h2>收看渠道</h2>
     <div class="bcast">
+      <div class="bc"><b>🇨🇳 CCTV-5 · CCTV-5+ · 央视频</b><p>中国大陆：中央广播电视总台持有 2026 世界杯独家全媒体转播权；CCTV-5 直播 92 场，CCTV-5+ 并机播出小组赛末轮 12 场关键赛事，央视频/央视体育等客户端跟进。</p></div>
       <div class="bc"><b>📺 DAZN</b><p>全部 104 场比赛直播（订阅）</p></div>
       <div class="bc"><b>📡 Rai · RaiPlay</b><p>35 场免费直播，含揭幕战、半决赛与决赛</p></div>
     </div>
@@ -456,7 +457,8 @@ body:not(.locked) .access-gate{display:none}
       ⑤ 本页为静态快照，不自动联网刷新；比分数据截至 2026年6月12日 15:30（Europe/Rome），后续以 FIFA 官方实时数据为准。<br>
       ⑥ 强队阵容为官方名单中的核心球员摘录，完整名单请点击各队 FIFA 球队页核验。<br>
       ⑦ 世界排名依据 FIFA/Coca-Cola 男足世界排名，官方更新时间为 2026年6月11日，下一次官方更新为 2026年7月20日；48 支参赛队名次按 FIFA 官方页面与 ESPN 对 June 2026 排名转述核对。<br>
-      ⑧ 竞猜娱乐系统：限 10 名玩家，每人初始 1000 虚拟币，仅开放意大利时间今天和明天、且对阵已确定的未完赛比赛；可投注「胜平负 / 猜比分」。单注下限 10 币、上限为当前余额的 50%。赔率依据 2026年6月11日 FIFA 官方世界排名实力评分、经泊松模型推导（含约 6% 抽水），排行榜按虚拟币实时刷新并记录每日涨跌。同一浏览器/同源标签页会自动同步 localStorage 变化；跨设备同步需要后端数据库。比赛产生比分后自动结算。账号与战绩仅保存在本浏览器，纯属娱乐、无真实货币。
+      ⑧ 中国大陆收看：中央广播电视总台持有 2026 世界杯独家全媒体转播权及分许可权利，CCTV-5、CCTV-5+、央视频、央视体育等提供赛事直播与内容服务；咪咕和小红书为官方持权转播合作方。<br>
+      ⑨ 竞猜娱乐系统：限 11 名玩家，每人初始 1000 虚拟币，仅开放意大利时间今天和明天、且对阵已确定的未完赛比赛；可投注「胜平负 / 猜比分」。单注下限 10 币、上限为当前余额的 50%。赔率依据 2026年6月11日 FIFA 官方世界排名实力评分、经泊松模型推导（含约 6% 抽水），排行榜按虚拟币实时刷新并记录每日涨跌。同一浏览器/同源标签页会自动同步 localStorage 变化；配置 Supabase 后端后可跨设备同步 11 名玩家的账号、余额、投注和榜单。比赛产生比分后自动结算，纯属娱乐、无真实货币。
     </div>
   </section>
 </main>
@@ -928,14 +930,71 @@ function bettable(m){return !betLockReason(m);}
 const MID2M={};M.forEach(m=>MID2M[matchId(m)]=m);
 
 /* ---- 持久化 ---- */
-const DB_KEY="wc2026_betting_v1",USER_KEY="wc2026_user",MAX_USERS=10,INIT_BAL=1000,MIN_STAKE=10,MAX_PCT=0.5;
+const DB_KEY="wc2026_betting_v1",USER_KEY="wc2026_user",MAX_USERS=11,INIT_BAL=1000,MIN_STAKE=10,MAX_PCT=0.5;
 let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{}},JSON.parse(localStorage.getItem(DB_KEY))||{});}
   catch(e){return {users:{},bets:[],daily:{}};}})();
 DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};
 const DB_CHANNEL=typeof BroadcastChannel!=="undefined"?new BroadcastChannel("wc2026_betting_sync"):null;
+const REMOTE_SYNC={
+  enabled:false,
+  provider:"supabase",
+  url:"",
+  anonKey:"",
+  table:"wc2026_state",
+  rowId:"global"
+};
+let remotePulling=false,remotePushTimer=null,remoteLastWrite=0;
+function remoteEnabled(){return REMOTE_SYNC.enabled&&REMOTE_SYNC.url&&REMOTE_SYNC.anonKey;}
+function remoteHeaders(extra={}){
+  return {"apikey":REMOTE_SYNC.anonKey,"Authorization":`Bearer ${REMOTE_SYNC.anonKey}`,...extra};
+}
+async function remoteFetch(method,path,body){
+  const res=await fetch(`${REMOTE_SYNC.url.replace(/\/$/,"")}/rest/v1/${path}`,{
+    method,headers:remoteHeaders(body?{"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"}:{}),
+    body:body?JSON.stringify(body):undefined
+  });
+  if(!res.ok)throw new Error(`remote ${method} ${res.status}`);
+  return res.status===204?null:res.json();
+}
+async function pullRemoteDB(){
+  if(!remoteEnabled()||remotePulling)return;
+  remotePulling=true;
+  try{
+    const rows=await remoteFetch("GET",`${REMOTE_SYNC.table}?id=eq.${encodeURIComponent(REMOTE_SYNC.rowId)}&select=data,updated_at`);
+    const row=Array.isArray(rows)?rows[0]:null;
+    if(row?.data&&row.updated_at){
+      const ts=Date.parse(row.updated_at)||0;
+      if(ts>remoteLastWrite){
+        remoteLastWrite=ts;
+        DB=Object.assign({users:{},bets:[],daily:{}},row.data);
+        DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};
+        localStorage.setItem(DB_KEY,JSON.stringify(DB));
+        if(typeof refreshAll==="function")refreshAll();
+      }
+    }
+  }catch(e){console.warn("远程同步拉取失败",e);}
+  finally{remotePulling=false;}
+}
+function scheduleRemotePush(){
+  if(!remoteEnabled())return;
+  clearTimeout(remotePushTimer);
+  remotePushTimer=setTimeout(async()=>{
+    try{
+      const updated_at=new Date().toISOString();
+      await remoteFetch("POST",REMOTE_SYNC.table,{id:REMOTE_SYNC.rowId,data:DB,updated_at});
+      remoteLastWrite=Date.parse(updated_at);
+    }catch(e){console.warn("远程同步写入失败",e);}
+  },250);
+}
+function initRemoteSync(){
+  if(!remoteEnabled())return;
+  pullRemoteDB();
+  setInterval(pullRemoteDB,6000);
+}
 function saveDB(){
   localStorage.setItem(DB_KEY,JSON.stringify(DB));
   DB_CHANNEL?.postMessage({type:"db-updated",at:Date.now()});
+  scheduleRemotePush();
 }
 function reloadDB(){
   try{DB=Object.assign({users:{},bets:[],daily:{}},JSON.parse(localStorage.getItem(DB_KEY))||{});}
@@ -972,7 +1031,7 @@ async function doLogin(){
   const hash=await sha(p),ex=DB.users[u];
   if(ex){ if(ex.passHash!==hash){msg.textContent="密码错误";return;} }
   else{
-    if(Object.keys(DB.users).length>=MAX_USERS){msg.textContent="玩家已满 10 人，无法注册新账号";return;}
+    if(Object.keys(DB.users).length>=MAX_USERS){msg.textContent="玩家已满 11 人，无法注册新账号";return;}
     DB.users[u]={name:u,passHash:hash,balance:INIT_BAL};saveDB();snapshotDaily();
   }
   setCur(u);
@@ -1067,7 +1126,7 @@ function renderWallet(){
   document.getElementById("betRuleNote").textContent="仅开放今天/明天 · 本金 1000 币 · 单注 10 ~ 余额50%";
   const u=DB.users[curUser()];
   if(!u){
-    w.innerHTML=`<div class="bet-empty">未登录。<button class="bet-btn sm" id="walletLogin">竞猜登录 / 注册</button> 后即可下注（每人初始 1000 虚拟币）。</div>`;
+    w.innerHTML=`<div class="bet-empty">未登录。<button class="bet-btn sm" id="walletLogin">竞猜登录 / 注册</button> 后即可下注（最多 11 人，每人初始 1000 虚拟币）。</div>`;
     sl.innerHTML="";document.getElementById("walletLogin")?.addEventListener("click",()=>openModal("loginMask"));return;
   }
   const mine=DB.bets.filter(b=>b.user===u.name);
@@ -1090,9 +1149,11 @@ function renderWallet(){
 function renderLeaderboard(){
   const box=document.getElementById("leaderboard");
   document.getElementById("lbDate").textContent=`实时余额榜 · 每日记录涨跌 · ${todayRome}`;
-  document.getElementById("syncNote").textContent="未登录也可查看榜单。本页会同步同一浏览器/同源标签页内其他玩家的注册、投注和余额变化；跨设备实时同步需要后端数据库。";
+  document.getElementById("syncNote").textContent=remoteEnabled()
+    ?"未登录也可查看榜单。跨设备同步已启用：11 名玩家的账号、余额、投注和榜单会同步到后端。"
+    :"未登录也可查看榜单。同一浏览器/同源标签页会自动同步；如需跨设备实时同步，请填入 Supabase 后端配置。";
   const users=Object.values(DB.users).sort((a,b)=>b.balance-a.balance||a.name.localeCompare(b.name));
-  if(!users.length){box.innerHTML=`<div class="bet-empty">还没有玩家。点击右上角「竞猜登录」注册（限 10 人），开始竞猜吧。</div>`;return;}
+  if(!users.length){box.innerHTML=`<div class="bet-empty">还没有玩家。点击右上角「竞猜登录」注册（限 11 人），开始竞猜吧。</div>`;return;}
   const pk=prevDayKey(),prevRank={};
   if(pk)DB.daily[pk].slice().sort((a,b)=>b.balance-a.balance).forEach((r,i)=>prevRank[r.user]=i);
   const me=curUser(),openCount=n=>DB.bets.filter(b=>b.user===n&&b.status==="open").length;
@@ -1131,6 +1192,7 @@ document.getElementById("list").addEventListener("click",e=>{const b=e.target.cl
 /* ---- 启动 ---- */
 settleBets();
 snapshotDaily();
+initRemoteSync();
 refreshAll();
 </script>
 </body>
