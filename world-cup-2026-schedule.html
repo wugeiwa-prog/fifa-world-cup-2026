@@ -92,8 +92,10 @@ body:not(.locked) .access-gate{display:none}
 /* ---------- 工具栏 ---------- */
 .toolbar{position:sticky;top:0;z-index:20;background:rgba(250,248,242,.92);
   backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-.toolbar-in{max-width:1080px;margin:0 auto;padding:10px 20px;display:flex;gap:10px;
+.toolbar-in{max-width:1080px;margin:0 auto;padding:10px 20px;display:flex;gap:12px;
   align-items:center;flex-wrap:wrap}
+.nav-group{display:flex;align-items:center;gap:7px;min-width:0;flex:1 1 320px}
+.nav-label{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--ink-soft);letter-spacing:.12em}
 .tabs{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1;min-width:0}
 .tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--ink-soft);
   border-radius:999px;padding:6px 14px;font-size:13.5px;cursor:pointer;font-family:var(--cjk);
@@ -101,6 +103,8 @@ body:not(.locked) .access-gate{display:none}
 .tab:hover{border-color:var(--grass)}
 .tab.on{background:var(--pitch);border-color:var(--pitch);color:var(--chalk);font-weight:600}
 .tab.hot.on{background:var(--host-red);border-color:var(--host-red)}
+.tab.link{border-radius:7px;padding:6px 10px}
+.tab.link.on{background:#E8EEF9;border-color:#CAD7EF;color:var(--host-blue)}
 .search{flex:0 0 auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line);
   background:#fff;border-radius:999px;padding:6px 12px}
 .search input{border:none;outline:none;font-size:13.5px;width:130px;background:transparent;font-family:var(--cjk)}
@@ -184,6 +188,17 @@ body:not(.locked) .access-gate{display:none}
 .bc b{font-size:15px}
 .bc p{font-size:13px;color:var(--ink-soft);margin-top:3px}
 .notes{font-size:13px;color:var(--ink-soft);line-height:2}
+.rank-meta{font-size:12.5px;color:var(--ink-soft);margin-bottom:10px}
+.rank-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.rank-table th,.rank-table td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left}
+.rank-table th{font-size:12px;color:var(--ink-soft);font-weight:700;letter-spacing:.06em}
+.rank-table .rk{font-family:var(--num);font-size:18px;font-weight:800;color:var(--pitch);width:56px}
+.rank-table .rteam{display:flex;align-items:center;gap:7px;font-weight:700}
+.rank-table .code{font-family:var(--num);font-size:12px;color:var(--ink-soft);letter-spacing:.08em}
+.rank-table .pill{display:inline-flex;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;background:#EFEDE6;color:var(--ink-soft)}
+.rank-table .pill.top{background:#FBE9E5;color:#A12A20}
+.rank-table .pill.strong{background:#E8EEF9;color:var(--host-blue)}
+.rank-table .pill.host{background:#E5F4EB;color:#10663C}
 .foot{max-width:1080px;margin:0 auto;padding:0 20px 50px;font-size:12px;color:var(--ink-soft);text-align:center}
 .to-top{position:fixed;right:18px;bottom:18px;z-index:40;width:44px;height:44px;border-radius:50%;
   border:1px solid rgba(243,239,230,.45);background:var(--pitch);color:var(--chalk);
@@ -329,14 +344,29 @@ body:not(.locked) .access-gate{display:none}
 
 <nav class="toolbar" aria-label="筛选">
   <div class="toolbar-in">
-    <div class="tabs" id="tabs">
-      <button class="tab on" data-st="all">全部</button>
-      <button class="tab" data-st="group">小组赛</button>
-      <button class="tab" data-st="r32">32强</button>
-      <button class="tab" data-st="r16">16强</button>
-      <button class="tab" data-st="qf">1/4决赛</button>
-      <button class="tab" data-st="fin">半决赛·决赛</button>
-      <button class="tab hot" data-st="hot">重要赛事</button>
+    <div class="nav-group">
+      <span class="nav-label">赛程</span>
+      <div class="tabs" id="tabs">
+        <button class="tab on" data-st="all">全部</button>
+        <button class="tab" data-st="group">小组赛</button>
+        <button class="tab" data-st="r32">32强</button>
+        <button class="tab" data-st="r16">16强</button>
+        <button class="tab" data-st="qf">1/4决赛</button>
+        <button class="tab" data-st="fin">半决赛·决赛</button>
+        <button class="tab hot" data-st="hot">重要赛事</button>
+      </div>
+    </div>
+    <div class="nav-group">
+      <span class="nav-label">导航</span>
+      <div class="tabs" id="pageTabs">
+        <button class="tab link" data-target="betHall">竞猜</button>
+        <button class="tab link" data-target="betBoard">榜单</button>
+        <button class="tab link" data-target="rankings">排名</button>
+        <button class="tab link" data-target="groupsPanel">小组</button>
+        <button class="tab link" data-target="squadsPanel">阵容</button>
+        <button class="tab link" data-target="broadcastPanel">收看</button>
+        <button class="tab link" data-target="notesPanel">说明</button>
+      </div>
     </div>
     <label class="search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -361,17 +391,23 @@ body:not(.locked) .access-gate{display:none}
     <div id="leaderboard"></div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="rankings">
+    <h2>FIFA 世界排名</h2>
+    <div class="rank-meta">FIFA/Coca-Cola 男足世界排名 · 2026-06-11 更新 · 下次官方更新 2026-07-20</div>
+    <div id="rankingList"></div>
+  </section>
+
+  <section class="panel" id="groupsPanel">
     <h2>12 个小组</h2>
     <div class="groups" id="groups"></div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="squadsPanel">
     <h2>强队阵容</h2>
     <div class="squads" id="squads"></div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="broadcastPanel">
     <h2>意大利收看渠道</h2>
     <div class="bcast">
       <div class="bc"><b>📺 DAZN</b><p>全部 104 场比赛直播（订阅）</p></div>
@@ -379,7 +415,7 @@ body:not(.locked) .access-gate{display:none}
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="notesPanel">
     <h2>说明</h2>
     <div class="notes">
       ① 球场使用 FIFA 本届官方命名（SoFi → 洛杉矶体育场，MetLife → 纽约/新泽西体育场，阿兹特克 → 墨西哥城体育场）。<br>
@@ -388,7 +424,8 @@ body:not(.locked) .access-gate{display:none}
       ④ 每场主时间为意大利时间 CEST（UTC+2），中国时间为北京时间 CST（UTC+8），本页按 +6 小时换算并自动标注次日。<br>
       ⑤ 本页为静态快照，不自动联网刷新；比分数据截至 2026年6月12日 15:30（Europe/Rome），后续以 FIFA 官方实时数据为准。<br>
       ⑥ 强队阵容为官方名单中的核心球员摘录，完整名单请点击各队 FIFA 球队页核验。<br>
-      ⑦ 竞猜娱乐系统：限 10 名玩家，每人初始 1000 虚拟币，可对未开赛且对阵已定的比赛投注「胜平负 / 猜比分」；单注下限 10 币、上限为当前余额的 50%。赔率依据 2026 年 6 月 FIFA 官方世界排名实力评分、经泊松模型推导（含约 6% 抽水），排行榜按虚拟币每日更新。比赛产生比分后自动结算。账号与战绩仅保存在本浏览器（localStorage），纯属娱乐、无真实货币。
+      ⑦ 世界排名依据 FIFA/Coca-Cola 男足世界排名，官方更新时间为 2026年6月11日，下一次官方更新为 2026年7月20日；48 支参赛队名次按 FIFA 官方页面与 ESPN 对 June 2026 排名转述核对。<br>
+      ⑧ 竞猜娱乐系统：限 10 名玩家，每人初始 1000 虚拟币，仅开放意大利时间今天和明天、且对阵已确定的未完赛比赛；可投注「胜平负 / 猜比分」。单注下限 10 币、上限为当前余额的 50%。赔率依据 2026年6月11日 FIFA 官方世界排名实力评分、经泊松模型推导（含约 6% 抽水），排行榜按虚拟币实时刷新并记录每日涨跌。比赛产生比分后自动结算。账号与战绩仅保存在本浏览器（localStorage），纯属娱乐、无真实货币。
     </div>
   </section>
 </main>
@@ -735,6 +772,12 @@ document.getElementById("tabs").addEventListener("click",e=>{
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
   b.classList.add("on");curStage=b.dataset.st;render();
 });
+document.getElementById("pageTabs").addEventListener("click",e=>{
+  const b=e.target.closest("[data-target]");if(!b)return;
+  document.querySelectorAll("#pageTabs .tab").forEach(t=>t.classList.remove("on"));
+  b.classList.add("on");
+  document.getElementById(b.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});
+});
 document.getElementById("q").addEventListener("input",e=>{curQ=e.target.value;render();});
 window.addEventListener("scroll",()=>{
   toTop.classList.toggle("show",window.scrollY>520);
@@ -765,7 +808,8 @@ document.getElementById("squads").innerHTML=SQUADS.map(s=>{
 }).join("");
 
 /* ============ 竞猜娱乐系统 ============ */
-/* 赔率来源：以 2026 年 6 月 FIFA 官方世界排名（ESPN/FIFA 公布）构建球队实力评分，
+/* 赔率来源：以 FIFA 2026-06-11 官方男足世界排名构建球队实力评分；
+   页面文本核对自 ESPN 对 June 2026 FIFA 排名的完整转述。
    经泊松（Poisson）模型推导 1X2 与比分赔率（含约 6% 抽水）。 */
 const FIFA_RANK={
   "阿根廷":1,"西班牙":2,"法国":3,"英格兰":4,"葡萄牙":5,"巴西":6,"摩洛哥":7,"荷兰":8,"比利时":9,"德国":10,
@@ -775,6 +819,25 @@ const FIFA_RANK={
   "乌兹别克斯坦":50,"卡塔尔":56,"伊拉克":57,"南非":60,"沙特阿拉伯":61,"约旦":63,"波黑":64,"佛得角":67,
   "加纳":73,"库拉索":82,"海地":83,"新西兰":85
 };
+function rankTier(rank){
+  if(rank<=10)return ["top","TOP 10"];
+  if(rank<=30)return ["strong","前 30"];
+  return ["","参赛队"];
+}
+function renderRankings(){
+  const box=document.getElementById("rankingList");
+  const rows=Object.values(TEAMS).map(t=>({...t,rank:FIFA_RANK[t.nameZh]})).sort((a,b)=>a.rank-b.rank);
+  box.innerHTML=`<table class="rank-table"><thead><tr><th>排名</th><th>球队</th><th>小组</th><th>标签</th></tr></thead><tbody>${
+    rows.map(t=>{
+      const tier=rankTier(t.rank),flags=[];
+      if(STRONG_TEAMS.has(t.nameZh))flags.push(`<span class="pill strong">强队</span>`);
+      if(HOST_TEAMS.has(t.nameZh))flags.push(`<span class="pill host">东道主</span>`);
+      flags.unshift(`<span class="pill ${tier[0]}">${tier[1]}</span>`);
+      return `<tr><td class="rk">${t.rank}</td><td><div class="rteam"><span>${t.flag}</span><span>${t.nameZh}</span><span class="code">${t.fifaCode}</span></div></td><td>GROUP ${t.group}</td><td>${flags.join(" ")}</td></tr>`;
+    }).join("")
+  }</tbody></table>`;
+}
+renderRankings();
 const HOST_ADV=70, BASE_TOTAL=2.65, ELO_PER_GOAL=130, MARGIN=0.94, GRID=7;
 function ratingOf(nameZh){return 2120-150*Math.log(FIFA_RANK[nameZh]||90);}
 function lambdas(m){
@@ -807,7 +870,23 @@ function topScoreOdds(m,n=12){
 }
 
 function matchId(m){return `${m.d}#${m.t}#${rawName(m.h)}#${rawName(m.a)}`;}
-function bettable(m){return !!(teamOf(m.h)&&teamOf(m.a))&&!m.s;}
+function addDays(dateStr,days){
+  const d=new Date(dateStr+"T00:00:00Z");
+  d.setUTCDate(d.getUTCDate()+days);
+  return d.toISOString().slice(0,10);
+}
+function matchDateKey(m){return `2026-${m.d}`;}
+function inBetWindow(m){
+  const md=matchDateKey(m),tomorrow=addDays(todayRome,1);
+  return md===todayRome||md===tomorrow;
+}
+function betLockReason(m){
+  if(m.s)return "已结束";
+  if(!(teamOf(m.h)&&teamOf(m.a)))return "对阵确定后开放竞猜";
+  if(!inBetWindow(m))return "仅开放今天/明天场次";
+  return "";
+}
+function bettable(m){return !betLockReason(m);}
 const MID2M={};M.forEach(m=>MID2M[matchId(m)]=m);
 
 /* ---- 持久化 ---- */
@@ -841,7 +920,7 @@ async function doLogin(){
   if(ex){ if(ex.passHash!==hash){msg.textContent="密码错误";return;} }
   else{
     if(Object.keys(DB.users).length>=MAX_USERS){msg.textContent="玩家已满 10 人，无法注册新账号";return;}
-    DB.users[u]={name:u,passHash:hash,balance:INIT_BAL};saveDB();
+    DB.users[u]={name:u,passHash:hash,balance:INIT_BAL};saveDB();snapshotDaily();
   }
   setCur(u);
   document.getElementById("loginPass").value="";document.getElementById("loginUser").value="";
@@ -885,7 +964,8 @@ function confirmBet(){
   const u=DB.users[curUser()];
   if(!u){msg.textContent="请先登录";return;}
   if(!slip||!slip.pick){msg.textContent="请先选择一个竞猜选项";return;}
-  if(slip.m.s||!bettable(slip.m)){msg.textContent="该场已开赛或对阵未定，无法投注";return;}
+  const lock=betLockReason(slip.m);
+  if(lock){msg.textContent=`${lock}，无法投注`;return;}
   const stake=parseInt(document.getElementById("betStake").value,10),max=Math.floor(u.balance*MAX_PCT);
   if(!stake||stake<MIN_STAKE){msg.textContent=`最低下注 ${MIN_STAKE} 币`;return;}
   if(stake>max){msg.textContent=`单注上限为当前余额的 50%（${max} 币）`;return;}
@@ -893,7 +973,7 @@ function confirmBet(){
   u.balance-=stake;
   DB.bets.push({id:"b"+Date.now()+Math.random().toString(36).slice(2,6),user:u.name,mid:matchId(slip.m),
     type:slip.type,pick:slip.pick,odds:slip.odds,stake,status:"open",placedAt:Date.now()});
-  saveDB();closeModal("betMask");refreshAll();
+  saveDB();snapshotDaily();closeModal("betMask");refreshAll();
 }
 
 /* ---- 结算 ---- */
@@ -910,7 +990,7 @@ function settleBets(){
     else{b.payout=0;b.status="lost";}
     b.settledAt=Date.now();changed=true;
   });
-  if(changed)saveDB();
+  if(changed)snapshotDaily();
 }
 
 /* ---- 每日榜快照 ---- */
@@ -931,7 +1011,7 @@ function renderLoginBar(){
 }
 function renderWallet(){
   const w=document.getElementById("betWallet"),sl=document.getElementById("betMySlips");
-  document.getElementById("betRuleNote").textContent="本金 1000 币 · 单注 10 ~ 余额50% · 胜平负 & 猜比分";
+  document.getElementById("betRuleNote").textContent="仅开放今天/明天 · 本金 1000 币 · 单注 10 ~ 余额50%";
   const u=DB.users[curUser()];
   if(!u){
     w.innerHTML=`<div class="bet-empty">未登录。<button class="bet-btn sm" id="walletLogin">竞猜登录 / 注册</button> 后即可下注（每人初始 1000 虚拟币）。</div>`;
@@ -956,7 +1036,7 @@ function renderWallet(){
 }
 function renderLeaderboard(){
   const box=document.getElementById("leaderboard");
-  document.getElementById("lbDate").textContent=`榜单日期 ${todayRome} · 每日更新`;
+  document.getElementById("lbDate").textContent=`实时余额榜 · 每日记录涨跌 · ${todayRome}`;
   const users=Object.values(DB.users).sort((a,b)=>b.balance-a.balance);
   if(!users.length){box.innerHTML=`<div class="bet-empty">还没有玩家。点击右上角「竞猜登录」注册（限 10 人），开始竞猜吧。</div>`;return;}
   const pk=prevDayKey(),prevRank={};
@@ -973,8 +1053,8 @@ function renderLeaderboard(){
   box.innerHTML=`<table class="lb"><thead><tr><th>名次</th><th>玩家</th><th>进行中</th><th style="text-align:right">虚拟币</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function betButtonHtml(m){
-  if(m.s)return "";
-  if(!bettable(m))return `<div class="betline"><span class="bet-locked">🔒 对阵确定后开放竞猜</span></div>`;
+  const lock=betLockReason(m);
+  if(lock)return `<div class="betline"><span class="bet-locked">🔒 ${esc(lock)}</span></div>`;
   const o=odds1x2(m);
   return `<div class="betline"><span class="odds"><span>主 <b>${o.h.toFixed(2)}</b></span><span>平 <b>${o.d.toFixed(2)}</b></span><span>客 <b>${o.a.toFixed(2)}</b></span></span><button class="bet-btn sm" data-bet="${matchId(m)}">竞猜</button></div>`;
 }
