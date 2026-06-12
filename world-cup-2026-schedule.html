@@ -303,10 +303,25 @@ body:not(.locked) .access-gate{display:none}
 .lb th{font-size:12px;color:var(--ink-soft);font-weight:600;letter-spacing:.05em}
 .lb td.rk{font-family:var(--num);font-weight:700;font-size:17px;color:var(--pitch);width:54px}
 .lb td.bal{font-family:var(--num);font-weight:700;color:var(--grass);text-align:right;white-space:nowrap}
+.lb td.num{text-align:right;font-family:var(--num);white-space:nowrap}
+.lb .profit.up,.lb-card .profit.up{color:#10663C}
+.lb .profit.down,.lb-card .profit.down{color:var(--host-red)}
+.lb .profit.same,.lb-card .profit.same{color:var(--ink-soft)}
 .lb tr.me{background:#F0F8F2}
 .lb .chg{font-family:var(--num);font-size:12px;margin-left:7px}
 .lb .chg.up{color:#10663C}.lb .chg.down{color:var(--host-red)}.lb .chg.same{color:var(--ink-soft)}
 .lb-date{font-family:var(--num);font-size:12.5px;color:var(--ink-soft);font-weight:400;margin-left:8px}
+.lb-cards{display:none}
+.lb-card{border:1px solid var(--line);border-radius:10px;background:#FCFBF7;padding:12px 13px;margin-top:9px}
+.lb-card.me{background:#F0F8F2;border-color:#CFE7D7}
+.lb-card .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.lb-card .player{font-weight:800;min-width:0}
+.lb-card .rank{font-family:var(--num);font-weight:800;color:var(--pitch);margin-right:6px}
+.lb-card .coins{font-family:var(--num);font-weight:800;color:var(--grass);white-space:nowrap}
+.lb-card .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.lb-card .stat{border-top:1px solid var(--line);padding-top:6px;min-width:0}
+.lb-card .stat span{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:2px}
+.lb-card .stat b{font-family:var(--num);font-size:13px;color:var(--ink)}
 
 /* 弹窗 */
 .bet-mask{position:fixed;inset:0;z-index:60;background:rgba(11,59,42,.45);backdrop-filter:blur(3px);
@@ -342,6 +357,10 @@ body:not(.locked) .access-gate{display:none}
 .bet-modal .ft{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px}
 .bet-modal .ft .bet-btn{flex:1;text-align:center;padding:10px}
 @media(max-width:480px){.bet-picks.scores{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){
+  .lb{display:none}
+  .lb-cards{display:block}
+}
 </style>
 </head>
 <body class="locked">
@@ -1280,16 +1299,62 @@ function renderLeaderboard(){
   if(!users.length){box.innerHTML=`<div class="bet-empty">还没有玩家。点击右上角「竞猜登录」注册（限 11 人），开始竞猜吧。</div>`;return;}
   const pk=prevDayKey(),prevRank={};
   if(pk)DB.daily[pk].slice().sort((a,b)=>b.balance-a.balance).forEach((r,i)=>prevRank[r.user]=i);
-  const me=curUser(),openCount=n=>DB.bets.filter(b=>b.user===n&&b.status==="open").length;
+  const me=curUser();
+  function fmtProfit(n){return n>0?`+${n}`:`${n}`;}
+  function signedClass(n){return n>0?"up":n<0?"down":"same";}
+  function pct(n){return Number.isFinite(n)?`${Math.round(n)}%`:"—";}
+  function leaderStats(name,balance){
+    const bets=DB.bets.filter(b=>b.user===name),open=bets.filter(b=>b.status==="open"),settled=bets.filter(b=>b.status==="won"||b.status==="lost");
+    const won=settled.filter(b=>b.status==="won"),lost=settled.filter(b=>b.status==="lost");
+    const settledStake=settled.reduce((s,b)=>s+(b.stake||0),0);
+    const openStake=open.reduce((s,b)=>s+(b.stake||0),0);
+    const totalStake=bets.reduce((s,b)=>s+(b.stake||0),0);
+    const returned=won.reduce((s,b)=>s+(b.payout||0),0);
+    const settledProfit=returned-settledStake;
+    const totalProfit=balance-INIT_BAL;
+    const winRate=settled.length?won.length/settled.length*100:NaN;
+    const roi=settledStake?settledProfit/settledStake*100:NaN;
+    return {bets,open,settled,won,lost,settledStake,openStake,totalStake,settledProfit,totalProfit,winRate,roi};
+  }
   const rows=users.map((u,i)=>{
     let chg;
     if(pk&&prevRank[u.name]!=null){const dlt=prevRank[u.name]-i;
       chg=dlt>0?`<span class="chg up">▲${dlt}</span>`:dlt<0?`<span class="chg down">▼${-dlt}</span>`:`<span class="chg same">—</span>`;}
     else chg=`<span class="chg same">NEW</span>`;
     const rk=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
-    return `<tr class="${u.name===me?"me":""}"><td class="rk">${rk}</td><td>${esc(u.name)}${chg}</td><td>${openCount(u.name)} 注未结</td><td class="bal">${u.balance} 币</td></tr>`;
+    const s=leaderStats(u.name,u.balance),pc=signedClass(s.totalProfit),rc=signedClass(s.settledProfit);
+    return `<tr class="${u.name===me?"me":""}">
+      <td class="rk">${rk}</td>
+      <td>${esc(u.name)}${chg}</td>
+      <td class="bal">${u.balance} 币</td>
+      <td class="num profit ${pc}">${fmtProfit(s.totalProfit)}</td>
+      <td class="num">${s.won.length}-${s.lost.length}</td>
+      <td class="num">${pct(s.winRate)}</td>
+      <td class="num profit ${rc}">${pct(s.roi)}</td>
+      <td class="num">${s.open.length} 注 / ${s.openStake} 币</td>
+      <td class="num">${s.totalStake} 币</td>
+    </tr>`;
   }).join("");
-  box.innerHTML=`<table class="lb"><thead><tr><th>名次</th><th>玩家</th><th>进行中</th><th style="text-align:right">虚拟币</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const cards=users.map((u,i)=>{
+    let chg;
+    if(pk&&prevRank[u.name]!=null){const dlt=prevRank[u.name]-i;
+      chg=dlt>0?`<span class="chg up">▲${dlt}</span>`:dlt<0?`<span class="chg down">▼${-dlt}</span>`:`<span class="chg same">—</span>`;}
+    else chg=`<span class="chg same">NEW</span>`;
+    const rk=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+    const s=leaderStats(u.name,u.balance),pc=signedClass(s.totalProfit),rc=signedClass(s.settledProfit);
+    return `<article class="lb-card ${u.name===me?"me":""}">
+      <div class="top"><div class="player"><span class="rank">${rk}</span>${esc(u.name)}${chg}</div><div class="coins">${u.balance} 币</div></div>
+      <div class="stats">
+        <div class="stat"><span>盈亏</span><b class="profit ${pc}">${fmtProfit(s.totalProfit)}</b></div>
+        <div class="stat"><span>战绩</span><b>${s.won.length}-${s.lost.length}</b></div>
+        <div class="stat"><span>命中率</span><b>${pct(s.winRate)}</b></div>
+        <div class="stat"><span>ROI</span><b class="profit ${rc}">${pct(s.roi)}</b></div>
+        <div class="stat"><span>进行中</span><b>${s.open.length} 注</b></div>
+        <div class="stat"><span>总押注</span><b>${s.totalStake} 币</b></div>
+      </div>
+    </article>`;
+  }).join("");
+  box.innerHTML=`<table class="lb"><thead><tr><th>名次</th><th>玩家</th><th style="text-align:right">余额</th><th style="text-align:right">盈亏</th><th style="text-align:right">战绩</th><th style="text-align:right">命中率</th><th style="text-align:right">ROI</th><th style="text-align:right">进行中</th><th style="text-align:right">总押注</th></tr></thead><tbody>${rows}</tbody></table><div class="lb-cards">${cards}</div>`;
 }
 function betButtonHtml(m){
   const lock=betLockReason(m);
