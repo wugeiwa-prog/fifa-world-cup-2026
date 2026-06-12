@@ -1,6 +1,20 @@
 # Cross-device betting sync
 
-The page supports optional Supabase REST sync for the local betting database.
+The page now uses Supabase REST sync for the betting leaderboard and public betting state.
+Current frontend config is already filled in `world-cup-2026-schedule.html`.
+
+Synced public data:
+
+- up to 11 player nicknames
+- virtual coin balances
+- bet slips and settlement status
+- daily leaderboard snapshots
+
+Not synced:
+
+- local password hashes
+- browser access password state
+- any real-money data
 
 1. Create a Supabase project.
 2. Run this SQL:
@@ -45,3 +59,5 @@ const REMOTE_SYNC={
 ```
 
 Do not use a Supabase service-role key in the frontend.
+The anon public key is enough only because the table policies above allow public read and public upsert for the single `global` row.
+This is suitable for the current entertainment-only static site, but it is not a fraud-proof betting backend.
