@@ -2,8 +2,17 @@ name: Sync Pinnacle odds
 
 on:
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Ignore cadence and fetch direct Pinnacle pages now"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "17 * * * *"
 
 permissions:
   contents: read
@@ -24,17 +33,32 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install Playwright
-        run: |
-          npm init -y
-          npm install playwright
-          npx playwright install chromium --with-deps
-
-      - name: Sync Pinnacle odds to Supabase
+      - name: Plan odds sync cadence
+        id: plan
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_TABLE: wc2026_state
           SUPABASE_ROW_ID: global
           ODDS_LOOKAHEAD_HOURS: "48"
+          ODDS_PLAN_ONLY: "1"
+          ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
+        run: node scripts/sync-pinnacle-odds.mjs
+
+      - name: Install Playwright
+        if: steps.plan.outputs.should_fetch == 'true'
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install chromium --with-deps
+
+      - name: Sync Pinnacle odds to Supabase
+        if: steps.plan.outputs.should_fetch == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_TABLE: wc2026_state
+          SUPABASE_ROW_ID: global
+          ODDS_LOOKAHEAD_HOURS: "48"
+          ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
         run: node scripts/sync-pinnacle-odds.mjs

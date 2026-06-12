@@ -5,8 +5,10 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "sb_publishable_-bRXY
 const SUPABASE_TABLE = process.env.SUPABASE_TABLE || "wc2026_state";
 const SUPABASE_ROW_ID = process.env.SUPABASE_ROW_ID || "global";
 const DRY_RUN = process.env.DRY_RUN === "1";
+const PLAN_ONLY = process.env.ODDS_PLAN_ONLY === "1";
 const LOOKAHEAD_HOURS = Number(process.env.ODDS_LOOKAHEAD_HOURS || 48);
 const FORCE_ALL = process.env.FORCE_ALL === "1";
+const FORCE_SYNC = process.env.ODDS_FORCE_SYNC === "1" || process.env.ODDS_FORCE_SYNC === "true" || FORCE_ALL;
 const ALLOW_MATCHUPS_PARSE = process.env.PINNACLE_ALLOW_MATCHUPS_PARSE === "1";
 
 const PINNACLE_MATCHUPS_URLS = [
@@ -47,9 +49,32 @@ function romeKickoffUtc(m){
 }
 function isOddsCandidate(m, now = new Date()){
   if(m.s && !FORCE_ALL)return false;
+  if(!PINNACLE_URLS[matchId(m)] && !ALLOW_MATCHUPS_PARSE)return false;
   const kick = romeKickoffUtc(m).getTime();
   const diffHours = (kick - now.getTime()) / 3_600_000;
   return FORCE_ALL || (diffHours > 0 && diffHours <= LOOKAHEAD_HOURS);
+}
+function syncCadenceMinutes(candidates, now = new Date()){
+  if(!candidates.length)return {minutes:360, tier:"no-direct-match"};
+  const nextHours = Math.min(...candidates.map(m => (romeKickoffUtc(m).getTime() - now.getTime()) / 3_600_000));
+  if(nextHours <= 6)return {minutes:60, tier:"kickoff-within-6h"};
+  if(nextHours <= 24)return {minutes:120, tier:"matchday-minus-1"};
+  return {minutes:360, tier:"normal"};
+}
+function shouldFetchOdds(state, candidates, now = new Date()){
+  const cadence = syncCadenceMinutes(candidates, now);
+  if(FORCE_SYNC)return {...cadence, shouldFetch:true, reason:"forced"};
+  if(!candidates.length)return {...cadence, shouldFetch:false, reason:"no direct Pinnacle URL in lookahead window"};
+  const last = Date.parse(state?.oddsSync?.lastCheckedAt || state?.oddsSync?.lastAttemptAt || "") || 0;
+  if(!last)return {...cadence, shouldFetch:true, reason:"no previous odds sync"};
+  const elapsedMinutes = (now.getTime() - last) / 60_000;
+  if(elapsedMinutes >= cadence.minutes)return {...cadence, shouldFetch:true, reason:`elapsed ${Math.floor(elapsedMinutes)}m >= ${cadence.minutes}m`};
+  return {...cadence, shouldFetch:false, reason:`elapsed ${Math.floor(elapsedMinutes)}m < ${cadence.minutes}m`};
+}
+function setGithubOutput(values){
+  const out = process.env.GITHUB_OUTPUT;
+  if(!out)return;
+  fs.appendFileSync(out, Object.entries(values).map(([k,v]) => `${k}=${String(v).replace(/\r?\n/g," ")}`).join("\n") + "\n");
 }
 function norm(s){
   return String(s || "")
@@ -145,63 +170,95 @@ const state = await loadState();
 state.odds ||= {};
 state.oddsSync ||= {};
 
-const urls = [...new Set([
-  ...(ALLOW_MATCHUPS_PARSE ? PINNACLE_MATCHUPS_URLS : []),
-  ...candidates.map(m => PINNACLE_URLS[matchId(m)]).filter(Boolean)
-])];
-const pageTexts = await loadPageTexts(urls);
-let updated = 0;
-let pruned = 0;
-const warnings = [];
-const checkedAt = new Date().toISOString();
-
-if(!ALLOW_MATCHUPS_PARSE){
-  for(const [id,entry] of Object.entries(state.odds)){
-    if(String(entry?.url || "").includes("/matchups/")){
-      delete state.odds[id];
-      pruned += 1;
-    }
+const plan = shouldFetchOdds(state, candidates);
+console.log(`Odds sync plan: ${plan.shouldFetch ? "fetch" : "skip"} (${plan.tier}, every ${plan.minutes}m, ${plan.reason})`);
+setGithubOutput({
+  should_fetch: plan.shouldFetch ? "true" : "false",
+  tier: plan.tier,
+  cadence_minutes: plan.minutes,
+  reason: plan.reason
+});
+if(PLAN_ONLY || !plan.shouldFetch){
+  if(DRY_RUN || PLAN_ONLY){
+    console.log(JSON.stringify({checked:candidates.length,...plan},null,2));
+  }else{
+    state.oddsSync = {
+      ...state.oddsSync,
+      source:"Pinnacle",
+      mode:"pre-match-periodic",
+      lastSkippedAt:new Date().toISOString(),
+      checked:candidates.length,
+      cadenceMinutes:plan.minutes,
+      cadenceTier:plan.tier,
+      skipReason:plan.reason,
+      matchupsParse:ALLOW_MATCHUPS_PARSE,
+      lookaheadHours:LOOKAHEAD_HOURS
+    };
+    await saveState(state);
   }
-}
-
-for(const m of candidates){
-  let found = null;
-  const direct = PINNACLE_URLS[matchId(m)];
-  const sources = direct
-    ? pageTexts.filter(p => p.url === direct || (ALLOW_MATCHUPS_PARSE && !PINNACLE_URLS[matchId(m)]))
-    : (ALLOW_MATCHUPS_PARSE ? pageTexts : []);
-  for(const page of sources){
-    const odds = parseOddsFromText(page.text, m);
-    if(odds){
-      found = {...odds, source:"Pinnacle", url:page.url, updatedAt:checkedAt, market:"1X2"};
-      break;
-    }
-  }
-  if(!found){
-    warnings.push(`No Pinnacle 1X2 odds parsed: ${oddsKey(m)}`);
-    continue;
-  }
-  state.odds[matchId(m)] = found;
-  updated += 1;
-  console.log(`Pinnacle odds: ${oddsKey(m)} ${found.h}/${found.d}/${found.a}`);
-}
-
-state.oddsSync = {
-  source:"Pinnacle",
-  mode:"pre-match-periodic",
-  lastCheckedAt:checkedAt,
-  checked:candidates.length,
-  updated,
-  pruned,
-  matchupsParse:ALLOW_MATCHUPS_PARSE,
-  lookaheadHours:LOOKAHEAD_HOURS,
-  warnings:warnings.slice(0,20)
-};
-
-if(DRY_RUN){
-  console.log(JSON.stringify(state.oddsSync,null,2));
-  console.log("DRY_RUN=1, not writing Supabase");
 }else{
-  await saveState(state);
-  console.log(`Supabase odds sync complete. Updated odds: ${updated}`);
+  const urls = [...new Set([
+    ...(ALLOW_MATCHUPS_PARSE ? PINNACLE_MATCHUPS_URLS : []),
+    ...candidates.map(m => PINNACLE_URLS[matchId(m)]).filter(Boolean)
+  ])];
+  const pageTexts = await loadPageTexts(urls);
+  let updated = 0;
+  let pruned = 0;
+  const warnings = [];
+  const checkedAt = new Date().toISOString();
+
+  if(!ALLOW_MATCHUPS_PARSE){
+    for(const [id,entry] of Object.entries(state.odds)){
+      if(String(entry?.url || "").includes("/matchups/")){
+        delete state.odds[id];
+        pruned += 1;
+      }
+    }
+  }
+
+  for(const m of candidates){
+    let found = null;
+    const direct = PINNACLE_URLS[matchId(m)];
+    const sources = direct
+      ? pageTexts.filter(p => p.url === direct || (ALLOW_MATCHUPS_PARSE && !PINNACLE_URLS[matchId(m)]))
+      : (ALLOW_MATCHUPS_PARSE ? pageTexts : []);
+    for(const page of sources){
+      const odds = parseOddsFromText(page.text, m);
+      if(odds){
+        found = {...odds, source:"Pinnacle", url:page.url, updatedAt:checkedAt, market:"1X2"};
+        break;
+      }
+    }
+    if(!found){
+      warnings.push(`No Pinnacle 1X2 odds parsed: ${oddsKey(m)}`);
+      continue;
+    }
+    state.odds[matchId(m)] = found;
+    updated += 1;
+    console.log(`Pinnacle odds: ${oddsKey(m)} ${found.h}/${found.d}/${found.a}`);
+  }
+
+  state.oddsSync = {
+    source:"Pinnacle",
+    mode:"pre-match-periodic",
+    lastAttemptAt:checkedAt,
+    lastCheckedAt:checkedAt,
+    checked:candidates.length,
+    updated,
+    pruned,
+    cadenceMinutes:plan.minutes,
+    cadenceTier:plan.tier,
+    syncReason:plan.reason,
+    matchupsParse:ALLOW_MATCHUPS_PARSE,
+    lookaheadHours:LOOKAHEAD_HOURS,
+    warnings:warnings.slice(0,20)
+  };
+
+  if(DRY_RUN){
+    console.log(JSON.stringify(state.oddsSync,null,2));
+    console.log("DRY_RUN=1, not writing Supabase");
+  }else{
+    await saveState(state);
+    console.log(`Supabase odds sync complete. Updated odds: ${updated}`);
+  }
 }
