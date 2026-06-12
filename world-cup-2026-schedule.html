@@ -532,16 +532,6 @@ body:not(.locked) .access-gate{display:none}
 <script>
 const ACCESS_PASSWORD="fifa2026";
 const ACCESS_KEY="fwc2026_access_ok";
-function clearLocalBettingIfRequested(){
-  const params=new URLSearchParams(location.search);
-  if(params.get("clear")!=="1")return;
-  localStorage.removeItem("wc2026_betting_v1");
-  localStorage.removeItem("wc2026_user");
-  params.delete("clear");
-  const clean=`${location.pathname}${params.toString()?`?${params}`:""}${location.hash}`;
-  history.replaceState(null,"",clean);
-}
-clearLocalBettingIfRequested();
 function unlockPage(){
   document.body.classList.remove("locked");
   const pass=document.getElementById("accessPass");
