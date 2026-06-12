@@ -28,6 +28,27 @@ html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
 body{font-family:var(--cjk);background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
 img.emoji{width:1.15em;height:1.15em;margin:0 .04em;vertical-align:-.18em}
+body.locked{overflow:hidden}
+body.locked header,body.locked nav,body.locked main,body.locked footer,body.locked .to-top,body.locked .bet-mask{display:none!important}
+
+.access-gate{position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,var(--pitch),var(--pitch-2));
+  color:var(--chalk);display:grid;place-items:center;padding:22px}
+body:not(.locked) .access-gate{display:none}
+.access-box{width:min(420px,100%);background:rgba(250,248,242,.96);color:var(--ink);
+  border:1px solid rgba(243,239,230,.45);border-radius:14px;padding:24px 22px;
+  box-shadow:0 18px 60px rgba(0,0,0,.28)}
+.access-box .ey{font-family:var(--num);font-weight:700;font-size:12px;letter-spacing:.18em;color:var(--grass);text-transform:uppercase}
+.access-box h2{font-size:22px;margin:8px 0 6px}
+.access-box p{font-size:13.5px;color:var(--ink-soft);margin-bottom:16px}
+.access-form{display:flex;gap:8px}
+.access-form input{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:10px 12px;
+  font-size:15px;font-family:var(--cjk);outline:none}
+.access-form input:focus{border-color:var(--host-blue);box-shadow:0 0 0 2px rgba(31,79,160,.15)}
+.access-form button{border:none;border-radius:9px;background:var(--pitch);color:var(--chalk);
+  padding:0 16px;font-weight:800;font-family:var(--cjk);cursor:pointer}
+.access-form button:hover{background:var(--host-blue)}
+.access-error{min-height:18px;margin-top:9px;font-size:12.5px;color:var(--host-red)}
+@media(max-width:460px){.access-form{flex-direction:column}.access-form button{padding:10px 16px}}
 
 /* ---------- 页头：球场 ---------- */
 .hero{position:relative;overflow:hidden;color:var(--chalk);
@@ -262,7 +283,20 @@ img.emoji{width:1.15em;height:1.15em;margin:0 .04em;vertical-align:-.18em}
 @media(max-width:480px){.bet-picks.scores{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
-<body>
+<body class="locked">
+
+<section class="access-gate" aria-label="密码访问">
+  <div class="access-box">
+    <div class="ey">PRIVATE ACCESS</div>
+    <h2>2026 世界杯赛程</h2>
+    <p>请输入访问密码，在当前设备解锁页面。</p>
+    <div class="access-form">
+      <input id="accessPass" type="password" autocomplete="current-password" placeholder="访问密码" aria-label="访问密码">
+      <button id="accessGo" type="button">进入</button>
+    </div>
+    <div class="access-error" id="accessError" role="status" aria-live="polite"></div>
+  </div>
+</section>
 
 <header class="hero">
   <span class="dot"></span>
@@ -395,6 +429,27 @@ img.emoji{width:1.15em;height:1.15em;margin:0 .04em;vertical-align:-.18em}
 <button class="to-top" id="toTop" type="button" aria-label="回到顶部" title="回到顶部">↑</button>
 
 <script>
+const ACCESS_PASSWORD="fifa2026";
+const ACCESS_KEY="fwc2026_access_ok";
+function unlockPage(){
+  document.body.classList.remove("locked");
+  const pass=document.getElementById("accessPass");
+  if(pass)pass.value="";
+}
+function initAccessGate(){
+  const pass=document.getElementById("accessPass"),go=document.getElementById("accessGo"),err=document.getElementById("accessError");
+  if(localStorage.getItem(ACCESS_KEY)==="1"){unlockPage();return;}
+  setTimeout(()=>pass?.focus(),80);
+  function submit(){
+    if(pass.value===ACCESS_PASSWORD){localStorage.setItem(ACCESS_KEY,"1");unlockPage();return;}
+    err.textContent="密码不正确，请重试。";
+    pass.select();
+  }
+  go.addEventListener("click",submit);
+  pass.addEventListener("keydown",e=>{if(e.key==="Enter")submit();});
+}
+initAccessGate();
+
 /* ============ 数据（意大利时间 CEST）============ */
 /* st: group/r32/r16/qf/fin | g: 小组字母或场次标签 | s: 比分 | n: 备注 */
 const RAW_MATCHES=[
