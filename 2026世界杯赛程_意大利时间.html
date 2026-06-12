@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 世界杯完整赛程 · 意大利时间</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<style>
+:root{
+  --pitch:#0B3B2A;        /* 深草皮绿 */
+  --pitch-2:#0E4A35;
+  --chalk:#F3EFE6;        /* 粉笔白 */
+  --grass:#1AA15F;        /* 亮草绿 */
+  --host-red:#C8372D;     /* 加/美红 */
+  --host-blue:#1F4FA0;    /* 美蓝 */
+  --paper:#FAF8F2;
+  --ink:#21201C;
+  --ink-soft:#6B6A63;
+  --line:#E5E1D6;
+  --card:#FFFFFF;
+  --num:'Barlow Condensed','PingFang SC','Microsoft YaHei',sans-serif;
+  --cjk:'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{font-family:var(--cjk);background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+img.emoji{width:1.15em;height:1.15em;margin:0 .04em;vertical-align:-.18em}
+
+/* ---------- 页头：球场 ---------- */
+.hero{position:relative;overflow:hidden;color:var(--chalk);
+  background:linear-gradient(180deg,var(--pitch) 0%,var(--pitch-2) 60%,var(--pitch) 100%);}
+.hero::before{ /* 粉笔中圈 */
+  content:"";position:absolute;right:-130px;top:50%;transform:translateY(-50%);
+  width:460px;height:460px;border-radius:50%;
+  border:2px solid rgba(243,239,230,.35);}
+.hero::after{ /* 中线 + 中点 */
+  content:"";position:absolute;right:100px;top:0;bottom:0;width:2px;
+  background:rgba(243,239,230,.25);}
+.hero .dot{position:absolute;right:99px;top:50%;width:10px;height:10px;border-radius:50%;
+  background:rgba(243,239,230,.55);transform:translate(50%,-50%)}
+.hero-in{position:relative;max-width:1080px;margin:0 auto;padding:46px 20px 30px;z-index:1}
+.eyebrow{font-family:var(--num);font-weight:600;letter-spacing:.22em;font-size:13px;
+  color:var(--grass);text-transform:uppercase}
+.hero h1{font-size:clamp(26px,5vw,42px);font-weight:800;letter-spacing:.02em;margin:8px 0 4px}
+.hero h1 .yr{font-family:var(--num);color:var(--grass)}
+.hero .sub{color:rgba(243,239,230,.85);font-size:15px}
+.tz-pill{display:inline-flex;align-items:center;gap:7px;margin-top:14px;
+  background:rgba(243,239,230,.1);border:1px solid rgba(243,239,230,.3);
+  border-radius:999px;padding:6px 14px;font-size:13.5px}
+.tz-pill b{color:#fff}
+.stats{display:flex;flex-wrap:wrap;gap:26px;margin-top:26px}
+.stat .n{font-family:var(--num);font-weight:700;font-size:34px;line-height:1;color:#fff}
+.stat .l{font-size:12.5px;color:rgba(243,239,230,.7);margin-top:3px;letter-spacing:.08em}
+
+/* 阶段时间轴 */
+.timeline{display:flex;gap:0;margin-top:30px;overflow-x:auto;padding-bottom:6px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.tl{flex:0 0 auto;min-width:118px;padding:10px 14px 10px 12px;border-left:2px solid rgba(243,239,230,.28);position:relative}
+.tl:first-child{border-left-color:var(--grass)}
+.tl .s{font-weight:700;font-size:14.5px;color:#fff}
+.tl .d{font-family:var(--num);font-size:13px;color:rgba(243,239,230,.65);letter-spacing:.05em}
+.tl.final .s{color:#FFD56A}
+
+/* ---------- 工具栏 ---------- */
+.toolbar{position:sticky;top:0;z-index:20;background:rgba(250,248,242,.92);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.toolbar-in{max-width:1080px;margin:0 auto;padding:10px 20px;display:flex;gap:10px;
+  align-items:center;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1;min-width:0}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--ink-soft);
+  border-radius:999px;padding:6px 14px;font-size:13.5px;cursor:pointer;font-family:var(--cjk);
+  transition:background .15s,color .15s}
+.tab:hover{border-color:var(--grass)}
+.tab.on{background:var(--pitch);border-color:var(--pitch);color:var(--chalk);font-weight:600}
+.tab.hot.on{background:var(--host-red);border-color:var(--host-red)}
+.search{flex:0 0 auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line);
+  background:#fff;border-radius:999px;padding:6px 12px}
+.search input{border:none;outline:none;font-size:13.5px;width:130px;background:transparent;font-family:var(--cjk)}
+.search svg{flex:0 0 auto;opacity:.45}
+.tab:focus-visible,.search:focus-within{outline:2px solid var(--host-blue);outline-offset:2px}
+
+/* ---------- 主体 ---------- */
+.wrap{max-width:1080px;margin:0 auto;padding:26px 20px 60px}
+.day{margin:30px 0 14px;display:flex;align-items:baseline;gap:12px;
+  border-bottom:2px solid var(--pitch);padding-bottom:6px}
+.day .date{font-family:var(--num);font-weight:700;font-size:24px;color:var(--pitch);letter-spacing:.03em}
+.day .week{font-size:14px;color:var(--ink-soft)}
+.day .today{font-size:12px;font-weight:700;color:#fff;background:var(--host-red);
+  border-radius:999px;padding:2px 10px;letter-spacing:.1em}
+.day .count{margin-left:auto;font-family:var(--num);font-size:13px;color:var(--ink-soft)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+
+.m{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:13px 15px;display:grid;grid-template-columns:62px 1fr;gap:14px;align-items:center;
+  border-left:4px solid var(--grass)}
+.m.k{border-left-color:var(--host-blue)}
+.m.f{border-left-color:var(--host-red);background:linear-gradient(0deg,#FFF9F0,#fff)}
+.m .time{font-family:var(--num);font-weight:700;font-size:26px;color:var(--ink);
+  line-height:1;text-align:center}
+.m .time small{display:block;font-size:10.5px;font-weight:600;color:var(--ink-soft);
+  letter-spacing:.14em;margin-top:4px}
+.m .time .cn{display:block;margin-top:6px;border-top:1px solid var(--line);padding-top:5px;
+  font-family:var(--cjk);font-size:11px;font-weight:700;color:var(--host-red);letter-spacing:0}
+.m .body{min-width:0}
+.row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px}
+.flag-img{width:20px;height:14px;object-fit:cover;border-radius:2px;box-shadow:0 0 0 1px rgba(33,32,28,.15)}
+.chip{font-size:11.5px;font-weight:700;border-radius:5px;padding:1.5px 7px;letter-spacing:.06em}
+.chip.g{background:#E5F4EB;color:#10663C}
+.chip.k{background:#E8EEF9;color:var(--host-blue)}
+.chip.f{background:#FBE9E5;color:#A12A20}
+.chip.live{background:var(--host-red);color:#fff}
+.chip.done{background:#EFEDE6;color:var(--ink-soft);font-weight:600}
+.teams{font-size:15.5px;font-weight:650;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.team{display:inline-flex;align-items:center;gap:5px;min-width:0}
+.team .flag{display:inline-flex;align-items:center;line-height:1}
+.team .flag img.emoji{width:20px;height:20px;margin:0}
+.team .flag .flag-img{width:22px;height:15px}
+.team .name{white-space:nowrap}
+.team .code{font-family:var(--num);font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.06em}
+.teams .vs{font-family:var(--num);font-weight:600;font-size:13px;color:var(--ink-soft)}
+.teams .score{font-family:var(--num);font-weight:700;font-size:18px;color:var(--host-red);padding:0 2px}
+.venue{margin-top:5px;font-size:12.5px;color:var(--ink-soft);display:flex;gap:6px;align-items:center}
+.note{margin-top:4px;font-size:12px;color:#8A6A1F}
+.watch{margin-top:6px;display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;font-size:12px;color:#5E4C17}
+.tag{display:inline-flex;align-items:center;border:1px solid #E9DDA9;background:#FFF8D7;border-radius:999px;
+  padding:1px 7px;font-size:11px;font-weight:700;color:#7A5513}
+.tag.hot{border-color:#F0C0B8;background:#FBE9E5;color:#A12A20}
+.stars{color:var(--ink-soft)}
+
+.empty{display:none;text-align:center;color:var(--ink-soft);padding:60px 0;font-size:15px}
+.empty .t{font-size:34px}
+
+/* ---------- 信息板块 ---------- */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-top:36px}
+.panel h2{font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.panel h2::before{content:"";width:5px;height:18px;background:var(--grass);border-radius:3px}
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:10px}
+.gcard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#FCFBF7}
+.gcard .gl{font-family:var(--num);font-weight:700;font-size:15px;color:var(--pitch);margin-bottom:3px}
+.gcard .gt{font-size:13.5px;color:var(--ink);line-height:1.8}
+.squads{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.scard{border:1px solid var(--line);border-radius:10px;padding:13px 14px;background:#FCFBF7}
+.scard .head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.scard .country{font-size:16px;font-weight:800;display:flex;align-items:center;gap:6px}
+.scard .country small{font-family:var(--num);font-size:12px;color:var(--ink-soft);letter-spacing:.08em}
+.scard .group{font-family:var(--num);font-weight:700;color:var(--host-blue);font-size:12px}
+.scard p{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
+.scard b{color:var(--ink)}
+.scard a{display:inline-flex;margin-top:8px;font-size:12px;color:var(--host-blue);font-weight:700;text-decoration:none}
+.scard a:hover{text-decoration:underline}
+.bcast{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.bcast{grid-template-columns:1fr}}
+.bc{border:1px solid var(--line);border-radius:10px;padding:13px 15px;background:#FCFBF7}
+.bc b{font-size:15px}
+.bc p{font-size:13px;color:var(--ink-soft);margin-top:3px}
+.notes{font-size:13px;color:var(--ink-soft);line-height:2}
+.foot{max-width:1080px;margin:0 auto;padding:0 20px 50px;font-size:12px;color:var(--ink-soft);text-align:center}
+.to-top{position:fixed;right:18px;bottom:18px;z-index:40;width:44px;height:44px;border-radius:50%;
+  border:1px solid rgba(243,239,230,.45);background:var(--pitch);color:var(--chalk);
+  display:grid;place-items:center;font-size:22px;line-height:1;cursor:pointer;box-shadow:0 8px 22px rgba(11,59,42,.22);
+  opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .18s,transform .18s,background .18s}
+.to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.to-top:hover{background:var(--host-blue)}
+.to-top:focus-visible{outline:3px solid var(--grass);outline-offset:3px}
+
+@media print{
+  .toolbar,.hero::before,.hero::after,.to-top{display:none}
+  .hero{background:var(--pitch)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .m{break-inside:avoid}
+}
+@media (max-width:560px){
+  .hero::before{width:300px;height:300px;right:-150px}
+  .stats{gap:18px}
+  .stat .n{font-size:27px}
+  .search input{width:96px}
+}
+
+/* ---------- 竞猜娱乐系统 ---------- */
+.bet-login{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.bet-login .who{font-size:13px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:5px}
+.bet-login .who b{color:var(--pitch);font-family:var(--num);font-size:15px}
+.bet-btn{border:1px solid var(--grass);background:var(--grass);color:#fff;border-radius:999px;
+  padding:6px 14px;font-size:13px;cursor:pointer;font-family:var(--cjk);font-weight:600;transition:filter .15s;white-space:nowrap}
+.bet-btn:hover{filter:brightness(1.07)}
+.bet-btn.ghost{background:#fff;color:var(--pitch);border-color:var(--line)}
+.bet-btn.ghost:hover{border-color:var(--grass)}
+.bet-btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.bet-btn.sm{padding:3px 11px;font-size:12px}
+
+/* 卡片内竞猜行 */
+.m .betline{margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.m .betline .odds{font-family:var(--num);font-size:12px;color:var(--ink-soft);display:flex;gap:9px;flex-wrap:wrap}
+.m .betline .odds b{color:var(--host-blue);font-weight:700}
+.m .betline .bet-btn{margin-left:auto}
+.bet-locked{font-size:11.5px;color:var(--ink-soft)}
+
+/* 面板：钱包 / 排行榜 */
+.bet-wallet{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.bet-wallet .bal{font-family:var(--num);font-weight:700;font-size:30px;color:var(--grass);line-height:1}
+.bet-wallet .bal small{display:block;font-family:var(--cjk);font-size:12px;color:var(--ink-soft);font-weight:400;margin-top:3px}
+.bet-coins{font-size:13px;color:var(--ink-soft)}
+.bet-coins b{font-family:var(--num);color:var(--pitch);font-size:15px}
+.bet-empty{color:var(--ink-soft);font-size:13.5px;padding:6px 0;line-height:1.9}
+.bet-slips{margin-top:14px;display:grid;gap:8px}
+.bet-slip{border:1px solid var(--line);border-radius:9px;padding:9px 12px;background:#FCFBF7;font-size:13px;
+  display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.bet-slip .meta{min-width:0}
+.bet-slip .res{font-family:var(--num);font-weight:700;font-size:14px;white-space:nowrap}
+.bet-slip .res.open{color:var(--host-blue)}
+.bet-slip .res.won{color:#10663C}
+.bet-slip .res.lost{color:var(--host-red)}
+
+.lb{width:100%;border-collapse:collapse;font-size:14px}
+.lb th,.lb td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+.lb th{font-size:12px;color:var(--ink-soft);font-weight:600;letter-spacing:.05em}
+.lb td.rk{font-family:var(--num);font-weight:700;font-size:17px;color:var(--pitch);width:54px}
+.lb td.bal{font-family:var(--num);font-weight:700;color:var(--grass);text-align:right;white-space:nowrap}
+.lb tr.me{background:#F0F8F2}
+.lb .chg{font-family:var(--num);font-size:12px;margin-left:7px}
+.lb .chg.up{color:#10663C}.lb .chg.down{color:var(--host-red)}.lb .chg.same{color:var(--ink-soft)}
+.lb-date{font-family:var(--num);font-size:12.5px;color:var(--ink-soft);font-weight:400;margin-left:8px}
+
+/* 弹窗 */
+.bet-mask{position:fixed;inset:0;z-index:60;background:rgba(11,59,42,.45);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;padding:18px}
+.bet-mask.show{display:flex}
+.bet-modal{background:#fff;border-radius:16px;width:min(440px,100%);max-height:90vh;overflow:auto;
+  box-shadow:0 20px 60px rgba(11,59,42,.32)}
+.bet-modal .hd{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.bet-modal .hd h3{font-size:17px;flex:1;min-width:0}
+.bet-modal .x{border:none;background:none;font-size:24px;line-height:1;cursor:pointer;color:var(--ink-soft)}
+.bet-modal .bd{padding:16px 20px}
+.bet-field{margin-bottom:14px}
+.bet-field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;font-weight:600}
+.bet-field input{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:14px;
+  font-family:var(--cjk);outline:none}
+.bet-field input:focus{border-color:var(--grass)}
+.bet-seg{display:flex;gap:6px;margin-bottom:14px}
+.bet-seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px;font-size:13px;
+  cursor:pointer;font-family:var(--cjk);color:var(--ink-soft)}
+.bet-seg button.on{background:var(--pitch);border-color:var(--pitch);color:#fff;font-weight:600}
+.bet-picks{display:grid;gap:8px}
+.bet-picks.x3{grid-template-columns:1fr 1fr 1fr}
+.bet-picks.scores{grid-template-columns:repeat(4,1fr)}
+.bet-pick{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 6px;cursor:pointer;
+  text-align:center;font-family:var(--cjk);transition:border-color .12s,background .12s}
+.bet-pick:hover{border-color:var(--grass)}
+.bet-pick.on{border-color:var(--grass);background:#F0F8F2;box-shadow:inset 0 0 0 1px var(--grass)}
+.bet-pick .pk{font-size:13px;font-weight:600;color:var(--ink)}
+.bet-pick .od{font-family:var(--num);font-size:13px;font-weight:700;color:var(--host-blue);margin-top:2px}
+.bet-summary{margin-top:14px;font-size:13px;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center}
+.bet-summary b{font-family:var(--num);font-size:17px;color:var(--grass)}
+.bet-msg{font-size:12.5px;color:var(--host-red);min-height:17px;margin-top:8px}
+.bet-modal .ft{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px}
+.bet-modal .ft .bet-btn{flex:1;text-align:center;padding:10px}
+@media(max-width:480px){.bet-picks.scores{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="dot"></span>
+  <div class="hero-in">
+    <div class="eyebrow">FIFA WORLD CUP · USA 🇺🇸 CANADA 🇨🇦 MEXICO 🇲🇽</div>
+    <h1><span class="yr">2026</span> 世界杯完整赛程</h1>
+    <div class="sub">6月11日 揭幕（墨西哥城） — 7月19日 决赛（纽约/新泽西 MetLife）</div>
+    <div class="tz-pill">🕘 主时间为 <b>意大利时间（CEST · UTC+2）</b>，每场附 <b>中国时间（CST · UTC+8）</b></div>
+    <div class="stats">
+      <div class="stat"><div class="n">104</div><div class="l">场比赛</div></div>
+      <div class="stat"><div class="n">48</div><div class="l">支球队</div></div>
+      <div class="stat"><div class="n">12</div><div class="l">个小组</div></div>
+      <div class="stat"><div class="n">16</div><div class="l">座城市</div></div>
+      <div class="stat"><div class="n">39</div><div class="l">天赛期</div></div>
+    </div>
+    <div class="timeline">
+      <div class="tl"><div class="s">小组赛</div><div class="d">6/11 – 6/28</div></div>
+      <div class="tl"><div class="s">1/16决赛</div><div class="d">6/28 – 7/4</div></div>
+      <div class="tl"><div class="s">1/8决赛</div><div class="d">7/4 – 7/7</div></div>
+      <div class="tl"><div class="s">1/4决赛</div><div class="d">7/9 – 7/12</div></div>
+      <div class="tl"><div class="s">半决赛</div><div class="d">7/14 – 7/15</div></div>
+      <div class="tl final"><div class="s">🏆 决赛</div><div class="d">7/19 · 21:00</div></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toolbar" aria-label="筛选">
+  <div class="toolbar-in">
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-st="all">全部</button>
+      <button class="tab" data-st="group">小组赛</button>
+      <button class="tab" data-st="r32">32强</button>
+      <button class="tab" data-st="r16">16强</button>
+      <button class="tab" data-st="qf">1/4决赛</button>
+      <button class="tab" data-st="fin">半决赛·决赛</button>
+      <button class="tab hot" data-st="hot">重要赛事</button>
+    </div>
+    <label class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="球队/简称/球星…" aria-label="按球队、英文简称或球星搜索">
+    </label>
+    <div class="bet-login" id="betLogin"></div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div id="list"></div>
+  <div class="empty" id="empty"><div class="t">⚽</div>没有找到相关比赛，换个球队名试试</div>
+
+  <section class="panel" id="betHall">
+    <h2>🎲 竞猜大厅 <span class="lb-date" id="betRuleNote"></span></h2>
+    <div id="betWallet"></div>
+    <div id="betMySlips"></div>
+  </section>
+
+  <section class="panel" id="betBoard">
+    <h2>🏆 竞猜排行榜 <span class="lb-date" id="lbDate"></span></h2>
+    <div id="leaderboard"></div>
+  </section>
+
+  <section class="panel">
+    <h2>12 个小组</h2>
+    <div class="groups" id="groups"></div>
+  </section>
+
+  <section class="panel">
+    <h2>强队阵容</h2>
+    <div class="squads" id="squads"></div>
+  </section>
+
+  <section class="panel">
+    <h2>意大利收看渠道</h2>
+    <div class="bcast">
+      <div class="bc"><b>📺 DAZN</b><p>全部 104 场比赛直播（订阅）</p></div>
+      <div class="bc"><b>📡 Rai · RaiPlay</b><p>35 场免费直播，含揭幕战、半决赛与决赛</p></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>说明</h2>
+    <div class="notes">
+      ① 球场使用 FIFA 本届官方命名（SoFi → 洛杉矶体育场，MetLife → 纽约/新泽西体育场，阿兹特克 → 墨西哥城体育场）。<br>
+      ② 每组前 2 名 + 8 个成绩最好的小组第 3 名晋级 32 强；淘汰赛"最佳第3"对手待小组赛结束后确定。<br>
+      ③ 淘汰赛平局进行 2×15 分钟加时，仍平则点球决胜。<br>
+      ④ 每场主时间为意大利时间 CEST（UTC+2），中国时间为北京时间 CST（UTC+8），本页按 +6 小时换算并自动标注次日。<br>
+      ⑤ 本页为静态快照，不自动联网刷新；比分数据截至 2026年6月12日 15:30（Europe/Rome），后续以 FIFA 官方实时数据为准。<br>
+      ⑥ 强队阵容为官方名单中的核心球员摘录，完整名单请点击各队 FIFA 球队页核验。<br>
+      ⑦ 竞猜娱乐系统：限 10 名玩家，每人初始 1000 虚拟币，可对未开赛且对阵已定的比赛投注「胜平负 / 猜比分」；单注下限 10 币、上限为当前余额的 50%。赔率依据 2026 年 6 月 FIFA 官方世界排名实力评分、经泊松模型推导（含约 6% 抽水），排行榜按虚拟币每日更新。比赛产生比分后自动结算。账号与战绩仅保存在本浏览器（localStorage），纯属娱乐、无真实货币。
+    </div>
+  </section>
+</main>
+
+<!-- 竞猜：登录/注册弹窗 -->
+<div class="bet-mask" id="loginMask">
+  <div class="bet-modal">
+    <div class="hd"><h3>🎲 竞猜登录 / 注册</h3><button class="x" data-close="loginMask" aria-label="关闭">×</button></div>
+    <div class="bd">
+      <div class="bet-field"><label>用户名（昵称）</label><input id="loginUser" maxlength="12" placeholder="例如：球迷小王"></div>
+      <div class="bet-field"><label>密码</label><input id="loginPass" type="password" maxlength="20" placeholder="首次输入该昵称即注册"></div>
+      <div class="bet-msg" id="loginMsg"></div>
+      <p class="bet-empty">本系统限 10 名玩家，每人初始 1000 虚拟币。首次用新昵称登录即完成注册；账号仅保存在本浏览器。</p>
+    </div>
+    <div class="ft"><button class="bet-btn" id="loginGo">登录 / 注册</button></div>
+  </div>
+</div>
+
+<!-- 竞猜：投注弹窗 -->
+<div class="bet-mask" id="betMask">
+  <div class="bet-modal">
+    <div class="hd"><h3 id="betTitle">竞猜投注</h3><button class="x" data-close="betMask" aria-label="关闭">×</button></div>
+    <div class="bd">
+      <div class="bet-seg" id="betSeg">
+        <button data-type="1x2" class="on">胜平负</button>
+        <button data-type="score">猜比分</button>
+      </div>
+      <div class="bet-picks" id="betPicks"></div>
+      <div class="bet-field" style="margin-top:16px"><label id="betStakeLabel">下注金额</label>
+        <input id="betStake" type="number" inputmode="numeric" min="10" placeholder="最低 10 币"></div>
+      <div class="bet-summary"><span>潜在奖金（含本金）</span><b id="betPayout">—</b></div>
+      <div class="bet-msg" id="betMsg"></div>
+    </div>
+    <div class="ft">
+      <button class="bet-btn ghost" data-close="betMask">取消</button>
+      <button class="bet-btn" id="betConfirm">确认下注</button>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">数据依据 FIFA 官方赛程、比分、球队与阵容页面 · 静态整理于 2026-06-12 15:30 Europe/Rome · 主时间为意大利时间，附中国时间</footer>
+<button class="to-top" id="toTop" type="button" aria-label="回到顶部" title="回到顶部">↑</button>
+
+<script>
+/* ============ 数据（意大利时间 CEST）============ */
+/* st: group/r32/r16/qf/fin | g: 小组字母或场次标签 | s: 比分 | n: 备注 */
+const RAW_MATCHES=[
+// —— 小组赛 ——
+{d:"06-11",t:"21:00",st:"group",g:"A",h:"🇲🇽 墨西哥",a:"🇿🇦 南非",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽",s:"2–0"},
+{d:"06-12",t:"04:00",st:"group",g:"A",h:"🇰🇷 韩国",a:"🇨🇿 捷克",v:"瓜达拉哈拉体育场",c:"🇲🇽",s:"2–1"},
+{d:"06-12",t:"21:00",st:"group",g:"B",h:"🇨🇦 加拿大",a:"🇧🇦 波黑",v:"多伦多体育场",c:"🇨🇦"},
+{d:"06-13",t:"03:00",st:"group",g:"D",h:"🇺🇸 美国",a:"🇵🇾 巴拉圭",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"06-13",t:"21:00",st:"group",g:"B",h:"🇶🇦 卡塔尔",a:"🇨🇭 瑞士",v:"旧金山湾区体育场",c:"🇺🇸"},
+{d:"06-14",t:"00:00",st:"group",g:"C",h:"🇧🇷 巴西",a:"🇲🇦 摩洛哥",v:"纽约/新泽西体育场",c:"🇺🇸"},
+{d:"06-14",t:"03:00",st:"group",g:"C",h:"🇭🇹 海地",a:"🏴󠁧󠁢󠁳󠁣󠁴󠁿 苏格兰",v:"波士顿体育场",c:"🇺🇸"},
+{d:"06-14",t:"06:00",st:"group",g:"D",h:"🇦🇺 澳大利亚",a:"🇹🇷 土耳其",v:"温哥华 BC Place",c:"🇨🇦"},
+{d:"06-14",t:"19:00",st:"group",g:"E",h:"🇩🇪 德国",a:"🇨🇼 库拉索",v:"休斯敦体育场",c:"🇺🇸"},
+{d:"06-14",t:"22:00",st:"group",g:"F",h:"🇳🇱 荷兰",a:"🇯🇵 日本",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"06-15",t:"01:00",st:"group",g:"E",h:"🇨🇮 科特迪瓦",a:"🇪🇨 厄瓜多尔",v:"费城体育场",c:"🇺🇸"},
+{d:"06-15",t:"04:00",st:"group",g:"F",h:"🇸🇪 瑞典",a:"🇹🇳 突尼斯",v:"蒙特雷体育场",c:"🇲🇽"},
+{d:"06-15",t:"18:00",st:"group",g:"H",h:"🇪🇸 西班牙",a:"🇨🇻 佛得角",v:"亚特兰大体育场",c:"🇺🇸"},
+{d:"06-15",t:"21:00",st:"group",g:"G",h:"🇧🇪 比利时",a:"🇪🇬 埃及",v:"西雅图体育场",c:"🇺🇸"},
+{d:"06-16",t:"00:00",st:"group",g:"H",h:"🇸🇦 沙特阿拉伯",a:"🇺🇾 乌拉圭",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"06-16",t:"03:00",st:"group",g:"G",h:"🇮🇷 伊朗",a:"🇳🇿 新西兰",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"06-16",t:"21:00",st:"group",g:"I",h:"🇫🇷 法国",a:"🇸🇳 塞内加尔",v:"纽约/新泽西体育场",c:"🇺🇸"},
+{d:"06-17",t:"00:00",st:"group",g:"I",h:"🇮🇶 伊拉克",a:"🇳🇴 挪威",v:"波士顿体育场",c:"🇺🇸"},
+{d:"06-17",t:"03:00",st:"group",g:"J",h:"🇦🇷 阿根廷",a:"🇩🇿 阿尔及利亚",v:"堪萨斯城体育场",c:"🇺🇸"},
+{d:"06-17",t:"06:00",st:"group",g:"J",h:"🇦🇹 奥地利",a:"🇯🇴 约旦",v:"旧金山湾区体育场",c:"🇺🇸"},
+{d:"06-17",t:"19:00",st:"group",g:"K",h:"🇵🇹 葡萄牙",a:"🇨🇩 刚果（金）",v:"休斯敦体育场",c:"🇺🇸"},
+{d:"06-17",t:"22:00",st:"group",g:"L",h:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰",a:"🇭🇷 克罗地亚",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"06-18",t:"01:00",st:"group",g:"L",h:"🇬🇭 加纳",a:"🇵🇦 巴拿马",v:"多伦多体育场",c:"🇨🇦"},
+{d:"06-18",t:"04:00",st:"group",g:"K",h:"🇺🇿 乌兹别克斯坦",a:"🇨🇴 哥伦比亚",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽"},
+{d:"06-18",t:"18:00",st:"group",g:"A",h:"🇨🇿 捷克",a:"🇿🇦 南非",v:"亚特兰大体育场",c:"🇺🇸"},
+{d:"06-18",t:"21:00",st:"group",g:"B",h:"🇨🇭 瑞士",a:"🇧🇦 波黑",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"06-19",t:"00:00",st:"group",g:"B",h:"🇨🇦 加拿大",a:"🇶🇦 卡塔尔",v:"温哥华 BC Place",c:"🇨🇦"},
+{d:"06-19",t:"03:00",st:"group",g:"A",h:"🇲🇽 墨西哥",a:"🇰🇷 韩国",v:"瓜达拉哈拉体育场",c:"🇲🇽"},
+{d:"06-19",t:"21:00",st:"group",g:"D",h:"🇺🇸 美国",a:"🇦🇺 澳大利亚",v:"西雅图体育场",c:"🇺🇸"},
+{d:"06-20",t:"00:00",st:"group",g:"C",h:"🏴󠁧󠁢󠁳󠁣󠁴󠁿 苏格兰",a:"🇲🇦 摩洛哥",v:"波士顿体育场",c:"🇺🇸"},
+{d:"06-20",t:"02:30",st:"group",g:"C",h:"🇧🇷 巴西",a:"🇭🇹 海地",v:"费城体育场",c:"🇺🇸"},
+{d:"06-20",t:"05:00",st:"group",g:"D",h:"🇹🇷 土耳其",a:"🇵🇾 巴拉圭",v:"旧金山湾区体育场",c:"🇺🇸"},
+{d:"06-20",t:"19:00",st:"group",g:"F",h:"🇳🇱 荷兰",a:"🇸🇪 瑞典",v:"休斯敦体育场",c:"🇺🇸"},
+{d:"06-20",t:"22:00",st:"group",g:"E",h:"🇩🇪 德国",a:"🇨🇮 科特迪瓦",v:"多伦多体育场",c:"🇨🇦"},
+{d:"06-21",t:"02:00",st:"group",g:"E",h:"🇪🇨 厄瓜多尔",a:"🇨🇼 库拉索",v:"堪萨斯城体育场",c:"🇺🇸"},
+{d:"06-21",t:"06:00",st:"group",g:"F",h:"🇹🇳 突尼斯",a:"🇯🇵 日本",v:"蒙特雷体育场",c:"🇲🇽"},
+{d:"06-21",t:"18:00",st:"group",g:"H",h:"🇪🇸 西班牙",a:"🇸🇦 沙特阿拉伯",v:"亚特兰大体育场",c:"🇺🇸"},
+{d:"06-21",t:"21:00",st:"group",g:"G",h:"🇧🇪 比利时",a:"🇮🇷 伊朗",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"06-22",t:"00:00",st:"group",g:"H",h:"🇺🇾 乌拉圭",a:"🇨🇻 佛得角",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"06-22",t:"03:00",st:"group",g:"G",h:"🇳🇿 新西兰",a:"🇪🇬 埃及",v:"温哥华 BC Place",c:"🇨🇦"},
+{d:"06-22",t:"19:00",st:"group",g:"J",h:"🇦🇷 阿根廷",a:"🇦🇹 奥地利",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"06-22",t:"23:00",st:"group",g:"I",h:"🇫🇷 法国",a:"🇮🇶 伊拉克",v:"费城体育场",c:"🇺🇸"},
+{d:"06-23",t:"02:00",st:"group",g:"I",h:"🇳🇴 挪威",a:"🇸🇳 塞内加尔",v:"纽约/新泽西体育场",c:"🇺🇸"},
+{d:"06-23",t:"05:00",st:"group",g:"J",h:"🇯🇴 约旦",a:"🇩🇿 阿尔及利亚",v:"旧金山湾区体育场",c:"🇺🇸"},
+{d:"06-23",t:"19:00",st:"group",g:"K",h:"🇵🇹 葡萄牙",a:"🇺🇿 乌兹别克斯坦",v:"休斯敦体育场",c:"🇺🇸"},
+{d:"06-23",t:"22:00",st:"group",g:"L",h:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰",a:"🇬🇭 加纳",v:"波士顿体育场",c:"🇺🇸"},
+{d:"06-24",t:"01:00",st:"group",g:"L",h:"🇵🇦 巴拿马",a:"🇭🇷 克罗地亚",v:"多伦多体育场",c:"🇨🇦"},
+{d:"06-24",t:"04:00",st:"group",g:"K",h:"🇨🇴 哥伦比亚",a:"🇨🇩 刚果（金）",v:"瓜达拉哈拉体育场",c:"🇲🇽"},
+{d:"06-24",t:"21:00",st:"group",g:"B",h:"🇨🇭 瑞士",a:"🇨🇦 加拿大",v:"温哥华 BC Place",c:"🇨🇦"},
+{d:"06-24",t:"21:00",st:"group",g:"B",h:"🇧🇦 波黑",a:"🇶🇦 卡塔尔",v:"西雅图体育场",c:"🇺🇸"},
+{d:"06-25",t:"00:00",st:"group",g:"C",h:"🇲🇦 摩洛哥",a:"🇭🇹 海地",v:"亚特兰大体育场",c:"🇺🇸"},
+{d:"06-25",t:"00:00",st:"group",g:"C",h:"🏴󠁧󠁢󠁳󠁣󠁴󠁿 苏格兰",a:"🇧🇷 巴西",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"06-25",t:"03:00",st:"group",g:"A",h:"🇨🇿 捷克",a:"🇲🇽 墨西哥",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽"},
+{d:"06-25",t:"03:00",st:"group",g:"A",h:"🇿🇦 南非",a:"🇰🇷 韩国",v:"蒙特雷体育场",c:"🇲🇽"},
+{d:"06-25",t:"22:00",st:"group",g:"E",h:"🇨🇼 库拉索",a:"🇨🇮 科特迪瓦",v:"费城体育场",c:"🇺🇸"},
+{d:"06-25",t:"22:00",st:"group",g:"E",h:"🇪🇨 厄瓜多尔",a:"🇩🇪 德国",v:"纽约/新泽西体育场",c:"🇺🇸"},
+{d:"06-26",t:"01:00",st:"group",g:"F",h:"🇯🇵 日本",a:"🇸🇪 瑞典",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"06-26",t:"01:00",st:"group",g:"F",h:"🇹🇳 突尼斯",a:"🇳🇱 荷兰",v:"堪萨斯城体育场",c:"🇺🇸"},
+{d:"06-26",t:"04:00",st:"group",g:"D",h:"🇹🇷 土耳其",a:"🇺🇸 美国",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"06-26",t:"04:00",st:"group",g:"D",h:"🇵🇾 巴拉圭",a:"🇦🇺 澳大利亚",v:"旧金山湾区体育场",c:"🇺🇸"},
+{d:"06-26",t:"21:00",st:"group",g:"I",h:"🇳🇴 挪威",a:"🇫🇷 法国",v:"波士顿体育场",c:"🇺🇸"},
+{d:"06-26",t:"21:00",st:"group",g:"I",h:"🇸🇳 塞内加尔",a:"🇮🇶 伊拉克",v:"多伦多体育场",c:"🇨🇦"},
+{d:"06-27",t:"02:00",st:"group",g:"H",h:"🇨🇻 佛得角",a:"🇸🇦 沙特阿拉伯",v:"休斯敦体育场",c:"🇺🇸"},
+{d:"06-27",t:"02:00",st:"group",g:"H",h:"🇺🇾 乌拉圭",a:"🇪🇸 西班牙",v:"瓜达拉哈拉体育场",c:"🇲🇽"},
+{d:"06-27",t:"05:00",st:"group",g:"G",h:"🇪🇬 埃及",a:"🇮🇷 伊朗",v:"西雅图体育场",c:"🇺🇸"},
+{d:"06-27",t:"05:00",st:"group",g:"G",h:"🇳🇿 新西兰",a:"🇧🇪 比利时",v:"温哥华 BC Place",c:"🇨🇦"},
+{d:"06-27",t:"23:00",st:"group",g:"L",h:"🇵🇦 巴拿马",a:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰",v:"纽约/新泽西体育场",c:"🇺🇸"},
+{d:"06-27",t:"23:00",st:"group",g:"L",h:"🇭🇷 克罗地亚",a:"🇬🇭 加纳",v:"费城体育场",c:"🇺🇸"},
+{d:"06-28",t:"01:30",st:"group",g:"K",h:"🇨🇴 哥伦比亚",a:"🇵🇹 葡萄牙",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"06-28",t:"01:30",st:"group",g:"K",h:"🇨🇩 刚果（金）",a:"🇺🇿 乌兹别克斯坦",v:"亚特兰大体育场",c:"🇺🇸"},
+{d:"06-28",t:"04:00",st:"group",g:"J",h:"🇩🇿 阿尔及利亚",a:"🇦🇹 奥地利",v:"堪萨斯城体育场",c:"🇺🇸"},
+{d:"06-28",t:"04:00",st:"group",g:"J",h:"🇯🇴 约旦",a:"🇦🇷 阿根廷",v:"达拉斯体育场",c:"🇺🇸"},
+// —— 1/16 决赛（32强）——
+{d:"06-28",t:"21:00",st:"r32",g:"第73场",h:"A组第2",a:"B组第2",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"06-29",t:"19:00",st:"r32",g:"第76场",h:"C组第1",a:"F组第2",v:"休斯敦体育场",c:"🇺🇸"},
+{d:"06-29",t:"22:30",st:"r32",g:"第74场",h:"E组第1",a:"最佳第3",v:"波士顿体育场",c:"🇺🇸",n:"第3名来自 A/B/C/D/F 组"},
+{d:"06-30",t:"03:00",st:"r32",g:"第75场",h:"F组第1",a:"C组第2",v:"蒙特雷体育场",c:"🇲🇽"},
+{d:"06-30",t:"19:00",st:"r32",g:"第78场",h:"E组第2",a:"I组第2",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"06-30",t:"23:00",st:"r32",g:"第77场",h:"I组第1",a:"最佳第3",v:"纽约/新泽西体育场",c:"🇺🇸",n:"第3名来自 C/D/F/G/H 组"},
+{d:"07-01",t:"03:00",st:"r32",g:"第79场",h:"A组第1",a:"最佳第3",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽",n:"第3名来自 C/E/F/H/I 组"},
+{d:"07-01",t:"18:00",st:"r32",g:"第80场",h:"L组第1",a:"最佳第3",v:"亚特兰大体育场",c:"🇺🇸",n:"第3名来自 E/H/I/J/K 组"},
+{d:"07-01",t:"22:00",st:"r32",g:"第82场",h:"G组第1",a:"最佳第3",v:"西雅图体育场",c:"🇺🇸",n:"第3名来自 A/E/H/I/J 组"},
+{d:"07-02",t:"02:00",st:"r32",g:"第81场",h:"D组第1",a:"最佳第3",v:"旧金山湾区体育场",c:"🇺🇸",n:"第3名来自 B/E/F/I/J 组"},
+{d:"07-02",t:"21:00",st:"r32",g:"第84场",h:"H组第1",a:"J组第2",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"07-03",t:"01:00",st:"r32",g:"第83场",h:"K组第2",a:"L组第2",v:"多伦多体育场",c:"🇨🇦"},
+{d:"07-03",t:"05:00",st:"r32",g:"第85场",h:"B组第1",a:"最佳第3",v:"温哥华 BC Place",c:"🇨🇦",n:"第3名来自 E/F/G/I/J 组"},
+{d:"07-03",t:"20:00",st:"r32",g:"第88场",h:"D组第2",a:"G组第2",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"07-04",t:"00:00",st:"r32",g:"第86场",h:"J组第1",a:"H组第2",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"07-04",t:"03:30",st:"r32",g:"第87场",h:"K组第1",a:"最佳第3",v:"堪萨斯城体育场",c:"🇺🇸",n:"第3名来自 D/E/I/J/L 组"},
+// —— 1/8 决赛（16强）——
+{d:"07-04",t:"19:00",st:"r16",g:"第90场",h:"第73场胜者",a:"第75场胜者",v:"休斯敦体育场",c:"🇺🇸"},
+{d:"07-04",t:"23:00",st:"r16",g:"第89场",h:"第74场胜者",a:"第77场胜者",v:"费城体育场",c:"🇺🇸"},
+{d:"07-05",t:"22:00",st:"r16",g:"第91场",h:"第76场胜者",a:"第78场胜者",v:"纽约/新泽西体育场",c:"🇺🇸"},
+{d:"07-06",t:"02:00",st:"r16",g:"第92场",h:"第79场胜者",a:"第80场胜者",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽"},
+{d:"07-06",t:"21:00",st:"r16",g:"第93场",h:"第83场胜者",a:"第84场胜者",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"07-07",t:"02:00",st:"r16",g:"第94场",h:"第81场胜者",a:"第82场胜者",v:"西雅图体育场",c:"🇺🇸"},
+{d:"07-07",t:"18:00",st:"r16",g:"第95场",h:"第86场胜者",a:"第88场胜者",v:"亚特兰大体育场",c:"🇺🇸"},
+{d:"07-07",t:"22:00",st:"r16",g:"第96场",h:"第85场胜者",a:"第87场胜者",v:"温哥华 BC Place",c:"🇨🇦"},
+// —— 1/4 决赛 ——
+{d:"07-09",t:"22:00",st:"qf",g:"第97场",h:"第89场胜者",a:"第90场胜者",v:"波士顿体育场",c:"🇺🇸"},
+{d:"07-10",t:"21:00",st:"qf",g:"第98场",h:"第93场胜者",a:"第94场胜者",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"07-11",t:"23:00",st:"qf",g:"第99场",h:"第91场胜者",a:"第92场胜者",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"07-12",t:"03:00",st:"qf",g:"第100场",h:"第95场胜者",a:"第96场胜者",v:"堪萨斯城体育场",c:"🇺🇸"},
+// —— 半决赛 / 季军赛 / 决赛 ——
+{d:"07-14",t:"21:00",st:"fin",g:"半决赛 1",h:"第97场胜者",a:"第98场胜者",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"07-15",t:"21:00",st:"fin",g:"半决赛 2",h:"第99场胜者",a:"第100场胜者",v:"亚特兰大体育场",c:"🇺🇸"},
+{d:"07-18",t:"23:00",st:"fin",g:"季军赛",h:"半决赛负者",a:"半决赛负者",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"07-19",t:"21:00",st:"fin",g:"🏆 决赛",h:"半决赛胜者",a:"半决赛胜者",v:"纽约/新泽西体育场（MetLife）",c:"🇺🇸",n:"Coldplay 领衔决赛中场表演（世界杯首次）"}
+];
+
+const GROUPS={A:"🇲🇽 墨西哥 · 🇿🇦 南非 · 🇰🇷 韩国 · 🇨🇿 捷克",B:"🇨🇦 加拿大 · 🇧🇦 波黑 · 🇶🇦 卡塔尔 · 🇨🇭 瑞士",C:"🇧🇷 巴西 · 🇲🇦 摩洛哥 · 🇭🇹 海地 · 🏴󠁧󠁢󠁳󠁣󠁴󠁿 苏格兰",D:"🇺🇸 美国 · 🇵🇾 巴拉圭 · 🇦🇺 澳大利亚 · 🇹🇷 土耳其",E:"🇩🇪 德国 · 🇨🇼 库拉索 · 🇨🇮 科特迪瓦 · 🇪🇨 厄瓜多尔",F:"🇳🇱 荷兰 · 🇯🇵 日本 · 🇸🇪 瑞典 · 🇹🇳 突尼斯",G:"🇧🇪 比利时 · 🇪🇬 埃及 · 🇮🇷 伊朗 · 🇳🇿 新西兰",H:"🇪🇸 西班牙 · 🇨🇻 佛得角 · 🇸🇦 沙特阿拉伯 · 🇺🇾 乌拉圭",I:"🇫🇷 法国 · 🇸🇳 塞内加尔 · 🇮🇶 伊拉克 · 🇳🇴 挪威",J:"🇦🇷 阿根廷 · 🇩🇿 阿尔及利亚 · 🇦🇹 奥地利 · 🇯🇴 约旦",K:"🇵🇹 葡萄牙 · 🇨🇩 刚果（金）· 🇺🇿 乌兹别克斯坦 · 🇨🇴 哥伦比亚",L:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰 · 🇭🇷 克罗地亚 · 🇬🇭 加纳 · 🇵🇦 巴拿马"};
+
+const SNAPSHOT_AT="2026-06-12 15:30 Europe/Rome";
+const FIFA_BASE="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026";
+const TEAM_ROWS=[
+["墨西哥","🇲🇽","Mexico","MEX","mexico","A",["Santiago Gimenez","Edson Alvarez"]],["南非","🇿🇦","South Africa","RSA","south-africa","A",["Percy Tau"]],["韩国","🇰🇷","Korea Republic","KOR","korea-republic","A",["Son Heung-min","Lee Kang-in","Kim Min-jae"]],["捷克","🇨🇿","Czechia","CZE","czechia","A",["Patrik Schick"]],
+["加拿大","🇨🇦","Canada","CAN","canada","B",["Alphonso Davies","Jonathan David"]],["波黑","🇧🇦","Bosnia & Herzegovina","BIH","bosnia-and-herzegovina","B",["Edin Dzeko"]],["卡塔尔","🇶🇦","Qatar","QAT","qatar","B",["Akram Afif"]],["瑞士","🇨🇭","Switzerland","SUI","switzerland","B",["Granit Xhaka"]],
+["巴西","🇧🇷","Brazil","BRA","brazil","C",["Vinicius Jr","Rodrygo","Bruno Guimaraes"]],["摩洛哥","🇲🇦","Morocco","MAR","morocco","C",["Achraf Hakimi","Sofyan Amrabat"]],["海地","🇭🇹","Haiti","HAI","haiti","C",["Duckens Nazon"]],["苏格兰","🏴","Scotland","SCO","scotland","C",["Scott McTominay","Andy Robertson"]],
+["美国","🇺🇸","USA","USA","usa","D",["Christian Pulisic","Weston McKennie","Tyler Adams"]],["巴拉圭","🇵🇾","Paraguay","PAR","paraguay","D",["Miguel Almiron"]],["澳大利亚","🇦🇺","Australia","AUS","australia","D",["Mathew Ryan"]],["土耳其","🇹🇷","Turkiye","TUR","turkiye","D",["Hakan Calhanoglu","Arda Guler"]],
+["德国","🇩🇪","Germany","GER","germany","E",["Jamal Musiala","Florian Wirtz","Joshua Kimmich"]],["库拉索","🇨🇼","Curacao","CUW","curacao","E",["Leandro Bacuna"]],["科特迪瓦","🇨🇮","Cote d'Ivoire","CIV","cote-divoire","E",["Franck Kessie"]],["厄瓜多尔","🇪🇨","Ecuador","ECU","ecuador","E",["Moises Caicedo"]],
+["荷兰","🇳🇱","Netherlands","NED","netherlands","F",["Virgil van Dijk","Frenkie de Jong","Xavi Simons"]],["日本","🇯🇵","Japan","JPN","japan","F",["Takefusa Kubo","Kaoru Mitoma"]],["瑞典","🇸🇪","Sweden","SWE","sweden","F",["Alexander Isak","Viktor Gyokeres"]],["突尼斯","🇹🇳","Tunisia","TUN","tunisia","F",["Ellyes Skhiri"]],
+["比利时","🇧🇪","Belgium","BEL","belgium","G",["Kevin De Bruyne","Romelu Lukaku","Jeremy Doku"]],["埃及","🇪🇬","Egypt","EGY","egypt","G",["Mohamed Salah"]],["伊朗","🇮🇷","IR Iran","IRN","ir-iran","G",["Mehdi Taremi"]],["新西兰","🇳🇿","New Zealand","NZL","new-zealand","G",["Chris Wood"]],
+["西班牙","🇪🇸","Spain","ESP","spain","H",["Lamine Yamal","Pedri","Rodri"]],["佛得角","🇨🇻","Cabo Verde","CPV","cabo-verde","H",["Ryan Mendes"]],["沙特阿拉伯","🇸🇦","Saudi Arabia","KSA","saudi-arabia","H",["Salem Al-Dawsari"]],["乌拉圭","🇺🇾","Uruguay","URU","uruguay","H",["Federico Valverde","Darwin Nunez","Ronald Araujo"]],
+["法国","🇫🇷","France","FRA","france","I",["Kylian Mbappe","Antoine Griezmann","Aurelien Tchouameni"]],["塞内加尔","🇸🇳","Senegal","SEN","senegal","I",["Sadio Mane","Kalidou Koulibaly"]],["伊拉克","🇮🇶","Iraq","IRQ","iraq","I",["Aymen Hussein"]],["挪威","🇳🇴","Norway","NOR","norway","I",["Erling Haaland","Martin Odegaard"]],
+["阿根廷","🇦🇷","Argentina","ARG","argentina","J",["Lionel Messi","Julian Alvarez","Lautaro Martinez"]],["阿尔及利亚","🇩🇿","Algeria","ALG","algeria","J",["Riyad Mahrez"]],["奥地利","🇦🇹","Austria","AUT","austria","J",["David Alaba","Marcel Sabitzer"]],["约旦","🇯🇴","Jordan","JOR","jordan","J",["Mousa Al-Taamari"]],
+["葡萄牙","🇵🇹","Portugal","POR","portugal","K",["Cristiano Ronaldo","Bruno Fernandes","Bernardo Silva"]],["刚果（金）","🇨🇩","DR Congo","COD","dr-congo","K",["Yoane Wissa"]],["乌兹别克斯坦","🇺🇿","Uzbekistan","UZB","uzbekistan","K",["Eldor Shomurodov"]],["哥伦比亚","🇨🇴","Colombia","COL","colombia","K",["Luis Diaz","James Rodriguez"]],
+["英格兰","🏴","England","ENG","england","L",["Harry Kane","Jude Bellingham","Phil Foden"]],["克罗地亚","🇭🇷","Croatia","CRO","croatia","L",["Luka Modric","Josko Gvardiol"]],["加纳","🇬🇭","Ghana","GHA","ghana","L",["Mohammed Kudus"]],["巴拿马","🇵🇦","Panama","PAN","panama","L",["Adalberto Carrasquilla"]]
+];
+const TEAMS=Object.fromEntries(TEAM_ROWS.map(([nameZh,flag,nameEnShort,fifaCode,slug,group,stars])=>[nameZh,{nameZh,flag,nameEnShort,fifaCode,slug,group,stars}]));
+TEAMS["英格兰"].flag="\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}";
+TEAMS["苏格兰"].flag="\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}";
+const STRONG_TEAMS=new Set(["法国","西班牙","阿根廷","英格兰","葡萄牙","巴西","德国","荷兰","比利时","乌拉圭"]);
+const HOST_TEAMS=new Set(["美国","加拿大","墨西哥"]);
+const STAR_TEAMS=new Set(["法国","阿根廷","葡萄牙","巴西","英格兰","西班牙","挪威","埃及","韩国","比利时","德国","荷兰","乌拉圭"]);
+const CLASSIC_MATCHES=new Set(["巴西-摩洛哥","克罗地亚-英格兰","日本-荷兰","乌拉圭-西班牙","哥伦比亚-葡萄牙","法国-挪威","奥地利-阿根廷"]);
+const STAR_ZH={
+  "Santiago Gimenez":"圣地亚哥·希门尼斯","Edson Alvarez":"埃德松·阿尔瓦雷斯","Percy Tau":"珀西·陶","Son Heung-min":"孙兴慜","Lee Kang-in":"李刚仁","Kim Min-jae":"金玟哉","Patrik Schick":"帕特里克·希克",
+  "Alphonso Davies":"阿方索·戴维斯","Jonathan David":"乔纳森·戴维","Edin Dzeko":"埃丁·哲科","Akram Afif":"阿克拉姆·阿菲夫","Granit Xhaka":"格拉尼特·扎卡",
+  "Vinicius Jr":"维尼修斯","Rodrygo":"罗德里戈","Bruno Guimaraes":"布鲁诺·吉马良斯","Achraf Hakimi":"阿什拉夫·哈基米","Sofyan Amrabat":"索菲扬·阿姆拉巴特","Duckens Nazon":"杜肯斯·纳松","Scott McTominay":"斯科特·麦克托米奈","Andy Robertson":"安迪·罗伯逊",
+  "Christian Pulisic":"克里斯蒂安·普利西奇","Weston McKennie":"韦斯顿·麦肯尼","Tyler Adams":"泰勒·亚当斯","Miguel Almiron":"米格尔·阿尔米隆","Mathew Ryan":"马修·瑞安","Hakan Calhanoglu":"恰尔汗奥卢","Arda Guler":"阿尔达·居莱尔",
+  "Jamal Musiala":"贾马尔·穆西亚拉","Florian Wirtz":"弗洛里安·维尔茨","Joshua Kimmich":"约书亚·基米希","Leandro Bacuna":"莱安德罗·巴库纳","Franck Kessie":"弗兰克·凯西","Moises Caicedo":"莫伊塞斯·凯塞多",
+  "Virgil van Dijk":"范戴克","Frenkie de Jong":"弗兰基·德容","Xavi Simons":"哈维·西蒙斯","Takefusa Kubo":"久保建英","Kaoru Mitoma":"三笘薫","Alexander Isak":"亚历山大·伊萨克","Viktor Gyokeres":"维克托·哲凯赖什","Ellyes Skhiri":"埃利耶斯·斯希里",
+  "Kevin De Bruyne":"凯文·德布劳内","Romelu Lukaku":"罗梅卢·卢卡库","Jeremy Doku":"杰里米·多库","Mohamed Salah":"穆罕默德·萨拉赫","Mehdi Taremi":"迈赫迪·塔雷米","Chris Wood":"克里斯·伍德",
+  "Lamine Yamal":"拉明·亚马尔","Pedri":"佩德里","Rodri":"罗德里","Ryan Mendes":"瑞安·门德斯","Salem Al-Dawsari":"萨勒姆·达瓦萨里","Federico Valverde":"费德里科·巴尔韦德","Darwin Nunez":"达尔文·努涅斯","Ronald Araujo":"罗纳德·阿劳霍",
+  "Kylian Mbappe":"基利安·姆巴佩","Antoine Griezmann":"安托万·格列兹曼","Aurelien Tchouameni":"楚阿梅尼","Sadio Mane":"萨迪奥·马内","Kalidou Koulibaly":"库利巴利","Aymen Hussein":"艾曼·侯赛因","Erling Haaland":"埃尔林·哈兰德","Martin Odegaard":"马丁·厄德高",
+  "Lionel Messi":"利昂内尔·梅西","Julian Alvarez":"朱利安·阿尔瓦雷斯","Lautaro Martinez":"劳塔罗·马丁内斯","Riyad Mahrez":"里亚德·马赫雷斯","David Alaba":"大卫·阿拉巴","Marcel Sabitzer":"马塞尔·萨比策","Mousa Al-Taamari":"穆萨·塔马里",
+  "Cristiano Ronaldo":"克里斯蒂亚诺·罗纳尔多","Bruno Fernandes":"布鲁诺·费尔南德斯","Bernardo Silva":"贝尔纳多·席尔瓦","Yoane Wissa":"约安·维萨","Eldor Shomurodov":"埃尔多尔·肖穆罗多夫","Luis Diaz":"路易斯·迪亚斯","James Rodriguez":"哈梅斯·罗德里格斯",
+  "Harry Kane":"哈里·凯恩","Jude Bellingham":"裘德·贝林厄姆","Phil Foden":"菲尔·福登","Luka Modric":"卢卡·莫德里奇","Josko Gvardiol":"格瓦迪奥尔","Mohammed Kudus":"穆罕默德·库杜斯","Adalberto Carrasquilla":"卡拉斯基利亚"
+};
+const SQUADS=[
+  {team:"法国",coach:"Didier Deschamps",core:["Kylian Mbappe","Antoine Griezmann","Aurelien Tchouameni","William Saliba"],lines:"门将与防线经验充足；中前场由姆巴佩牵引速度，格列兹曼负责串联。",first:"6月16日 21:00 对 塞内加尔"},
+  {team:"西班牙",coach:"Luis de la Fuente",core:["Lamine Yamal","Pedri","Rodri","Nico Williams"],lines:"控球中场厚度强，边路一对一和高位压迫是主要看点。",first:"6月15日 18:00 对 佛得角"},
+  {team:"阿根廷",coach:"Lionel Scaloni",core:["Lionel Messi","Julian Alvarez","Lautaro Martinez","Emiliano Martinez"],lines:"卫冕冠军核心仍在，锋线轮换丰富，比赛节奏控制能力突出。",first:"6月17日 03:00 对 阿尔及利亚"},
+  {team:"英格兰",coach:"Thomas Tuchel",core:["Harry Kane","Jude Bellingham","Phil Foden","Bukayo Saka"],lines:"前场天赋密集，贝林厄姆与凯恩组成的中轴会决定上限。",first:"6月17日 22:00 对 克罗地亚"},
+  {team:"葡萄牙",coach:"Roberto Martinez",core:["Cristiano Ronaldo","Bruno Fernandes","Bernardo Silva","Ruben Dias"],lines:"经验与技术兼备，中前场创造力强，定位球和禁区终结值得关注。",first:"6月17日 19:00 对 刚果（金）"},
+  {team:"巴西",coach:"Carlo Ancelotti",core:["Vinicius Jr","Rodrygo","Bruno Guimaraes","Marquinhos"],lines:"边锋爆点突出，前场转换速度快，防守平衡是争冠关键。",first:"6月14日 00:00 对 摩洛哥"},
+  {team:"德国",coach:"Julian Nagelsmann",core:["Jamal Musiala","Florian Wirtz","Joshua Kimmich","Antonio Rudiger"],lines:"穆西亚拉与维尔茨创造力强，中后场出球质量高，适合持续压迫。",first:"6月14日 19:00 对 库拉索"},
+  {team:"荷兰",coach:"Ronald Koeman",core:["Virgil van Dijk","Frenkie de Jong","Xavi Simons","Cody Gakpo"],lines:"后防领袖稳定，边路和前场机动性强，攻守转换很有层次。",first:"6月14日 22:00 对 日本"},
+  {team:"比利时",coach:"Rudi Garcia",core:["Kevin De Bruyne","Romelu Lukaku","Jeremy Doku","Youri Tielemans"],lines:"德布劳内仍是进攻发动机，多库的突破会改变比赛节奏。",first:"6月15日 21:00 对 埃及"},
+  {team:"乌拉圭",coach:"Marcelo Bielsa",core:["Federico Valverde","Darwin Nunez","Ronald Araujo","Giorgian de Arrascaeta"],lines:"高强度跑动与纵向冲击鲜明，巴尔韦德是攻防转换核心。",first:"6月16日 00:00 对 沙特阿拉伯"}
+];
+const COACH_ZH={
+  "Didier Deschamps":"迪迪埃·德尚","Luis de la Fuente":"路易斯·德拉富恩特","Lionel Scaloni":"利昂内尔·斯卡洛尼","Thomas Tuchel":"托马斯·图赫尔","Roberto Martinez":"罗伯托·马丁内斯",
+  "Carlo Ancelotti":"卡洛·安切洛蒂","Julian Nagelsmann":"尤利安·纳格尔斯曼","Ronald Koeman":"罗纳德·科曼","Rudi Garcia":"鲁迪·加西亚","Marcelo Bielsa":"马塞洛·贝尔萨"
+};
+const SQUAD_NAME_ZH={
+  ...STAR_ZH,
+  "William Saliba":"威廉·萨利巴","Nico Williams":"尼科·威廉斯","Emiliano Martinez":"埃米利亚诺·马丁内斯","Bukayo Saka":"布卡约·萨卡","Ruben Dias":"鲁本·迪亚斯",
+  "Marquinhos":"马尔基尼奥斯","Antonio Rudiger":"安东尼奥·吕迪格","Cody Gakpo":"科迪·加克波","Youri Tielemans":"尤里·蒂勒曼斯","Giorgian de Arrascaeta":"乔治安·德阿拉斯卡埃塔"
+};
+function rawName(s){return s.includes(" ")?s.split(" ").slice(1).join(" "):s;}
+function teamOf(s){return TEAMS[rawName(s)]||null;}
+function matchupKey(m){return [rawName(m.h),rawName(m.a)].sort().join("-");}
+function zhStars(stars){return stars.map(x=>STAR_ZH[x]||x);}
+function zhPerson(name,map=SQUAD_NAME_ZH){
+  const zh=map[name]||STAR_ZH[name];
+  return zh&&zh!==name?`${zh}（${name}）`:name;
+}
+function enrichMatch(m){
+  const home=teamOf(m.h),away=teamOf(m.a);
+  const homeName=home?.nameZh||rawName(m.h),awayName=away?.nameZh||rawName(m.a);
+  const tags=[];
+  if(m.st!=="group")tags.push("淘汰赛");
+  if(HOST_TEAMS.has(homeName)||HOST_TEAMS.has(awayName))tags.push("东道主");
+  if(STRONG_TEAMS.has(homeName)||STRONG_TEAMS.has(awayName))tags.push("强队");
+  if(STAR_TEAMS.has(homeName)||STAR_TEAMS.has(awayName))tags.push("球星");
+  if(CLASSIC_MATCHES.has(matchupKey(m)))tags.push("强强对话");
+  if(m.g==="🏆 决赛"||m.g==="半决赛 1"||m.g==="半决赛 2"||m.d==="06-11")tags.push("必看");
+  const stars=[...(home?.stars||[]),...(away?.stars||[])].slice(0,4);
+  const importance=tags.includes("必看")||m.st==="fin"||CLASSIC_MATCHES.has(matchupKey(m))?3:(tags.includes("淘汰赛")||tags.includes("强队")||tags.includes("东道主")?2:1);
+  const starText=zhStars(stars).join(" / ");
+  const matchupText=home&&away?`${home.nameZh} ${home.fifaCode} 对阵 ${away.nameZh} ${away.fifaCode}`:"";
+  const watchNote=m.n||((importance>=2&&stars.length)?`中文看点：${matchupText}，关注 ${starText} 的发挥。`:"");
+  const searchText=[m.h,m.a,homeName,awayName,home?.nameEnShort,away?.nameEnShort,home?.fifaCode,away?.fifaCode,...stars,...zhStars(stars),...tags,watchNote].filter(Boolean).join(" ").toLowerCase();
+  return {...m,home,away,status:m.s?"done":"scheduled",score:m.s||"",importance,tags,stars,watchNote,searchText,sourceUpdatedAt:SNAPSHOT_AT};
+}
+const M=RAW_MATCHES.map(enrichMatch);
+
+const WK=["周日","周一","周二","周三","周四","周五","周六"];
+const STAGE_NAME={group:"小组赛",r32:"32强",r16:"16强",qf:"1/4决赛",fin:"决赛阶段"};
+const todayRome=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome"}).format(new Date()); // YYYY-MM-DD
+
+let curStage="all",curQ="";
+const list=document.getElementById("list"),empty=document.getElementById("empty");
+const toTop=document.getElementById("toTop");
+
+function weekday(d){const[m,dd]=d.split("-").map(Number);return WK[new Date(2026,m-1,dd).getDay()];}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function chinaTime(d,t){
+  const[mo,dd]=d.split("-").map(Number);
+  const[hh,mm]=t.split(":").map(Number);
+  const rome=new Date(Date.UTC(2026,mo-1,dd,hh-2,mm));
+  const cn=new Date(rome.getTime()+8*60*60*1000);
+  const label=cn.getUTCDate()===dd?"中国":"次日中国";
+  return `${label} ${String(cn.getUTCHours()).padStart(2,"0")}:${String(cn.getUTCMinutes()).padStart(2,"0")}`;
+}
+function emojify(root=document.body){
+  if(typeof twemoji!=="undefined")twemoji.parse(root,{folder:"svg",ext:".svg"});
+}
+
+function teamHtml(team,raw){
+  if(!team)return `<span class="team"><span class="name">${esc(raw)}</span></span>`;
+  return `<span class="team" title="${esc(team.nameEnShort)}"><span class="flag">${team.flag}</span><span class="name">${esc(team.nameZh)}</span><span class="code">${team.fifaCode}</span></span>`;
+}
+function importanceLabel(m){return m.importance===3?"必看":(m.importance===2?"重点":"普通");}
+
+function render(){
+  const q=curQ.trim().toLowerCase();
+  const rows=M.filter(m=>{
+    const stageOk=curStage==="all"||(curStage==="hot"?m.importance>=2:m.st===curStage);
+    const queryOk=!q||m.searchText.includes(q);
+    return stageOk&&queryOk;
+  });
+  list.innerHTML="";
+  empty.style.display=rows.length?"none":"block";
+  let day=null,grid=null;
+  rows.forEach(m=>{
+    if(m.d!==day){
+      day=m.d;
+      const[mo,dd]=day.split("-").map(Number);
+      const isToday=("2026-"+day)===todayRome;
+      const n=rows.filter(r=>r.d===day).length;
+      const h=document.createElement("div");h.className="day";
+      h.innerHTML=`<span class="date">${mo}月${dd}日</span><span class="week">${weekday(day)}</span>`+
+        (isToday?`<span class="today">今天</span>`:"")+`<span class="count">${n} 场</span>`;
+      list.appendChild(h);
+      grid=document.createElement("div");grid.className="grid";list.appendChild(grid);
+    }
+    const kn=m.st!=="group",fin=m.st==="fin";
+    const chip=m.st==="group"
+      ?`<span class="chip g">${m.g} 组</span>`
+      :`<span class="chip ${fin?"f":"k"}">${STAGE_NAME[m.st]} · ${esc(m.g)}</span>`;
+    const status=m.status==="done"?`<span class="chip done">已结束</span>`:`<span class="chip">待赛</span>`;
+    const level=`<span class="tag ${m.importance===3?"hot":""}">${importanceLabel(m)}</span>`;
+    const tags=m.tags.slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join("");
+    const mid=m.score?`<span class="score">${m.score}</span>`:`<span class="vs">VS</span>`;
+    const card=document.createElement("article");
+    card.className="m"+(fin?" f":(kn?" k":""));
+    card.innerHTML=`
+      <div class="time">${m.t}<small>CEST</small><span class="cn">${chinaTime(m.d,m.t)}</span></div>
+      <div class="body">
+        <div class="row1">${chip}${status}${level}</div>
+        <div class="teams">${teamHtml(m.home,m.h)}${mid}${teamHtml(m.away,m.a)}</div>
+        <div class="venue">📍 ${esc(m.v)} ${m.c}</div>
+        ${(m.watchNote||tags)?`<div class="watch">${tags}${m.watchNote?`<span class="stars">${esc(m.watchNote)}</span>`:""}</div>`:""}
+        ${betButtonHtml(m)}
+      </div>`;
+    grid.appendChild(card);
+  });
+  emojify(list);
+}
+
+document.getElementById("tabs").addEventListener("click",e=>{
+  const b=e.target.closest(".tab");if(!b)return;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+  b.classList.add("on");curStage=b.dataset.st;render();
+});
+document.getElementById("q").addEventListener("input",e=>{curQ=e.target.value;render();});
+window.addEventListener("scroll",()=>{
+  toTop.classList.toggle("show",window.scrollY>520);
+},{passive:true});
+toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
+function groupTeamHtml(name){
+  const t=TEAMS[name];
+  return t?`${t.flag} ${t.nameZh} <span class="code">${t.fifaCode}</span>`:esc(name);
+}
+document.getElementById("groups").innerHTML=Object.entries(GROUPS)
+  .map(([k,v])=>`<div class="gcard"><div class="gl">GROUP ${k}</div><div class="gt">${
+    v.replace("）·","） ·").split(" · ").map(x=>groupTeamHtml(rawName(x))).join(" · ")
+  }</div></div>`).join("");
+
+document.getElementById("squads").innerHTML=SQUADS.map(s=>{
+  const t=TEAMS[s.team];
+  const coach=zhPerson(s.coach,COACH_ZH);
+  const core=s.core.map(x=>zhPerson(x)).join(" · ");
+  return `<article class="scard">
+    <div class="head"><div class="country"><span>${t.flag}</span>${t.nameZh}<small>${t.fifaCode}</small></div><div class="group">GROUP ${t.group}</div></div>
+    <p><b>主帅：</b>${esc(coach)}</p>
+    <p><b>核心：</b>${esc(core)}</p>
+    <p><b>阵容看点：</b>${esc(s.lines)}</p>
+    <p><b>首战：</b>${esc(s.first)}</p>
+    <a href="${FIFA_BASE}/teams/${t.slug}/squad" target="_blank" rel="noopener">FIFA 官方球队页</a>
+  </article>`;
+}).join("");
+
+/* ============ 竞猜娱乐系统 ============ */
+/* 赔率来源：以 2026 年 6 月 FIFA 官方世界排名（ESPN/FIFA 公布）构建球队实力评分，
+   经泊松（Poisson）模型推导 1X2 与比分赔率（含约 6% 抽水）。 */
+const FIFA_RANK={
+  "阿根廷":1,"西班牙":2,"法国":3,"英格兰":4,"葡萄牙":5,"巴西":6,"摩洛哥":7,"荷兰":8,"比利时":9,"德国":10,
+  "克罗地亚":11,"哥伦比亚":13,"墨西哥":14,"塞内加尔":15,"乌拉圭":16,"美国":17,"日本":18,"瑞士":19,"伊朗":20,
+  "土耳其":22,"厄瓜多尔":23,"奥地利":24,"韩国":25,"澳大利亚":27,"阿尔及利亚":28,"埃及":29,"加拿大":30,
+  "挪威":31,"科特迪瓦":33,"巴拿马":34,"瑞典":38,"捷克":40,"巴拉圭":41,"苏格兰":42,"突尼斯":45,"刚果（金）":46,
+  "乌兹别克斯坦":50,"卡塔尔":56,"伊拉克":57,"南非":60,"沙特阿拉伯":61,"约旦":63,"波黑":64,"佛得角":67,
+  "加纳":73,"库拉索":82,"海地":83,"新西兰":85
+};
+const HOST_ADV=70, BASE_TOTAL=2.65, ELO_PER_GOAL=130, MARGIN=0.94, GRID=7;
+function ratingOf(nameZh){return 2120-150*Math.log(FIFA_RANK[nameZh]||90);}
+function lambdas(m){
+  const hN=teamOf(m.h)?.nameZh, aN=teamOf(m.a)?.nameZh;
+  let d=ratingOf(hN)-ratingOf(aN);
+  if(HOST_TEAMS.has(hN))d+=HOST_ADV; if(HOST_TEAMS.has(aN))d-=HOST_ADV;
+  const gd=Math.max(-2.2,Math.min(2.2,d/ELO_PER_GOAL)); // 限制净胜球幅度，避免极端赔率
+  return [Math.max(0.25,(BASE_TOTAL+gd)/2),Math.max(0.25,(BASE_TOTAL-gd)/2)];
+}
+function pois(k,l){let p=Math.exp(-l);for(let i=1;i<=k;i++)p*=l/i;return p;}
+function scoreMatrix(m){
+  const[lh,la]=lambdas(m),mat=[];
+  for(let i=0;i<=GRID;i++){mat[i]=[];for(let j=0;j<=GRID;j++)mat[i][j]=pois(i,lh)*pois(j,la);}
+  return mat;
+}
+const round2=x=>Math.round(x*100)/100;
+function odds1x2(m){
+  const mat=scoreMatrix(m);let h=0,d=0,a=0,tot=0;
+  for(let i=0;i<mat.length;i++)for(let j=0;j<mat.length;j++){const p=mat[i][j];tot+=p;
+    if(i>j)h+=p;else if(i===j)d+=p;else a+=p;}
+  const f=p=>Math.max(1.01,round2(MARGIN/(p/tot)));
+  return {h:f(h),d:f(d),a:f(a)};
+}
+function topScoreOdds(m,n=12){
+  const mat=scoreMatrix(m),arr=[];let tot=0;
+  for(const row of mat)for(const p of row)tot+=p;
+  for(let i=0;i<mat.length;i++)for(let j=0;j<mat.length;j++)arr.push({s:`${i}-${j}`,p:mat[i][j]/tot});
+  arr.sort((x,y)=>y.p-x.p);
+  return arr.slice(0,n).map(o=>({s:o.s,odds:Math.max(1.5,round2(MARGIN/o.p))}));
+}
+
+function matchId(m){return `${m.d}#${m.t}#${rawName(m.h)}#${rawName(m.a)}`;}
+function bettable(m){return !!(teamOf(m.h)&&teamOf(m.a))&&!m.s;}
+const MID2M={};M.forEach(m=>MID2M[matchId(m)]=m);
+
+/* ---- 持久化 ---- */
+const DB_KEY="wc2026_betting_v1",USER_KEY="wc2026_user",MAX_USERS=10,INIT_BAL=1000,MIN_STAKE=10,MAX_PCT=0.5;
+let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{}},JSON.parse(localStorage.getItem(DB_KEY))||{});}
+  catch(e){return {users:{},bets:[],daily:{}};}})();
+DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};
+function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(DB));}
+function curUser(){return sessionStorage.getItem(USER_KEY);}
+function setCur(u){u?sessionStorage.setItem(USER_KEY,u):sessionStorage.removeItem(USER_KEY);}
+async function sha(s){
+  if(crypto&&crypto.subtle){try{
+    const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+    return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+  }catch(e){}}
+  let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return "f"+h.toString(16);
+}
+
+/* ---- 弹窗 ---- */
+function openModal(id){document.getElementById(id).classList.add("show");}
+function closeModal(id){document.getElementById(id).classList.remove("show");}
+
+/* ---- 登录 / 注册 ---- */
+async function doLogin(){
+  const u=document.getElementById("loginUser").value.trim();
+  const p=document.getElementById("loginPass").value;
+  const msg=document.getElementById("loginMsg");msg.textContent="";
+  if(!u){msg.textContent="请输入用户名";return;}
+  if(!p){msg.textContent="请输入密码";return;}
+  const hash=await sha(p),ex=DB.users[u];
+  if(ex){ if(ex.passHash!==hash){msg.textContent="密码错误";return;} }
+  else{
+    if(Object.keys(DB.users).length>=MAX_USERS){msg.textContent="玩家已满 10 人，无法注册新账号";return;}
+    DB.users[u]={name:u,passHash:hash,balance:INIT_BAL};saveDB();
+  }
+  setCur(u);
+  document.getElementById("loginPass").value="";document.getElementById("loginUser").value="";
+  closeModal("loginMask");refreshAll();
+}
+
+/* ---- 投注 ---- */
+let slip=null;
+function openBet(mid){
+  if(!curUser()){openModal("loginMask");return;}
+  const m=MID2M[mid];if(!m||!bettable(m))return;
+  slip={m,type:"1x2",pick:null,odds:0};
+  document.getElementById("betTitle").textContent=`${teamOf(m.h).nameZh} vs ${teamOf(m.a).nameZh}`;
+  document.querySelectorAll("#betSeg button").forEach(b=>b.classList.toggle("on",b.dataset.type==="1x2"));
+  document.getElementById("betStake").value="";
+  document.getElementById("betMsg").textContent="";
+  buildPicks();openModal("betMask");
+}
+function buildPicks(){
+  const m=slip.m,box=document.getElementById("betPicks");
+  if(slip.type==="1x2"){
+    const o=odds1x2(m);
+    const opts=[["h",teamOf(m.h).nameZh+" 胜",o.h],["d","平局",o.d],["a",teamOf(m.a).nameZh+" 胜",o.a]];
+    box.className="bet-picks x3";
+    box.innerHTML=opts.map(([k,lab,od])=>`<button class="bet-pick" data-pick="${k}" data-odds="${od}"><div class="pk">${esc(lab)}</div><div class="od">${od.toFixed(2)}</div></button>`).join("");
+  }else{
+    box.className="bet-picks scores";
+    box.innerHTML=topScoreOdds(m,12).map(o=>`<button class="bet-pick" data-pick="${o.s}" data-odds="${o.odds}"><div class="pk">${o.s.replace("-","–")}</div><div class="od">${o.odds.toFixed(2)}</div></button>`).join("");
+  }
+  slip.pick=null;slip.odds=0;updatePayout();
+}
+function updatePayout(){
+  const stake=parseInt(document.getElementById("betStake").value,10)||0;
+  const u=DB.users[curUser()],max=u?Math.floor(u.balance*MAX_PCT):0;
+  document.getElementById("betStakeLabel").textContent=`下注金额（${MIN_STAKE} ~ ${max} 币 · 当前余额 ${u?u.balance:0}）`;
+  const out=document.getElementById("betPayout");
+  out.textContent=(slip&&slip.pick&&stake>0)?Math.round(stake*slip.odds)+" 币":"—";
+}
+function confirmBet(){
+  const msg=document.getElementById("betMsg");msg.textContent="";
+  const u=DB.users[curUser()];
+  if(!u){msg.textContent="请先登录";return;}
+  if(!slip||!slip.pick){msg.textContent="请先选择一个竞猜选项";return;}
+  if(slip.m.s||!bettable(slip.m)){msg.textContent="该场已开赛或对阵未定，无法投注";return;}
+  const stake=parseInt(document.getElementById("betStake").value,10),max=Math.floor(u.balance*MAX_PCT);
+  if(!stake||stake<MIN_STAKE){msg.textContent=`最低下注 ${MIN_STAKE} 币`;return;}
+  if(stake>max){msg.textContent=`单注上限为当前余额的 50%（${max} 币）`;return;}
+  if(stake>u.balance){msg.textContent="余额不足";return;}
+  u.balance-=stake;
+  DB.bets.push({id:"b"+Date.now()+Math.random().toString(36).slice(2,6),user:u.name,mid:matchId(slip.m),
+    type:slip.type,pick:slip.pick,odds:slip.odds,stake,status:"open",placedAt:Date.now()});
+  saveDB();closeModal("betMask");refreshAll();
+}
+
+/* ---- 结算 ---- */
+function parseScore(s){const a=s.split(/[–-]/).map(x=>parseInt(x.trim(),10));return a.length===2&&a.every(n=>!isNaN(n))?a:null;}
+function settleBets(){
+  let changed=false;
+  DB.bets.forEach(b=>{
+    if(b.status!=="open")return;
+    const m=MID2M[b.mid];if(!m||!m.s)return;
+    const sc=parseScore(m.s);if(!sc)return;
+    const[h,a]=sc,u=DB.users[b.user];if(!u)return;
+    const win=b.type==="1x2"?(b.pick===(h>a?"h":h<a?"a":"d")):(b.pick===`${h}-${a}`);
+    if(win){b.payout=Math.round(b.stake*b.odds);u.balance+=b.payout;b.status="won";}
+    else{b.payout=0;b.status="lost";}
+    b.settledAt=Date.now();changed=true;
+  });
+  if(changed)saveDB();
+}
+
+/* ---- 每日榜快照 ---- */
+function snapshotDaily(){
+  DB.daily[todayRome]=Object.values(DB.users).map(u=>({user:u.name,balance:u.balance})).sort((a,b)=>b.balance-a.balance);
+  saveDB();
+}
+function prevDayKey(){const ks=Object.keys(DB.daily).filter(k=>k<todayRome).sort();return ks[ks.length-1]||null;}
+
+/* ---- 渲染 ---- */
+function renderLoginBar(){
+  const el=document.getElementById("betLogin"),u=DB.users[curUser()];
+  el.innerHTML=u
+    ?`<span class="who">🎲 <b>${esc(u.name)}</b> ${u.balance}币</span><button class="bet-btn sm ghost" id="barOut">登出</button>`
+    :`<button class="bet-btn sm" id="barIn">🎲 竞猜登录</button>`;
+  document.getElementById("barIn")?.addEventListener("click",()=>openModal("loginMask"));
+  document.getElementById("barOut")?.addEventListener("click",()=>{setCur(null);refreshAll();});
+}
+function renderWallet(){
+  const w=document.getElementById("betWallet"),sl=document.getElementById("betMySlips");
+  document.getElementById("betRuleNote").textContent="本金 1000 币 · 单注 10 ~ 余额50% · 胜平负 & 猜比分";
+  const u=DB.users[curUser()];
+  if(!u){
+    w.innerHTML=`<div class="bet-empty">未登录。<button class="bet-btn sm" id="walletLogin">竞猜登录 / 注册</button> 后即可下注（每人初始 1000 虚拟币）。</div>`;
+    sl.innerHTML="";document.getElementById("walletLogin")?.addEventListener("click",()=>openModal("loginMask"));return;
+  }
+  const mine=DB.bets.filter(b=>b.user===u.name);
+  const open=mine.filter(b=>b.status==="open"),won=mine.filter(b=>b.status==="won"),lost=mine.filter(b=>b.status==="lost");
+  const staked=open.reduce((s,b)=>s+b.stake,0);
+  w.innerHTML=`<div class="bet-wallet">
+    <div class="bal">${u.balance}<small>当前余额（币）</small></div>
+    <div class="bet-coins"><b>${open.length}</b> 注进行中（押 ${staked} 币）</div>
+    <div class="bet-coins">战绩 <b>${won.length}</b> 胜 / <b>${lost.length}</b> 负</div>
+    <button class="bet-btn ghost sm" id="walletOut" style="margin-left:auto">登出（${esc(u.name)}）</button></div>`;
+  document.getElementById("walletOut").addEventListener("click",()=>{setCur(null);refreshAll();});
+  if(!mine.length){sl.innerHTML=`<div class="bet-empty">还没有竞猜。在下方赛程里点任意「竞猜」按钮即可开始。</div>`;return;}
+  sl.innerHTML=`<div class="bet-slips">`+mine.slice().sort((a,b)=>b.placedAt-a.placedAt).map(b=>{
+    const m=MID2M[b.mid],t=m?`${teamOf(m.h)?.nameZh||rawName(m.h)} vs ${teamOf(m.a)?.nameZh||rawName(m.a)}`:b.mid;
+    const pickTxt=b.type==="1x2"?({h:"主胜",d:"平局",a:"客胜"})[b.pick]:`比分 ${b.pick.replace("-","–")}`;
+    const rtxt=b.status==="open"?"进行中":b.status==="won"?`+${b.payout}`:`-${b.stake}`;
+    return `<div class="bet-slip"><div class="meta"><div>${esc(t)}</div><div class="bet-empty">${pickTxt} @${b.odds.toFixed(2)} · 押 ${b.stake} 币</div></div><div class="res ${b.status}">${rtxt}</div></div>`;
+  }).join("")+`</div>`;
+}
+function renderLeaderboard(){
+  const box=document.getElementById("leaderboard");
+  document.getElementById("lbDate").textContent=`榜单日期 ${todayRome} · 每日更新`;
+  const users=Object.values(DB.users).sort((a,b)=>b.balance-a.balance);
+  if(!users.length){box.innerHTML=`<div class="bet-empty">还没有玩家。点击右上角「竞猜登录」注册（限 10 人），开始竞猜吧。</div>`;return;}
+  const pk=prevDayKey(),prevRank={};
+  if(pk)DB.daily[pk].slice().sort((a,b)=>b.balance-a.balance).forEach((r,i)=>prevRank[r.user]=i);
+  const me=curUser(),openCount=n=>DB.bets.filter(b=>b.user===n&&b.status==="open").length;
+  const rows=users.map((u,i)=>{
+    let chg;
+    if(pk&&prevRank[u.name]!=null){const dlt=prevRank[u.name]-i;
+      chg=dlt>0?`<span class="chg up">▲${dlt}</span>`:dlt<0?`<span class="chg down">▼${-dlt}</span>`:`<span class="chg same">—</span>`;}
+    else chg=`<span class="chg same">NEW</span>`;
+    const rk=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+    return `<tr class="${u.name===me?"me":""}"><td class="rk">${rk}</td><td>${esc(u.name)}${chg}</td><td>${openCount(u.name)} 注未结</td><td class="bal">${u.balance} 币</td></tr>`;
+  }).join("");
+  box.innerHTML=`<table class="lb"><thead><tr><th>名次</th><th>玩家</th><th>进行中</th><th style="text-align:right">虚拟币</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function betButtonHtml(m){
+  if(m.s)return "";
+  if(!bettable(m))return `<div class="betline"><span class="bet-locked">🔒 对阵确定后开放竞猜</span></div>`;
+  const o=odds1x2(m);
+  return `<div class="betline"><span class="odds"><span>主 <b>${o.h.toFixed(2)}</b></span><span>平 <b>${o.d.toFixed(2)}</b></span><span>客 <b>${o.a.toFixed(2)}</b></span></span><button class="bet-btn sm" data-bet="${matchId(m)}">竞猜</button></div>`;
+}
+function refreshAll(){renderLoginBar();renderWallet();renderLeaderboard();render();emojify(document.body);}
+
+/* ---- 事件绑定（一次）---- */
+document.getElementById("loginGo").addEventListener("click",doLogin);
+document.getElementById("loginPass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("betConfirm").addEventListener("click",confirmBet);
+document.getElementById("betStake").addEventListener("input",updatePayout);
+document.getElementById("betSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!slip)return;
+  slip.type=b.dataset.type;document.querySelectorAll("#betSeg button").forEach(x=>x.classList.toggle("on",x===b));buildPicks();});
+document.getElementById("betPicks").addEventListener("click",e=>{const b=e.target.closest(".bet-pick");if(!b)return;
+  document.querySelectorAll("#betPicks .bet-pick").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+  slip.pick=b.dataset.pick;slip.odds=parseFloat(b.dataset.odds);updatePayout();});
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
+document.querySelectorAll(".bet-mask").forEach(mask=>mask.addEventListener("click",e=>{if(e.target===mask)closeModal(mask.id);}));
+document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-bet]");if(b)openBet(b.dataset.bet);});
+
+/* ---- 启动 ---- */
+settleBets();
+snapshotDaily();
+refreshAll();
+</script>
+</body>
+</html>
