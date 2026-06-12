@@ -12,11 +12,7 @@
 https://wugeiwa-prog.github.io/fifa-world-cup-2026/
 ```
 
-访问密码：
-
-```text
-fifa2026
-```
+访问密码请向组织者获取。
 
 ## 主要功能
 
