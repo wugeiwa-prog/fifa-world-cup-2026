@@ -392,6 +392,19 @@ body:not(.locked) .access-gate{display:none}
 <nav class="toolbar" aria-label="筛选">
   <div class="toolbar-in">
     <div class="nav-group">
+      <span class="nav-label">导航</span>
+      <div class="tabs" id="pageTabs">
+        <button class="tab link" data-target="betHall">竞猜</button>
+        <button class="tab link" data-target="betBoard">榜单</button>
+        <button class="tab link" data-target="schedulePanel">赛程</button>
+        <button class="tab link" data-target="rankings">排名</button>
+        <button class="tab link" data-target="groupsPanel">小组</button>
+        <button class="tab link" data-target="squadsPanel">阵容</button>
+        <button class="tab link" data-target="broadcastPanel">收看</button>
+        <button class="tab link" data-target="notesPanel">说明</button>
+      </div>
+    </div>
+    <div class="nav-group">
       <span class="nav-label">赛程</span>
       <div class="tabs" id="tabs">
         <button class="tab on" data-st="all">全部</button>
@@ -403,18 +416,6 @@ body:not(.locked) .access-gate{display:none}
         <button class="tab hot" data-st="hot">重要赛事</button>
       </div>
     </div>
-    <div class="nav-group">
-      <span class="nav-label">导航</span>
-      <div class="tabs" id="pageTabs">
-        <button class="tab link" data-target="betHall">竞猜</button>
-        <button class="tab link" data-target="betBoard">榜单</button>
-        <button class="tab link" data-target="rankings">排名</button>
-        <button class="tab link" data-target="groupsPanel">小组</button>
-        <button class="tab link" data-target="squadsPanel">阵容</button>
-        <button class="tab link" data-target="broadcastPanel">收看</button>
-        <button class="tab link" data-target="notesPanel">说明</button>
-      </div>
-    </div>
     <label class="search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="球队/简称/球星…" aria-label="按球队、英文简称或球星搜索">
@@ -424,9 +425,6 @@ body:not(.locked) .access-gate{display:none}
 </nav>
 
 <main class="wrap">
-  <div id="list"></div>
-  <div class="empty" id="empty"><div class="t">⚽</div>没有找到相关比赛，换个球队名试试</div>
-
   <section class="panel" id="betHall">
     <h2>🎲 竞猜大厅 <span class="lb-date" id="betRuleNote"></span></h2>
     <div id="betWallet"></div>
@@ -437,6 +435,11 @@ body:not(.locked) .access-gate{display:none}
     <h2>🏆 竞猜排行榜 <span class="lb-date" id="lbDate"></span></h2>
     <div class="sync-note" id="syncNote"></div>
     <div id="leaderboard"></div>
+  </section>
+
+  <section id="schedulePanel" aria-label="赛程列表">
+    <div id="list"></div>
+    <div class="empty" id="empty"><div class="t">⚽</div>没有找到相关比赛，换个球队名试试</div>
   </section>
 
   <section class="panel" id="rankings">
@@ -862,8 +865,9 @@ function render(){
 
 document.getElementById("tabs").addEventListener("click",e=>{
   const b=e.target.closest(".tab");if(!b)return;
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+  document.querySelectorAll("#tabs .tab").forEach(t=>t.classList.remove("on"));
   b.classList.add("on");curStage=b.dataset.st;render();
+  document.getElementById("schedulePanel")?.scrollIntoView({behavior:"smooth",block:"start"});
 });
 document.getElementById("pageTabs").addEventListener("click",e=>{
   const b=e.target.closest("[data-target]");if(!b)return;
