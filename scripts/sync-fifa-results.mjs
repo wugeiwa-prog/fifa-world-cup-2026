@@ -18,6 +18,12 @@ const TEAM_EN = {
   "阿根廷":"Argentina","阿尔及利亚":"Algeria","奥地利":"Austria","约旦":"Jordan","葡萄牙":"Portugal","刚果（金）":"Congo DR",
   "乌兹别克斯坦":"Uzbekistan","哥伦比亚":"Colombia","英格兰":"England","克罗地亚":"Croatia","加纳":"Ghana","巴拿马":"Panama"
 };
+const FALLBACK_RESULT_SOURCES = {
+  "06-12#21:00#加拿大#波黑": [
+    {name:"Canada Soccer",url:"https://canadasoccer.com/match/4696/",parser:"canada-soccer"},
+    {name:"FOX Sports",url:"https://www.foxsports.com/soccer/fifa-world-cup-men-canada-vs-bosnia-and-herzegovina-jun-12-2026-game-boxscore-647618",parser:"generic"}
+  ]
+};
 
 function rawName(name){
   return String(name).replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\s]+/u,"").trim();
@@ -64,6 +70,41 @@ function scoreFromWindow(text, homeEn, awayEn){
   if(first)return `${Number(first[1])}-${Number(first[2])}`;
   const second = win.match(patterns[1]);
   if(second)return `${Number(second[2])}-${Number(second[1])}`;
+  return null;
+}
+function scoreFromCanadaSoccer(html){
+  if(!/Full Time/i.test(html))return null;
+  const m = html.match(/id=["']match-score["'][^>]*>\s*(\d{1,2})\s*[-–]\s*(\d{1,2})\s*</i)
+    || html.match(/<div class=["']score["'][\s\S]{0,260}?(\d{1,2})\s*[-–]\s*(\d{1,2})[\s\S]{0,260}?Full Time/i);
+  return m ? `${Number(m[1])}-${Number(m[2])}` : null;
+}
+function scoreFromGenericHtml(html, homeEn, awayEn){
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi," ")
+    .replace(/<style[\s\S]*?<\/style>/gi," ")
+    .replace(/<[^>]+>/g," ")
+    .replace(/&nbsp;/g," ")
+    .replace(/&amp;/g,"&");
+  return scoreFromWindow(text, homeEn, awayEn);
+}
+async function fetchFallbackScore(m){
+  const id = matchId(m), sources = FALLBACK_RESULT_SOURCES[id] || [];
+  const home = rawName(m.h), away = rawName(m.a);
+  for(const source of sources){
+    try{
+      const html = await fetch(source.url,{headers:{"user-agent":"Mozilla/5.0"}}).then(r=>{
+        if(!r.ok)throw new Error(`${r.status} ${r.statusText}`);
+        return r.text();
+      });
+      const score = source.parser === "canada-soccer"
+        ? scoreFromCanadaSoccer(html)
+        : scoreFromGenericHtml(html, TEAM_EN[home] || home, TEAM_EN[away] || away);
+      if(score)return {score, source:source.name, url:source.url};
+      console.log(`Fallback source had no final score: ${source.name} ${home} vs ${away}`);
+    }catch(e){
+      console.warn(`Fallback source failed: ${source.name} ${id}: ${e.message}`);
+    }
+  }
   return null;
 }
 function escapeRe(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&").replace(/\\ /g,"\\s+");}
@@ -117,14 +158,21 @@ try{
   officialText = await getOfficialText();
 }catch(e){
   console.warn(`FIFA page fetch failed: ${e.message}`);
-  state.resultSync = {source:"FIFA", mode:"post-match-only", lastCheckedAt:new Date().toISOString(), updated:0, warning:"fifa-fetch-failed"};
-  if(!DRY_RUN)await saveState(state);
-  process.exit(0);
 }
 let updated = 0;
 for(const m of candidates){
   const home = rawName(m.h), away = rawName(m.a);
-  const score = scoreFromWindow(officialText, TEAM_EN[home] || home, TEAM_EN[away] || away);
+  let score = officialText ? scoreFromWindow(officialText, TEAM_EN[home] || home, TEAM_EN[away] || away) : null;
+  let source = "FIFA";
+  let sourceUrl = FIFA_URL;
+  if(!score){
+    const fallback = await fetchFallbackScore(m);
+    if(fallback){
+      score = fallback.score;
+      source = `FIFA fallback: ${fallback.source}`;
+      sourceUrl = fallback.url;
+    }
+  }
   if(!score){
     console.log(`No final score found: ${home} vs ${away}`);
     continue;
@@ -132,7 +180,8 @@ for(const m of candidates){
   state.results[matchId(m)] = {
     score,
     status:"final",
-    source:"FIFA",
+    source,
+    sourceUrl,
     updatedAt:new Date().toISOString()
   };
   updated += 1;
