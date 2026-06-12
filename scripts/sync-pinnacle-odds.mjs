@@ -7,6 +7,7 @@ const SUPABASE_ROW_ID = process.env.SUPABASE_ROW_ID || "global";
 const DRY_RUN = process.env.DRY_RUN === "1";
 const LOOKAHEAD_HOURS = Number(process.env.ODDS_LOOKAHEAD_HOURS || 48);
 const FORCE_ALL = process.env.FORCE_ALL === "1";
+const ALLOW_MATCHUPS_PARSE = process.env.PINNACLE_ALLOW_MATCHUPS_PARSE === "1";
 
 const PINNACLE_MATCHUPS_URLS = [
   "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/",
@@ -145,20 +146,30 @@ state.odds ||= {};
 state.oddsSync ||= {};
 
 const urls = [...new Set([
-  ...PINNACLE_MATCHUPS_URLS,
+  ...(ALLOW_MATCHUPS_PARSE ? PINNACLE_MATCHUPS_URLS : []),
   ...candidates.map(m => PINNACLE_URLS[matchId(m)]).filter(Boolean)
 ])];
 const pageTexts = await loadPageTexts(urls);
 let updated = 0;
+let pruned = 0;
 const warnings = [];
 const checkedAt = new Date().toISOString();
+
+if(!ALLOW_MATCHUPS_PARSE){
+  for(const [id,entry] of Object.entries(state.odds)){
+    if(String(entry?.url || "").includes("/matchups/")){
+      delete state.odds[id];
+      pruned += 1;
+    }
+  }
+}
 
 for(const m of candidates){
   let found = null;
   const direct = PINNACLE_URLS[matchId(m)];
   const sources = direct
-    ? [...pageTexts.filter(p => p.url === direct), ...pageTexts.filter(p => p.url !== direct)]
-    : pageTexts;
+    ? pageTexts.filter(p => p.url === direct || (ALLOW_MATCHUPS_PARSE && !PINNACLE_URLS[matchId(m)]))
+    : (ALLOW_MATCHUPS_PARSE ? pageTexts : []);
   for(const page of sources){
     const odds = parseOddsFromText(page.text, m);
     if(odds){
@@ -181,6 +192,8 @@ state.oddsSync = {
   lastCheckedAt:checkedAt,
   checked:candidates.length,
   updated,
+  pruned,
+  matchupsParse:ALLOW_MATCHUPS_PARSE,
   lookaheadHours:LOOKAHEAD_HOURS,
   warnings:warnings.slice(0,20)
 };
