@@ -503,8 +503,8 @@ body:not(.locked) .access-gate{display:none}
       ⑥ 强队阵容为官方名单中的核心球员摘录，完整名单请点击各队 FIFA 球队页核验。<br>
       ⑦ 世界排名依据 FIFA/Coca-Cola 男足世界排名，官方更新时间为 2026年6月11日，下一次官方更新为 2026年7月20日；48 支参赛队名次按 FIFA 官方页面与 ESPN 对 June 2026 排名转述核对。<br>
       ⑧ 中国大陆收看：中央广播电视总台持有 2026 世界杯独家全媒体转播权及分许可权利，CCTV-5、CCTV-5+、央视频、央视体育等提供赛事直播与内容服务；咪咕和小红书为官方持权转播合作方。<br>
-      ⑨ 竞猜娱乐系统：限 11 名玩家，每人初始 1000 虚拟币，仅开放意大利时间今天和明天、且对阵已确定的未开赛比赛；比赛开球即停止竞猜，比赛结束并写入最终比分后自动结算。可投注「胜平负 / 猜比分」。单注下限 10 币、上限为当前余额的 50%。竞猜窗口内已查到的胜平负赔率优先使用 Pinnacle 赛前快照，其他比赛回退到基于 2026年6月11日 FIFA 官方世界排名的泊松模型赔率（含约 6% 抽水）。排行榜按虚拟币实时刷新并记录每日涨跌；未登录访客也可查看当前榜单。云端同步会更新 11 名玩家的公开昵称、余额、投注和榜单；密码校验信息仅保留在当前设备。竞猜仅供朋友间娱乐，无真实货币。<br>
-      ⑩ 赔率快照来源：Pinnacle，更新于 2026年6月12日 20:20（Europe/Rome）；赔率会随盘口变化而变化，本页为静态快照。
+      ⑨ 竞猜娱乐系统：限 11 名玩家，每人初始 1000 虚拟币，仅开放意大利时间今天和明天、且对阵已确定的未开赛比赛；比赛开球即停止竞猜，比赛结束并写入最终比分后自动结算。可投注「胜平负 / 猜比分」。单注下限 10 币、上限为当前余额的 50%。竞猜窗口内优先使用云端同步的 Pinnacle 赛前胜平负赔率；未取得 Pinnacle 快照的比赛，回退到基于 2026年6月11日 FIFA 官方世界排名的泊松模型赔率（含约 6% 抽水）。排行榜按虚拟币实时刷新并记录每日涨跌；未登录访客也可查看当前榜单。云端同步会更新 11 名玩家的公开昵称、余额、投注和榜单；密码校验信息仅保留在当前设备。竞猜仅供朋友间娱乐，无真实货币。<br>
+      ⑩ 赔率快照来源：Pinnacle，GitHub Actions 周期性抓取并写入 Supabase；页面读取云端最新快照，不需要重新发布 GitHub Pages。Pinnacle 页面不可访问或无法解析时，会保留既有快照并使用模型赔率兜底。
     </div>
   </section>
 </main>
@@ -840,7 +840,8 @@ function updateResultSummary(){
   if(!el)return;
   const total=M.length,done=M.filter(m=>m.status==="done"||m.score).length,remain=total-done;
   const cloud=DB?.resultSync?.lastCheckedAt?`；官方结果最近核对：${DB.resultSync.lastCheckedAt}`:"";
-  el.textContent=`已录入 ${done} 场赛果，剩余 ${remain} 场${cloud}`;
+  const odds=DB?.oddsSync?.lastCheckedAt?`；Pinnacle 赔率最近核对：${DB.oddsSync.lastCheckedAt}`:"";
+  el.textContent=`已录入 ${done} 场赛果，剩余 ${remain} 场${cloud}${odds}`;
 }
 
 function render(){
@@ -970,7 +971,15 @@ const BOOK_ODDS={
   "卡塔尔-瑞士":{h:12.840,d:6.830,a:1.230,url:"https://www.pinnacle.com/en/soccer/fifa-world-cup/qatar-vs-switzerland/1620858176/"}
 };
 function oddsKey(m){return `${rawName(m.h)}-${rawName(m.a)}`;}
-function bookOdds(m){return BOOK_ODDS[oddsKey(m)]||null;}
+function cleanBookOdds(o){
+  if(!o)return null;
+  const h=Number(o.h),d=Number(o.d),a=Number(o.a);
+  if(!(h>1&&d>1&&a>1))return null;
+  return {...o,h,d,a};
+}
+function bookOdds(m){
+  return cleanBookOdds(DB?.odds?.[matchId(m)]||DB?.odds?.[oddsKey(m)]||BOOK_ODDS[oddsKey(m)]);
+}
 function lambdas(m){
   const hN=teamOf(m.h)?.nameZh, aN=teamOf(m.a)?.nameZh;
   let d=ratingOf(hN)-ratingOf(aN);
@@ -987,7 +996,7 @@ function scoreMatrix(m){
 const round2=x=>Math.round(x*100)/100;
 function odds1x2(m){
   const live=bookOdds(m);
-  if(live)return {h:live.h,d:live.d,a:live.a,source:BOOK_ODDS_SOURCE,url:live.url,updated:BOOK_ODDS_UPDATED};
+  if(live)return {h:live.h,d:live.d,a:live.a,source:live.source||BOOK_ODDS_SOURCE,url:live.url,updated:live.updatedAt||live.updated||BOOK_ODDS_UPDATED};
   const mat=scoreMatrix(m);let h=0,d=0,a=0,tot=0;
   for(let i=0;i<mat.length;i++)for(let j=0;j<mat.length;j++){const p=mat[i][j];tot+=p;
     if(i>j)h+=p;else if(i===j)d+=p;else a+=p;}
@@ -1031,9 +1040,9 @@ const MID2M={};M.forEach(m=>MID2M[matchId(m)]=m);
 
 /* ---- 持久化 ---- */
 const DB_KEY="wc2026_betting_v1",USER_KEY="wc2026_user",MAX_USERS=11,INIT_BAL=1000,MIN_STAKE=10,MAX_PCT=0.5;
-let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{}},JSON.parse(localStorage.getItem(DB_KEY))||{});}
-  catch(e){return {users:{},bets:[],daily:{},results:{},resultSync:{}};}})();
-DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};DB.results=DB.results||{};DB.resultSync=DB.resultSync||{};
+let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{}},JSON.parse(localStorage.getItem(DB_KEY))||{});}
+  catch(e){return {users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{}};}})();
+DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};DB.results=DB.results||{};DB.resultSync=DB.resultSync||{};DB.odds=DB.odds||{};DB.oddsSync=DB.oddsSync||{};
 const DB_CHANNEL=typeof BroadcastChannel!=="undefined"?new BroadcastChannel("wc2026_betting_sync"):null;
 const REMOTE_SYNC={
   enabled:true,
@@ -1046,8 +1055,8 @@ const REMOTE_SYNC={
 let remotePulling=false,remotePushTimer=null,remoteLastWrite=0;
 let remoteStatus="已配置，正在连接";
 function normalizeDB(db){
-  db=Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{}},db||{});
-  db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};
+  db=Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{}},db||{});
+  db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};db.odds=db.odds||{};db.oddsSync=db.oddsSync||{};
   return db;
 }
 function publicDB(db){
@@ -1077,7 +1086,14 @@ function mergeDB(local,remote){
     results[id]=!lr||rt>=lt?rr:lr;
   });
   const resultSync={...local.resultSync,...remote.resultSync};
-  return normalizeDB({users,bets:Object.values(betsById).sort((a,b)=>(a.placedAt||0)-(b.placedAt||0)),daily:{...remote.daily,...local.daily},results,resultSync});
+  const odds={...local.odds};
+  Object.entries(remote.odds).forEach(([id,ro])=>{
+    const lo=odds[id];
+    const rt=Date.parse(ro?.updatedAt||ro?.updated||"")||0,lt=Date.parse(lo?.updatedAt||lo?.updated||"")||0;
+    odds[id]=!lo||rt>=lt?ro:lo;
+  });
+  const oddsSync={...local.oddsSync,...remote.oddsSync};
+  return normalizeDB({users,bets:Object.values(betsById).sort((a,b)=>(a.placedAt||0)-(b.placedAt||0)),daily:{...remote.daily,...local.daily},results,resultSync,odds,oddsSync});
 }
 function remoteEnabled(){return REMOTE_SYNC.enabled&&REMOTE_SYNC.url&&REMOTE_SYNC.anonKey;}
 function remoteHeaders(extra={}){
@@ -1266,7 +1282,7 @@ function renderLoginBar(){
 }
 function renderWallet(){
   const w=document.getElementById("betWallet"),sl=document.getElementById("betMySlips");
-  document.getElementById("betRuleNote").textContent="今天/明天 · 开赛停止 · 完赛结算 · 单注 10 ~ 余额50%";
+  document.getElementById("betRuleNote").textContent="今天/明天 · 开赛停止 · 完赛结算 · Pinnacle快照/模型兜底";
   const u=DB.users[curUser()];
   if(!u){
     w.innerHTML=`<div class="bet-empty">未登录。<button class="bet-btn sm" id="walletLogin">竞猜登录 / 注册</button> 后即可下注（最多 11 人，每人初始 1000 虚拟币）。</div>`;
