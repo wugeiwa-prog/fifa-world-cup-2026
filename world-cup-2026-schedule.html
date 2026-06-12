@@ -199,6 +199,8 @@ body:not(.locked) .access-gate{display:none}
 .rank-table .pill.top{background:#FBE9E5;color:#A12A20}
 .rank-table .pill.strong{background:#E8EEF9;color:var(--host-blue)}
 .rank-table .pill.host{background:#E5F4EB;color:#10663C}
+#rankingList{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sync-note{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .foot{max-width:1080px;margin:0 auto;padding:0 20px 50px;font-size:12px;color:var(--ink-soft);text-align:center}
 .to-top{position:fixed;right:18px;bottom:18px;z-index:40;width:44px;height:44px;border-radius:50%;
   border:1px solid rgba(243,239,230,.45);background:var(--pitch);color:var(--chalk);
@@ -215,9 +217,33 @@ body:not(.locked) .access-gate{display:none}
 }
 @media (max-width:560px){
   .hero::before{width:300px;height:300px;right:-150px}
+  .hero-in{padding:34px 16px 24px}
   .stats{gap:18px}
   .stat .n{font-size:27px}
+  .toolbar-in{padding:9px 12px;gap:8px}
+  .nav-group{flex:1 1 100%;align-items:flex-start}
+  .nav-label{padding-top:7px;width:34px}
+  .tab{font-size:12.5px;padding:5px 10px}
+  .tab.link{padding:5px 9px}
+  .search{flex:1 1 58%;min-width:0}
   .search input{width:96px}
+  .bet-login{margin-left:auto}
+  .wrap{padding:18px 12px 54px}
+  .day{margin:22px 0 10px}
+  .day .date{font-size:21px}
+  .m{grid-template-columns:52px 1fr;gap:10px;padding:11px 10px;border-radius:9px}
+  .m .time{font-size:22px}
+  .m .time .cn{font-size:10px}
+  .row1{gap:5px}
+  .chip,.tag{font-size:10.5px}
+  .teams{font-size:14px;gap:5px}
+  .team .name{white-space:normal}
+  .venue,.watch{font-size:11.5px}
+  .panel{padding:16px 14px;margin-top:24px;border-radius:10px}
+  .panel h2{font-size:16px}
+  .rank-table{min-width:560px}
+  .lb{font-size:12.5px}
+  .lb th,.lb td{padding:7px 6px}
 }
 
 /* ---------- 竞猜娱乐系统 ---------- */
@@ -388,6 +414,7 @@ body:not(.locked) .access-gate{display:none}
 
   <section class="panel" id="betBoard">
     <h2>🏆 竞猜排行榜 <span class="lb-date" id="lbDate"></span></h2>
+    <div class="sync-note" id="syncNote"></div>
     <div id="leaderboard"></div>
   </section>
 
@@ -403,7 +430,7 @@ body:not(.locked) .access-gate{display:none}
   </section>
 
   <section class="panel" id="squadsPanel">
-    <h2>强队阵容</h2>
+    <h2>16 强队阵容</h2>
     <div class="squads" id="squads"></div>
   </section>
 
@@ -425,7 +452,7 @@ body:not(.locked) .access-gate{display:none}
       ⑤ 本页为静态快照，不自动联网刷新；比分数据截至 2026年6月12日 15:30（Europe/Rome），后续以 FIFA 官方实时数据为准。<br>
       ⑥ 强队阵容为官方名单中的核心球员摘录，完整名单请点击各队 FIFA 球队页核验。<br>
       ⑦ 世界排名依据 FIFA/Coca-Cola 男足世界排名，官方更新时间为 2026年6月11日，下一次官方更新为 2026年7月20日；48 支参赛队名次按 FIFA 官方页面与 ESPN 对 June 2026 排名转述核对。<br>
-      ⑧ 竞猜娱乐系统：限 10 名玩家，每人初始 1000 虚拟币，仅开放意大利时间今天和明天、且对阵已确定的未完赛比赛；可投注「胜平负 / 猜比分」。单注下限 10 币、上限为当前余额的 50%。赔率依据 2026年6月11日 FIFA 官方世界排名实力评分、经泊松模型推导（含约 6% 抽水），排行榜按虚拟币实时刷新并记录每日涨跌。比赛产生比分后自动结算。账号与战绩仅保存在本浏览器（localStorage），纯属娱乐、无真实货币。
+      ⑧ 竞猜娱乐系统：限 10 名玩家，每人初始 1000 虚拟币，仅开放意大利时间今天和明天、且对阵已确定的未完赛比赛；可投注「胜平负 / 猜比分」。单注下限 10 币、上限为当前余额的 50%。赔率依据 2026年6月11日 FIFA 官方世界排名实力评分、经泊松模型推导（含约 6% 抽水），排行榜按虚拟币实时刷新并记录每日涨跌。同一浏览器/同源标签页会自动同步 localStorage 变化；跨设备同步需要后端数据库。比赛产生比分后自动结算。账号与战绩仅保存在本浏览器，纯属娱乐、无真实货币。
     </div>
   </section>
 </main>
@@ -626,7 +653,7 @@ const TEAM_ROWS=[
 const TEAMS=Object.fromEntries(TEAM_ROWS.map(([nameZh,flag,nameEnShort,fifaCode,slug,group,stars])=>[nameZh,{nameZh,flag,nameEnShort,fifaCode,slug,group,stars}]));
 TEAMS["英格兰"].flag="\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}";
 TEAMS["苏格兰"].flag="\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}";
-const STRONG_TEAMS=new Set(["法国","西班牙","阿根廷","英格兰","葡萄牙","巴西","德国","荷兰","比利时","乌拉圭"]);
+const STRONG_TEAMS=new Set(["阿根廷","西班牙","法国","英格兰","葡萄牙","巴西","摩洛哥","荷兰","比利时","德国","克罗地亚","哥伦比亚","墨西哥","塞内加尔","乌拉圭","美国"]);
 const HOST_TEAMS=new Set(["美国","加拿大","墨西哥"]);
 const STAR_TEAMS=new Set(["法国","阿根廷","葡萄牙","巴西","英格兰","西班牙","挪威","埃及","韩国","比利时","德国","荷兰","乌拉圭"]);
 const CLASSIC_MATCHES=new Set(["巴西-摩洛哥","克罗地亚-英格兰","日本-荷兰","乌拉圭-西班牙","哥伦比亚-葡萄牙","法国-挪威","奥地利-阿根廷"]);
@@ -642,7 +669,7 @@ const STAR_ZH={
   "Kylian Mbappe":"基利安·姆巴佩","Antoine Griezmann":"安托万·格列兹曼","Aurelien Tchouameni":"楚阿梅尼","Sadio Mane":"萨迪奥·马内","Kalidou Koulibaly":"库利巴利","Aymen Hussein":"艾曼·侯赛因","Erling Haaland":"埃尔林·哈兰德","Martin Odegaard":"马丁·厄德高",
   "Lionel Messi":"利昂内尔·梅西","Julian Alvarez":"朱利安·阿尔瓦雷斯","Lautaro Martinez":"劳塔罗·马丁内斯","Riyad Mahrez":"里亚德·马赫雷斯","David Alaba":"大卫·阿拉巴","Marcel Sabitzer":"马塞尔·萨比策","Mousa Al-Taamari":"穆萨·塔马里",
   "Cristiano Ronaldo":"克里斯蒂亚诺·罗纳尔多","Bruno Fernandes":"布鲁诺·费尔南德斯","Bernardo Silva":"贝尔纳多·席尔瓦","Yoane Wissa":"约安·维萨","Eldor Shomurodov":"埃尔多尔·肖穆罗多夫","Luis Diaz":"路易斯·迪亚斯","James Rodriguez":"哈梅斯·罗德里格斯",
-  "Harry Kane":"哈里·凯恩","Jude Bellingham":"裘德·贝林厄姆","Phil Foden":"菲尔·福登","Luka Modric":"卢卡·莫德里奇","Josko Gvardiol":"格瓦迪奥尔","Mohammed Kudus":"穆罕默德·库杜斯","Adalberto Carrasquilla":"卡拉斯基利亚"
+  "Harry Kane":"哈里·凯恩","Jude Bellingham":"裘德·贝林厄姆","Phil Foden":"菲尔·福登","Luka Modric":"卢卡·莫德里奇","Josko Gvardiol":"格瓦迪奥尔","Ivan Perisic":"伊万·佩里西奇","Yassine Bounou":"亚辛·布努","Brahim Diaz":"卜拉欣·迪亚斯","Youssef En-Nesyri":"优素福·恩内斯里","Folarin Balogun":"弗拉林·巴洛贡","Antonee Robinson":"安东尼·罗宾逊","Mohammed Kudus":"穆罕默德·库杜斯","Adalberto Carrasquilla":"卡拉斯基利亚"
 };
 const SQUADS=[
   {team:"法国",coach:"Didier Deschamps",core:["Kylian Mbappe","Antoine Griezmann","Aurelien Tchouameni","William Saliba"],lines:"门将与防线经验充足；中前场由姆巴佩牵引速度，格列兹曼负责串联。",first:"6月16日 21:00 对 塞内加尔"},
@@ -654,16 +681,24 @@ const SQUADS=[
   {team:"德国",coach:"Julian Nagelsmann",core:["Jamal Musiala","Florian Wirtz","Joshua Kimmich","Antonio Rudiger"],lines:"穆西亚拉与维尔茨创造力强，中后场出球质量高，适合持续压迫。",first:"6月14日 19:00 对 库拉索"},
   {team:"荷兰",coach:"Ronald Koeman",core:["Virgil van Dijk","Frenkie de Jong","Xavi Simons","Cody Gakpo"],lines:"后防领袖稳定，边路和前场机动性强，攻守转换很有层次。",first:"6月14日 22:00 对 日本"},
   {team:"比利时",coach:"Rudi Garcia",core:["Kevin De Bruyne","Romelu Lukaku","Jeremy Doku","Youri Tielemans"],lines:"德布劳内仍是进攻发动机，多库的突破会改变比赛节奏。",first:"6月15日 21:00 对 埃及"},
-  {team:"乌拉圭",coach:"Marcelo Bielsa",core:["Federico Valverde","Darwin Nunez","Ronald Araujo","Giorgian de Arrascaeta"],lines:"高强度跑动与纵向冲击鲜明，巴尔韦德是攻防转换核心。",first:"6月16日 00:00 对 沙特阿拉伯"}
+  {team:"乌拉圭",coach:"Marcelo Bielsa",core:["Federico Valverde","Darwin Nunez","Ronald Araujo","Giorgian de Arrascaeta"],lines:"高强度跑动与纵向冲击鲜明，巴尔韦德是攻防转换核心。",first:"6月16日 00:00 对 沙特阿拉伯"},
+  {team:"摩洛哥",coach:"Mohamed Ouahbi",core:["Achraf Hakimi","Yassine Bounou","Brahim Diaz","Sofyan Amrabat"],lines:"防线和转换速度仍是底色，哈基米与卜拉欣的右路联动值得关注。",first:"6月14日 00:00 对 巴西"},
+  {team:"克罗地亚",coach:"Zlatko Dalic",core:["Luka Modric","Josko Gvardiol","Ivan Perisic","Marcelo Brozovic"],lines:"老将经验和中场控节奏能力突出，格瓦迪奥尔支撑后场上限。",first:"6月17日 22:00 对 英格兰"},
+  {team:"哥伦比亚",coach:"Nestor Lorenzo",core:["Luis Diaz","James Rodriguez","Davinson Sanchez","Jhon Arias"],lines:"路易斯·迪亚斯负责纵向爆点，哈梅斯仍是定位球和最后一传核心。",first:"6月18日 04:00 对 乌兹别克斯坦"},
+  {team:"墨西哥",coach:"Javier Aguirre",core:["Santiago Gimenez","Edson Alvarez","Raul Jimenez","Hirving Lozano"],lines:"东道主开局气势足，中轴硬度和主场氛围会放大竞争力。",first:"6月11日 21:00 对 南非"},
+  {team:"塞内加尔",coach:"Pape Thiaw",core:["Sadio Mane","Kalidou Koulibaly","Nicolas Jackson","Ismaila Sarr"],lines:"身体对抗和边路冲击强，面对强队时反击效率是关键。",first:"6月16日 21:00 对 法国"},
+  {team:"美国",coach:"Mauricio Pochettino",core:["Christian Pulisic","Weston McKennie","Tyler Adams","Folarin Balogun"],lines:"东道主阵容机动性强，普利西奇和巴洛贡决定前场效率。",first:"6月13日 03:00 对 巴拉圭"}
 ];
 const COACH_ZH={
   "Didier Deschamps":"迪迪埃·德尚","Luis de la Fuente":"路易斯·德拉富恩特","Lionel Scaloni":"利昂内尔·斯卡洛尼","Thomas Tuchel":"托马斯·图赫尔","Roberto Martinez":"罗伯托·马丁内斯",
-  "Carlo Ancelotti":"卡洛·安切洛蒂","Julian Nagelsmann":"尤利安·纳格尔斯曼","Ronald Koeman":"罗纳德·科曼","Rudi Garcia":"鲁迪·加西亚","Marcelo Bielsa":"马塞洛·贝尔萨"
+  "Carlo Ancelotti":"卡洛·安切洛蒂","Julian Nagelsmann":"尤利安·纳格尔斯曼","Ronald Koeman":"罗纳德·科曼","Rudi Garcia":"鲁迪·加西亚","Marcelo Bielsa":"马塞洛·贝尔萨",
+  "Mohamed Ouahbi":"穆罕默德·瓦赫比","Zlatko Dalic":"兹拉特科·达利奇","Nestor Lorenzo":"内斯托尔·洛伦索","Javier Aguirre":"哈维尔·阿吉雷","Pape Thiaw":"帕普·蒂奥","Mauricio Pochettino":"毛里西奥·波切蒂诺"
 };
 const SQUAD_NAME_ZH={
   ...STAR_ZH,
   "William Saliba":"威廉·萨利巴","Nico Williams":"尼科·威廉斯","Emiliano Martinez":"埃米利亚诺·马丁内斯","Bukayo Saka":"布卡约·萨卡","Ruben Dias":"鲁本·迪亚斯",
-  "Marquinhos":"马尔基尼奥斯","Antonio Rudiger":"安东尼奥·吕迪格","Cody Gakpo":"科迪·加克波","Youri Tielemans":"尤里·蒂勒曼斯","Giorgian de Arrascaeta":"乔治安·德阿拉斯卡埃塔"
+  "Marquinhos":"马尔基尼奥斯","Antonio Rudiger":"安东尼奥·吕迪格","Cody Gakpo":"科迪·加克波","Youri Tielemans":"尤里·蒂勒曼斯","Giorgian de Arrascaeta":"乔治安·德阿拉斯卡埃塔",
+  "Marcelo Brozovic":"马塞洛·布罗佐维奇","Davinson Sanchez":"达文森·桑切斯","Jhon Arias":"约翰·阿里亚斯","Raul Jimenez":"劳尔·希门尼斯","Hirving Lozano":"伊尔文·洛萨诺","Nicolas Jackson":"尼古拉斯·杰克逊","Ismaila Sarr":"伊斯梅拉·萨尔","Folarin Balogun":"弗拉林·巴洛贡"
 };
 function rawName(s){return s.includes(" ")?s.split(" ").slice(1).join(" "):s;}
 function teamOf(s){return TEAMS[rawName(s)]||null;}
@@ -687,7 +722,7 @@ function enrichMatch(m){
   const importance=tags.includes("必看")||m.st==="fin"||CLASSIC_MATCHES.has(matchupKey(m))?3:(tags.includes("淘汰赛")||tags.includes("强队")||tags.includes("东道主")?2:1);
   const starText=zhStars(stars).join(" / ");
   const matchupText=home&&away?`${home.nameZh} ${home.fifaCode} 对阵 ${away.nameZh} ${away.fifaCode}`:"";
-  const watchNote=m.n||((importance>=2&&stars.length)?`中文看点：${matchupText}，关注 ${starText} 的发挥。`:"");
+  const watchNote=m.n||((importance>=2&&stars.length)?`看点：${matchupText}，关注 ${starText} 的发挥。`:"");
   const searchText=[m.h,m.a,homeName,awayName,home?.nameEnShort,away?.nameEnShort,home?.fifaCode,away?.fifaCode,...stars,...zhStars(stars),...tags,watchNote].filter(Boolean).join(" ").toLowerCase();
   return {...m,home,away,status:m.s?"done":"scheduled",score:m.s||"",importance,tags,stars,watchNote,searchText,sourceUpdatedAt:SNAPSHOT_AT};
 }
@@ -894,7 +929,22 @@ const DB_KEY="wc2026_betting_v1",USER_KEY="wc2026_user",MAX_USERS=10,INIT_BAL=10
 let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{}},JSON.parse(localStorage.getItem(DB_KEY))||{});}
   catch(e){return {users:{},bets:[],daily:{}};}})();
 DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};
-function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(DB));}
+const DB_CHANNEL=typeof BroadcastChannel!=="undefined"?new BroadcastChannel("wc2026_betting_sync"):null;
+function saveDB(){
+  localStorage.setItem(DB_KEY,JSON.stringify(DB));
+  DB_CHANNEL?.postMessage({type:"db-updated",at:Date.now()});
+}
+function reloadDB(){
+  try{DB=Object.assign({users:{},bets:[],daily:{}},JSON.parse(localStorage.getItem(DB_KEY))||{});}
+  catch(e){DB={users:{},bets:[],daily:{}};}
+  DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};
+}
+function syncFromStorage(){
+  reloadDB();
+  if(typeof refreshAll==="function")refreshAll();
+}
+window.addEventListener("storage",e=>{if(e.key===DB_KEY)syncFromStorage();});
+DB_CHANNEL?.addEventListener("message",e=>{if(e.data?.type==="db-updated")syncFromStorage();});
 function curUser(){return sessionStorage.getItem(USER_KEY);}
 function setCur(u){u?sessionStorage.setItem(USER_KEY,u):sessionStorage.removeItem(USER_KEY);}
 async function sha(s){
@@ -1037,7 +1087,8 @@ function renderWallet(){
 function renderLeaderboard(){
   const box=document.getElementById("leaderboard");
   document.getElementById("lbDate").textContent=`实时余额榜 · 每日记录涨跌 · ${todayRome}`;
-  const users=Object.values(DB.users).sort((a,b)=>b.balance-a.balance);
+  document.getElementById("syncNote").textContent="未登录也可查看榜单。本页会同步同一浏览器/同源标签页内其他玩家的注册、投注和余额变化；跨设备实时同步需要后端数据库。";
+  const users=Object.values(DB.users).sort((a,b)=>b.balance-a.balance||a.name.localeCompare(b.name));
   if(!users.length){box.innerHTML=`<div class="bet-empty">还没有玩家。点击右上角「竞猜登录」注册（限 10 人），开始竞猜吧。</div>`;return;}
   const pk=prevDayKey(),prevRank={};
   if(pk)DB.daily[pk].slice().sort((a,b)=>b.balance-a.balance).forEach((r,i)=>prevRank[r.user]=i);
