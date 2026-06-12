@@ -79,6 +79,12 @@ body:not(.locked) .access-gate{display:none}
 .stats{display:flex;flex-wrap:wrap;gap:26px;margin-top:26px}
 .stat .n{font-family:var(--num);font-weight:700;font-size:34px;line-height:1;color:#fff}
 .stat .l{font-size:12.5px;color:rgba(243,239,230,.7);margin-top:3px;letter-spacing:.08em}
+.progress-card{margin-top:22px;max-width:620px}
+.progress-head{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:13px;color:rgba(243,239,230,.78);margin-bottom:8px}
+.progress-head b{font-family:var(--num);font-size:18px;color:#fff}
+.progress-track{height:10px;border-radius:999px;background:rgba(243,239,230,.18);overflow:hidden;border:1px solid rgba(243,239,230,.22)}
+.progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--grass),#FFD56A);border-radius:inherit;transition:width .35s ease}
+.progress-detail{margin-top:7px;font-size:12px;color:rgba(243,239,230,.68)}
 
 /* 阶段时间轴 */
 .timeline{display:flex;gap:0;margin-top:30px;overflow-x:auto;padding-bottom:6px;
@@ -361,6 +367,11 @@ body:not(.locked) .access-gate{display:none}
       <div class="stat"><div class="n">12</div><div class="l">个小组</div></div>
       <div class="stat"><div class="n">16</div><div class="l">座城市</div></div>
       <div class="stat"><div class="n">39</div><div class="l">天赛期</div></div>
+    </div>
+    <div class="progress-card" aria-label="赛事进度">
+      <div class="progress-head"><span>赛事进度</span><b id="progressPct">0%</b></div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-detail" id="progressDetail">已完成 0 场 · 剩余 104 场</div>
     </div>
     <div class="timeline">
       <div class="tl"><div class="s">小组赛</div><div class="d">6/11 – 6/28</div></div>
@@ -735,6 +746,15 @@ function enrichMatch(m){
   return {...m,home,away,status:m.s?"done":"scheduled",score:m.s||"",importance,tags,stars,watchNote,searchText,sourceUpdatedAt:SNAPSHOT_AT};
 }
 const M=RAW_MATCHES.map(enrichMatch);
+const RESULTS=Object.fromEntries(M.filter(m=>m.score).map(m=>[matchId(m),m.score]));
+function applyResults(){
+  M.forEach(m=>{
+    const s=RESULTS[matchId(m)];
+    if(!s)return;
+    m.s=s;m.score=s;m.status="done";
+  });
+}
+applyResults();
 
 const WK=["周日","周一","周二","周三","周四","周五","周六"];
 const STAGE_NAME={group:"小组赛",r32:"32强",r16:"16强",qf:"1/4决赛",fin:"决赛阶段"};
@@ -763,6 +783,13 @@ function teamHtml(team,raw){
   return `<span class="team" title="${esc(team.nameEnShort)}"><span class="flag">${team.flag}</span><span class="name">${esc(team.nameZh)}</span><span class="code">${team.fifaCode}</span></span>`;
 }
 function importanceLabel(m){return m.importance===3?"必看":(m.importance===2?"重点":"普通");}
+function updateTournamentProgress(){
+  const total=M.length,done=M.filter(m=>m.status==="done"||m.score).length,remain=total-done;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById("progressPct").textContent=`${pct}%`;
+  document.getElementById("progressBar").style.width=`${pct}%`;
+  document.getElementById("progressDetail").textContent=`已完成 ${done} 场 · 剩余 ${remain} 场`;
+}
 
 function render(){
   const q=curQ.trim().toLowerCase();
@@ -1009,6 +1036,8 @@ async function pullRemoteDB(){
         remoteLastWrite=ts;
         DB=mergeDB(DB,row.data);
         localStorage.setItem(DB_KEY,JSON.stringify(DB));
+        applyResults();
+        settleBets();
         if(typeof refreshAll==="function")refreshAll();
       }
     }
@@ -1219,7 +1248,7 @@ function betButtonHtml(m){
   const src=o.source?`<span class="src">${esc(o.source)} 快照</span>`:`<span class="src">模型赔率</span>`;
   return `<div class="betline"><span class="odds"><span>主 <b>${o.h.toFixed(2)}</b></span><span>平 <b>${o.d.toFixed(2)}</b></span><span>客 <b>${o.a.toFixed(2)}</b></span>${src}</span><button class="bet-btn sm" data-bet="${matchId(m)}">竞猜</button></div>`;
 }
-function refreshAll(){renderLoginBar();renderWallet();renderLeaderboard();render();emojify(document.body);}
+function refreshAll(){settleBets();renderLoginBar();renderWallet();renderLeaderboard();updateTournamentProgress();render();emojify(document.body);}
 
 /* ---- 事件绑定（一次）---- */
 document.getElementById("loginGo").addEventListener("click",doLogin);
@@ -1236,7 +1265,6 @@ document.querySelectorAll(".bet-mask").forEach(mask=>mask.addEventListener("clic
 document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-bet]");if(b)openBet(b.dataset.bet);});
 
 /* ---- 启动 ---- */
-settleBets();
 snapshotDaily();
 initRemoteSync();
 refreshAll();
