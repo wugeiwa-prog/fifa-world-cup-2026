@@ -18,6 +18,15 @@ const TEAM_EN = {
   "阿根廷":"Argentina","阿尔及利亚":"Algeria","奥地利":"Austria","约旦":"Jordan","葡萄牙":"Portugal","刚果（金）":"Congo DR",
   "乌兹别克斯坦":"Uzbekistan","哥伦比亚":"Colombia","英格兰":"England","克罗地亚":"Croatia","加纳":"Ghana","巴拿马":"Panama"
 };
+const TEAM_CODE = {
+  "墨西哥":"MEX","南非":"RSA","韩国":"KOR","捷克":"CZE","加拿大":"CAN","波黑":"BIH","卡塔尔":"QAT","瑞士":"SUI",
+  "巴西":"BRA","摩洛哥":"MAR","海地":"HAI","苏格兰":"SCO","美国":"USA","巴拉圭":"PAR","澳大利亚":"AUS","土耳其":"TUR",
+  "德国":"GER","库拉索":"CUW","科特迪瓦":"CIV","厄瓜多尔":"ECU","荷兰":"NED","日本":"JPN","瑞典":"SWE","突尼斯":"TUN",
+  "比利时":"BEL","埃及":"EGY","伊朗":"IRN","新西兰":"NZL","西班牙":"ESP","佛得角":"CPV","沙特阿拉伯":"KSA","乌拉圭":"URU",
+  "法国":"FRA","塞内加尔":"SEN","伊拉克":"IRQ","挪威":"NOR","阿根廷":"ARG","阿尔及利亚":"ALG","奥地利":"AUT","约旦":"JOR",
+  "葡萄牙":"POR","刚果（金）":"COD","乌兹别克斯坦":"UZB","哥伦比亚":"COL","英格兰":"ENG","克罗地亚":"CRO","加纳":"GHA","巴拿马":"PAN"
+};
+const ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
 const FALLBACK_RESULT_SOURCES = {
   "06-12#21:00#加拿大#波黑": [
     {name:"Canada Soccer",url:"https://canadasoccer.com/match/4696/",parser:"canada-soccer"},
@@ -40,6 +49,19 @@ function romeKickoffUtc(m){
   const [mo,dd] = m.d.split("-").map(Number);
   const [hh,mm] = m.t.split(":").map(Number);
   return new Date(Date.UTC(2026, mo - 1, dd, hh - 2, mm));
+}
+function ymd(date){
+  return `${date.getUTCFullYear()}${String(date.getUTCMonth()+1).padStart(2,"0")}${String(date.getUTCDate()).padStart(2,"0")}`;
+}
+function candidateEspnDates(m){
+  const kick = romeKickoffUtc(m);
+  const dates = new Set();
+  dates.add(ymd(kick));
+  dates.add(ymd(new Date(kick.getTime() - 6 * 60 * 60_000)));
+  dates.add(ymd(new Date(kick.getTime() + 6 * 60 * 60_000)));
+  const [mo,dd] = m.d.split("-").map(Number);
+  dates.add(`2026${String(mo).padStart(2,"0")}${String(dd).padStart(2,"0")}`);
+  return [...dates];
 }
 function isCandidate(m, now = new Date()){
   if(!FORCE_ALL && m.s)return false;
@@ -107,6 +129,56 @@ async function fetchFallbackScore(m){
   }
   return null;
 }
+const espnCache = new Map();
+async function espnScoreboard(dateKey){
+  if(espnCache.has(dateKey))return espnCache.get(dateKey);
+  const url = `${ESPN_SCOREBOARD_URL}?dates=${dateKey}`;
+  const data = await fetch(url,{headers:{"user-agent":"Mozilla/5.0"}}).then(r=>{
+    if(!r.ok)throw new Error(`ESPN ${r.status} ${r.statusText}`);
+    return r.json();
+  });
+  espnCache.set(dateKey,{url,events:Array.isArray(data.events)?data.events:[]});
+  return espnCache.get(dateKey);
+}
+function espnTeamKey(team){
+  return norm([team?.abbreviation,team?.displayName,team?.shortDisplayName,team?.name,team?.location].filter(Boolean).join(" "));
+}
+function matchEspnEvent(event, home, away){
+  const comp = event.competitions?.[0], competitors = comp?.competitors || [];
+  const homeCode = TEAM_CODE[home], awayCode = TEAM_CODE[away];
+  const homeEn = TEAM_EN[home] || home, awayEn = TEAM_EN[away] || away;
+  const wantedHome = [homeCode, homeEn, home].filter(Boolean).map(norm);
+  const wantedAway = [awayCode, awayEn, away].filter(Boolean).map(norm);
+  const homeComp = competitors.find(c => c.homeAway === "home");
+  const awayComp = competitors.find(c => c.homeAway === "away");
+  if(!homeComp || !awayComp)return null;
+  const eh = espnTeamKey(homeComp.team), ea = espnTeamKey(awayComp.team);
+  const homeOk = wantedHome.some(x => eh.includes(x));
+  const awayOk = wantedAway.some(x => ea.includes(x));
+  if(homeOk && awayOk)return {homeComp,awayComp};
+  return null;
+}
+async function fetchEspnScore(m){
+  const home = rawName(m.h), away = rawName(m.a);
+  for(const dateKey of candidateEspnDates(m)){
+    try{
+      const board = await espnScoreboard(dateKey);
+      for(const event of board.events){
+        const status = event.status?.type || event.competitions?.[0]?.status?.type || {};
+        if(!status.completed && String(status.state || "").toLowerCase() !== "post")continue;
+        const matched = matchEspnEvent(event, home, away);
+        if(!matched)continue;
+        const hs = Number(matched.homeComp.score), as = Number(matched.awayComp.score);
+        if(!Number.isFinite(hs) || !Number.isFinite(as))continue;
+        const link = event.links?.find(l => l.rel?.includes("summary"))?.href || board.url;
+        return {score:`${hs}-${as}`,source:"ESPN",url:link};
+      }
+    }catch(e){
+      console.warn(`ESPN scoreboard failed ${dateKey}: ${e.message}`);
+    }
+  }
+  return null;
+}
 function escapeRe(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&").replace(/\\ /g,"\\s+");}
 async function getOfficialText(){
   const { chromium } = await import("playwright");
@@ -145,7 +217,7 @@ const state = await loadState();
 state.results ||= {};
 state.resultSync ||= {};
 
-const candidates = matches.filter(m => isCandidate(m) && !state.results[matchId(m)]);
+const candidates = matches.filter(m => isCandidate(m) && (FORCE_ALL || !state.results[matchId(m)]));
 console.log(`Candidate matches: ${candidates.length}`);
 if(!candidates.length){
   state.resultSync = {source:"FIFA", mode:"post-match-only", lastCheckedAt:new Date().toISOString(), updated:0};
@@ -166,7 +238,7 @@ for(const m of candidates){
   let source = "FIFA";
   let sourceUrl = FIFA_URL;
   if(!score){
-    const fallback = await fetchFallbackScore(m);
+    const fallback = await fetchEspnScore(m) || await fetchFallbackScore(m);
     if(fallback){
       score = fallback.score;
       source = `FIFA fallback: ${fallback.source}`;
