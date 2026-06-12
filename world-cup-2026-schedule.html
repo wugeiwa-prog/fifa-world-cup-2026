@@ -855,7 +855,7 @@ const FIFA_RANK={
   "加纳":73,"库拉索":82,"海地":83,"新西兰":85
 };
 function rankTier(rank){
-  if(rank<=10)return ["top","TOP 10"];
+  if(rank<=10)return ["top","强队"];
   if(rank<=30)return ["strong","前 30"];
   return ["","参赛队"];
 }
@@ -865,7 +865,6 @@ function renderRankings(){
   box.innerHTML=`<table class="rank-table"><thead><tr><th>排名</th><th>球队</th><th>小组</th><th>标签</th></tr></thead><tbody>${
     rows.map(t=>{
       const tier=rankTier(t.rank),flags=[];
-      if(STRONG_TEAMS.has(t.nameZh))flags.push(`<span class="pill strong">强队</span>`);
       if(HOST_TEAMS.has(t.nameZh))flags.push(`<span class="pill host">东道主</span>`);
       flags.unshift(`<span class="pill ${tier[0]}">${tier[1]}</span>`);
       return `<tr><td class="rk">${t.rank}</td><td><div class="rteam"><span>${t.flag}</span><span>${t.nameZh}</span><span class="code">${t.fifaCode}</span></div></td><td>GROUP ${t.group}</td><td>${flags.join(" ")}</td></tr>`;
