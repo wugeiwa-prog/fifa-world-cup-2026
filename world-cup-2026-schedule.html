@@ -936,14 +936,15 @@ let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{}},JSON.parse(loc
 DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};
 const DB_CHANNEL=typeof BroadcastChannel!=="undefined"?new BroadcastChannel("wc2026_betting_sync"):null;
 const REMOTE_SYNC={
-  enabled:false,
+  enabled:true,
   provider:"supabase",
-  url:"",
-  anonKey:"",
+  url:"https://dngazmrtmtdahbrlazcj.supabase.co",
+  anonKey:"sb_publishable_-bRXY4XdE8-mbyEHVnxvGw_EfCd8RuY",
   table:"wc2026_state",
   rowId:"global"
 };
 let remotePulling=false,remotePushTimer=null,remoteLastWrite=0;
+let remoteStatus="已配置，正在连接";
 function remoteEnabled(){return REMOTE_SYNC.enabled&&REMOTE_SYNC.url&&REMOTE_SYNC.anonKey;}
 function remoteHeaders(extra={}){
   return {"apikey":REMOTE_SYNC.anonKey,"Authorization":`Bearer ${REMOTE_SYNC.anonKey}`,...extra};
@@ -972,7 +973,7 @@ async function pullRemoteDB(){
         if(typeof refreshAll==="function")refreshAll();
       }
     }
-  }catch(e){console.warn("远程同步拉取失败",e);}
+  }catch(e){remoteStatus="后端表未就绪，请执行 BACKEND_SYNC.md 中的 SQL";console.warn("远程同步拉取失败",e);}
   finally{remotePulling=false;}
 }
 function scheduleRemotePush(){
@@ -983,7 +984,7 @@ function scheduleRemotePush(){
       const updated_at=new Date().toISOString();
       await remoteFetch("POST",REMOTE_SYNC.table,{id:REMOTE_SYNC.rowId,data:DB,updated_at});
       remoteLastWrite=Date.parse(updated_at);
-    }catch(e){console.warn("远程同步写入失败",e);}
+    }catch(e){remoteStatus="后端写入失败，请检查 Supabase 表和 RLS policy";console.warn("远程同步写入失败",e);}
   },250);
 }
 function initRemoteSync(){
@@ -1150,7 +1151,7 @@ function renderLeaderboard(){
   const box=document.getElementById("leaderboard");
   document.getElementById("lbDate").textContent=`实时余额榜 · 每日记录涨跌 · ${todayRome}`;
   document.getElementById("syncNote").textContent=remoteEnabled()
-    ?"未登录也可查看榜单。跨设备同步已启用：11 名玩家的账号、余额、投注和榜单会同步到后端。"
+    ?`未登录也可查看榜单。跨设备同步已配置：${remoteStatus}。`
     :"未登录也可查看榜单。同一浏览器/同源标签页会自动同步；如需跨设备实时同步，请填入 Supabase 后端配置。";
   const users=Object.values(DB.users).sort((a,b)=>b.balance-a.balance||a.name.localeCompare(b.name));
   if(!users.length){box.innerHTML=`<div class="bet-empty">还没有玩家。点击右上角「竞猜登录」注册（限 11 人），开始竞猜吧。</div>`;return;}
