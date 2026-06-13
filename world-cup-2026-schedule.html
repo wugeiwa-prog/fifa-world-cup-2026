@@ -214,7 +214,13 @@ body:not(.locked) .access-gate{display:none}
 .rank-table .pill.host{background:#E5F4EB;color:#10663C}
 #rankingList{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .sync-note{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.7}
-.foot{max-width:1080px;margin:0 auto;padding:0 20px 50px;font-size:12px;color:var(--ink-soft);text-align:center}
+.foot{max-width:1080px;margin:0 auto;padding:4px 20px 52px;text-align:center;color:var(--ink-soft)}
+.brand-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:7px;font-family:var(--num);font-weight:700;
+  font-size:18px;letter-spacing:.08em;color:var(--pitch);text-transform:uppercase}
+.brand-mark::before,.brand-mark::after{content:"";width:32px;height:1px;background:linear-gradient(90deg,transparent,var(--grass))}
+.brand-mark::after{background:linear-gradient(90deg,var(--grass),transparent)}
+.brand-mark .copy{font-size:14px;color:var(--grass);letter-spacing:0;text-transform:none}
+.foot .fine{font-size:12px;line-height:1.8}
 .to-top{position:fixed;right:18px;bottom:18px;z-index:40;width:44px;height:44px;border-radius:50%;
   border:1px solid rgba(243,239,230,.45);background:var(--pitch);color:var(--chalk);
   display:grid;place-items:center;font-size:22px;line-height:1;cursor:pointer;box-shadow:0 8px 22px rgba(11,59,42,.22);
@@ -557,7 +563,10 @@ body:not(.locked) .access-gate{display:none}
   </div>
 </div>
 
-<footer class="foot">数据依据 FIFA 官方赛程、比分、球队与阵容页面 · 静态整理于 2026-06-12 20:30 Europe/Rome · 主时间为意大利时间，附中国时间</footer>
+<footer class="foot">
+  <div class="brand-mark"><span class="copy">©</span> 2026 feifan &amp; his friends</div>
+  <div class="fine">数据依据 FIFA 官方赛程、比分、球队与阵容页面 · 静态整理于 2026-06-12 20:30 Europe/Rome · 主时间为意大利时间，附中国时间</div>
+</footer>
 <button class="to-top" id="toTop" type="button" aria-label="回到顶部" title="回到顶部">↑</button>
 
 <script>
