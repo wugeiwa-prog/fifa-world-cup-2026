@@ -32,7 +32,7 @@ const TEAM_EN = {
 };
 
 function rawName(name){
-  return String(name).replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\s]+/u,"").trim();
+  return String(name).replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u{E0060}-\u{E007F}\s]+/u,"").trim();
 }
 function matchId(m){return `${m.d}#${m.t}#${rawName(m.h)}#${rawName(m.a)}`;}
 function oddsKey(m){return `${rawName(m.h)}-${rawName(m.a)}`;}
@@ -47,8 +47,26 @@ function romeKickoffUtc(m){
   const [hh,mm] = m.t.split(":").map(Number);
   return new Date(Date.UTC(2026, mo - 1, dd, hh - 2, mm));
 }
+function romeDateKey(date = new Date()){
+  return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome"}).format(date);
+}
+function addDays(dateStr, days){
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0,10);
+}
+function matchDateKey(m){
+  return `2026-${m.d}`;
+}
+function inBetWindow(m, now = new Date()){
+  const today = romeDateKey(now);
+  return [today, addDays(today,1)].includes(matchDateKey(m));
+}
 function isOddsCandidate(m, now = new Date()){
   if(m.s && !FORCE_ALL)return false;
+  const home = rawName(m.h), away = rawName(m.a);
+  if(!TEAM_EN[home] || !TEAM_EN[away])return false;
+  if(!FORCE_ALL && !inBetWindow(m, now))return false;
   if(!PINNACLE_URLS[matchId(m)] && !ALLOW_MATCHUPS_PARSE)return false;
   const kick = romeKickoffUtc(m).getTime();
   const diffHours = (kick - now.getTime()) / 3_600_000;
@@ -116,6 +134,24 @@ function parseOddsFromText(text, m){
 }
 async function loadPageTexts(urls){
   const texts = [];
+  for(const url of urls){
+    try{
+      const res = await fetch(url,{headers:{"user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125 Safari/537.36"}});
+      if(res.ok){
+        const html = await res.text();
+        if(html && html.length > 200){
+          const text = html.replace(/<script[\s\S]*?<\/script>/gi," ").replace(/<style[\s\S]*?<\/style>/gi," ").replace(/<[^>]+>/g," ").replace(/\s+/g," ");
+          texts.push({url,text});
+          console.log(`Fetched Pinnacle html: ${url}`);
+          continue;
+        }
+      }
+    }catch(e){
+      console.warn(`Pinnacle html fetch failed: ${url}: ${e.message}`);
+    }
+  }
+  const remaining = urls.filter(url => !texts.some(t => t.url === url));
+  if(!remaining.length)return texts;
   let chromium;
   try{
     ({ chromium } = await import("playwright"));
@@ -123,13 +159,17 @@ async function loadPageTexts(urls){
     console.warn(`Playwright not available: ${e.message}`);
     return texts;
   }
-  const browser = await chromium.launch({ headless:true });
+  const browser = await chromium.launch({ headless:true, args:["--disable-dev-shm-usage"] });
   try{
-    for(const url of urls){
+    for(const url of remaining){
       try{
         const page = await browser.newPage({ userAgent:"Mozilla/5.0" });
-        await page.goto(url,{ waitUntil:"domcontentloaded", timeout:45_000 });
-        await page.waitForTimeout(8_000);
+        await page.route("**/*", route => {
+          const type = route.request().resourceType();
+          return ["image","media","font"].includes(type) ? route.abort() : route.continue();
+        });
+        await page.goto(url,{ waitUntil:"commit", timeout:90_000 });
+        await page.waitForTimeout(12_000);
         texts.push({url,text:await page.evaluate(() => document.body.innerText)});
         await page.close();
         console.log(`Fetched Pinnacle page: ${url}`);

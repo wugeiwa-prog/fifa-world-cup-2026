@@ -35,7 +35,7 @@ const FALLBACK_RESULT_SOURCES = {
 };
 
 function rawName(name){
-  return String(name).replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\s]+/u,"").trim();
+  return String(name).replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u{E0060}-\u{E007F}\s]+/u,"").trim();
 }
 function matchId(m){return `${m.d}#${m.t}#${rawName(m.h)}#${rawName(m.a)}`;}
 function loadMatches(){

@@ -43,6 +43,7 @@ jobs:
           ODDS_LOOKAHEAD_HOURS: "48"
           ODDS_PLAN_ONLY: "1"
           ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
+          PINNACLE_ALLOW_MATCHUPS_PARSE: "1"
         run: node scripts/sync-pinnacle-odds.mjs
 
       - name: Install Playwright
@@ -61,4 +62,5 @@ jobs:
           SUPABASE_ROW_ID: global
           ODDS_LOOKAHEAD_HOURS: "48"
           ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
+          PINNACLE_ALLOW_MATCHUPS_PARSE: "1"
         run: node scripts/sync-pinnacle-odds.mjs

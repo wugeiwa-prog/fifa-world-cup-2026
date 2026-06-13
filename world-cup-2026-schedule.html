@@ -789,7 +789,7 @@ const SQUAD_NAME_ZH={
   "Marquinhos":"马尔基尼奥斯","Antonio Rudiger":"安东尼奥·吕迪格","Cody Gakpo":"科迪·加克波","Youri Tielemans":"尤里·蒂勒曼斯","Giorgian de Arrascaeta":"乔治安·德阿拉斯卡埃塔",
   "Marcelo Brozovic":"马塞洛·布罗佐维奇","Davinson Sanchez":"达文森·桑切斯","Jhon Arias":"约翰·阿里亚斯","Raul Jimenez":"劳尔·希门尼斯","Hirving Lozano":"伊尔文·洛萨诺","Nicolas Jackson":"尼古拉斯·杰克逊","Ismaila Sarr":"伊斯梅拉·萨尔","Folarin Balogun":"弗拉林·巴洛贡"
 };
-function rawName(s){return s.includes(" ")?s.split(" ").slice(1).join(" "):s;}
+function rawName(s){return String(s).replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u{E0060}-\u{E007F}\s]+/u,"").trim();}
 function teamOf(s){return TEAMS[rawName(s)]||null;}
 function matchupKey(m){return [rawName(m.h),rawName(m.a)].sort().join("-");}
 function zhStars(stars){return stars.map(x=>STAR_ZH[x]||x);}
