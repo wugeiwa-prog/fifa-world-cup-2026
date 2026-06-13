@@ -96,7 +96,7 @@ function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
       const hasTableData=Object.keys(tableDb.users||{}).length||tableDb.bets.length||tableDb.comments.length||Object.keys(tableDb.results||{}).length||Object.keys(tableDb.odds||{}).length;
       return hasTableData?tableDb:await pullLegacy();
     }catch(e){return await pullLegacy();}},
-    async saveState(db){try{await pushTables(db);}catch(e){await pushLegacy(db);}}
+    async saveState(db){try{await pushTables(db);try{await pushLegacy(db);}catch(e){}}catch(e){await pushLegacy(db);}}
   };
 }
 

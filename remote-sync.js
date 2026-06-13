@@ -127,7 +127,11 @@
     }catch(e){return await pullLegacy(c);}
   }
   async function push(c,db){
-    try{return await pushTables(c,db);}catch(e){return await pushLegacy(c,db);}
+    try{
+      const out=await pushTables(c,db);
+      try{await pushLegacy(c,db);}catch(e){}
+      return out;
+    }catch(e){return await pushLegacy(c,db);}
   }
   window.WC2026_REMOTE={pull,push,rest,TABLES};
 })();
