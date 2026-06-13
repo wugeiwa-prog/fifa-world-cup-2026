@@ -202,12 +202,14 @@ body:not(.locked) .access-gate{display:none}
 .status-card b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
 .status-card span{font-size:12.5px;color:var(--ink-soft);line-height:1.55}
 .rank-meta{font-size:12.5px;color:var(--ink-soft);margin-bottom:10px}
-.rank-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.rank-table{width:100%;min-width:940px;border-collapse:collapse;font-size:13.5px}
 .rank-table th,.rank-table td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left}
 .rank-table th{font-size:12px;color:var(--ink-soft);font-weight:700;letter-spacing:.06em}
 .rank-table .rk{font-family:var(--num);font-size:18px;font-weight:800;color:var(--pitch);width:56px}
 .rank-table .rteam{display:flex;align-items:center;gap:7px;font-weight:700}
 .rank-table .code{font-family:var(--num);font-size:12px;color:var(--ink-soft);letter-spacing:.08em}
+.rank-table .coach{font-weight:700;color:var(--ink)}
+.rank-table .stars-cell{font-size:12.5px;color:var(--ink-soft);line-height:1.6;max-width:260px}
 .rank-table .pill{display:inline-flex;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;background:#EFEDE6;color:var(--ink-soft)}
 .rank-table .pill.top{background:#FBE9E5;color:#A12A20}
 .rank-table .pill.strong{background:#E8EEF9;color:var(--host-blue)}
@@ -271,7 +273,7 @@ body:not(.locked) .access-gate{display:none}
   .mention-title{padding-top:0}
   .panel{padding:16px 14px;margin-top:24px;border-radius:10px}
   .panel h2{font-size:16px}
-  .rank-table{min-width:560px}
+  .rank-table{min-width:940px}
   .lb{font-size:12.5px}
   .lb th,.lb td{padding:7px 6px}
 }
@@ -480,7 +482,7 @@ body:not(.locked) .access-gate{display:none}
 
   <section class="panel" id="rankings">
     <h2>FIFA 世界排名</h2>
-    <div class="rank-meta">FIFA/Coca-Cola 男足世界排名 · 2026-06-11 更新 · 下次官方更新 2026-07-20</div>
+    <div class="rank-meta">FIFA/Coca-Cola 男足世界排名 · 2026-06-11 更新 · 下次官方更新 2026-07-20 · 教练与当家球星为页面静态快照</div>
     <div id="rankingList"></div>
   </section>
 
@@ -767,6 +769,20 @@ const COACH_ZH={
   "Carlo Ancelotti":"卡洛·安切洛蒂","Julian Nagelsmann":"尤利安·纳格尔斯曼","Ronald Koeman":"罗纳德·科曼","Rudi Garcia":"鲁迪·加西亚","Marcelo Bielsa":"马塞洛·贝尔萨",
   "Mohamed Ouahbi":"穆罕默德·瓦赫比","Zlatko Dalic":"兹拉特科·达利奇","Nestor Lorenzo":"内斯托尔·洛伦索","Javier Aguirre":"哈维尔·阿吉雷","Pape Thiaw":"帕普·蒂奥","Mauricio Pochettino":"毛里西奥·波切蒂诺"
 };
+const TEAM_COACH_ZH={
+  "墨西哥":"哈维尔·阿吉雷","南非":"雨果·布鲁斯","韩国":"洪明甫","捷克":"伊万·哈谢克",
+  "加拿大":"杰西·马什","波黑":"谢尔盖·巴尔巴雷兹","卡塔尔":"胡伦·洛佩特吉","瑞士":"穆拉特·雅金",
+  "巴西":"卡洛·安切洛蒂","摩洛哥":"穆罕默德·瓦赫比","海地":"塞巴斯蒂安·米涅","苏格兰":"史蒂夫·克拉克",
+  "美国":"毛里西奥·波切蒂诺","巴拉圭":"古斯塔沃·阿尔法罗","澳大利亚":"托尼·波波维奇","土耳其":"文森佐·蒙特拉",
+  "德国":"尤利安·纳格尔斯曼","库拉索":"迪克·阿德沃卡特","科特迪瓦":"埃梅尔斯·法埃","厄瓜多尔":"塞巴斯蒂安·贝卡塞塞",
+  "荷兰":"罗纳德·科曼","日本":"森保一","瑞典":"容·达尔·托马森","突尼斯":"萨米·特拉贝尔西",
+  "比利时":"鲁迪·加西亚","埃及":"霍萨姆·哈桑","伊朗":"阿米尔·加莱诺伊","新西兰":"达伦·贝兹利",
+  "西班牙":"路易斯·德拉富恩特","佛得角":"布比斯塔","沙特阿拉伯":"埃尔韦·勒纳尔","乌拉圭":"马塞洛·贝尔萨",
+  "法国":"迪迪埃·德尚","塞内加尔":"帕普·蒂奥","伊拉克":"格雷厄姆·阿诺德","挪威":"斯托勒·索尔巴肯",
+  "阿根廷":"利昂内尔·斯卡洛尼","阿尔及利亚":"弗拉基米尔·佩特科维奇","奥地利":"拉尔夫·朗尼克","约旦":"贾马尔·塞拉米",
+  "葡萄牙":"罗伯托·马丁内斯","刚果（金）":"塞巴斯蒂安·德萨布尔","乌兹别克斯坦":"帖木儿·卡帕泽","哥伦比亚":"内斯托尔·洛伦索",
+  "英格兰":"托马斯·图赫尔","克罗地亚":"兹拉特科·达利奇","加纳":"奥托·阿多","巴拿马":"托马斯·克里斯蒂安森"
+};
 const SQUAD_NAME_ZH={
   ...STAR_ZH,
   "William Saliba":"威廉·萨利巴","Nico Williams":"尼科·威廉斯","Emiliano Martinez":"埃米利亚诺·马丁内斯","Bukayo Saka":"布卡约·萨卡","Ruben Dias":"鲁本·迪亚斯",
@@ -972,12 +988,15 @@ function rankTier(rank){
 function renderRankings(){
   const box=document.getElementById("rankingList");
   const rows=Object.values(TEAMS).map(t=>({...t,rank:FIFA_RANK[t.nameZh]})).sort((a,b)=>a.rank-b.rank);
-  box.innerHTML=`<table class="rank-table"><thead><tr><th>排名</th><th>球队</th><th>小组</th><th>标签</th></tr></thead><tbody>${
+  box.innerHTML=`<table class="rank-table"><thead><tr><th>排名</th><th>球队</th><th>小组</th><th>主教练</th><th>当家球星</th><th>标签</th></tr></thead><tbody>${
     rows.map(t=>{
       const tier=rankTier(t.rank),flags=[];
+      const squad=SQUADS.find(s=>s.team===t.nameZh);
+      const coach=TEAM_COACH_ZH[t.nameZh]||COACH_ZH[squad?.coach]||"待官方确认";
+      const stars=(squad?.core||t.stars||[]).slice(0,3).map(x=>SQUAD_NAME_ZH[x]||STAR_ZH[x]||x).join(" · ");
       if(HOST_TEAMS.has(t.nameZh))flags.push(`<span class="pill host">东道主</span>`);
       flags.unshift(`<span class="pill ${tier[0]}">${tier[1]}</span>`);
-      return `<tr><td class="rk">${t.rank}</td><td><div class="rteam"><span>${t.flag}</span><span>${t.nameZh}</span><span class="code">${t.fifaCode}</span></div></td><td>GROUP ${t.group}</td><td>${flags.join(" ")}</td></tr>`;
+      return `<tr><td class="rk">${t.rank}</td><td><div class="rteam"><span>${t.flag}</span><span>${t.nameZh}</span><span class="code">${t.fifaCode}</span></div></td><td>GROUP ${t.group}</td><td class="coach">${esc(coach)}</td><td class="stars-cell">${esc(stars)}</td><td>${flags.join(" ")}</td></tr>`;
     }).join("")
   }</tbody></table>`;
 }
