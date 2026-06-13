@@ -1217,8 +1217,15 @@ function syncFromStorage(){
 }
 window.addEventListener("storage",e=>{if(e.key===DB_KEY)syncFromStorage();});
 DB_CHANNEL?.addEventListener("message",e=>{if(e.data?.type==="db-updated")syncFromStorage();});
-function curUser(){return sessionStorage.getItem(USER_KEY);}
-function setCur(u){u?sessionStorage.setItem(USER_KEY,u):sessionStorage.removeItem(USER_KEY);}
+function curUser(){
+  const u=sessionStorage.getItem(USER_KEY)||localStorage.getItem(USER_KEY);
+  if(u){sessionStorage.setItem(USER_KEY,u);localStorage.setItem(USER_KEY,u);}
+  return u;
+}
+function setCur(u){
+  if(u){sessionStorage.setItem(USER_KEY,u);localStorage.setItem(USER_KEY,u);}
+  else{sessionStorage.removeItem(USER_KEY);localStorage.removeItem(USER_KEY);}
+}
 async function sha(s){
   if(crypto&&crypto.subtle){try{
     const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
