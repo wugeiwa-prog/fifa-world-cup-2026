@@ -229,6 +229,15 @@ body:not(.locked) .access-gate{display:none}
 .selected-phrase{min-height:34px;margin-top:11px;border:1px dashed #CFE7D7;background:#F8FBF6;border-radius:10px;
   padding:8px 10px;font-size:13px;color:var(--ink-soft)}
 .selected-phrase b{color:var(--pitch)}
+.mention-picker{display:grid;gap:9px;margin-top:10px}
+.mention-group{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:start}
+.mention-title{font-size:11px;font-weight:800;color:var(--ink-soft);letter-spacing:.08em;padding-top:7px}
+.mention-options{display:flex;gap:6px;flex-wrap:wrap;max-height:118px;overflow:auto;padding:1px 2px 4px 0;scrollbar-width:thin}
+.mention-chip{border:1px solid #DED9CC;background:#fff;border-radius:999px;padding:5px 9px;cursor:pointer;
+  font-family:var(--cjk);font-size:12px;line-height:1.2;color:var(--ink);white-space:nowrap;transition:border-color .12s,background .12s,color .12s}
+.mention-chip:hover{border-color:var(--host-blue)}
+.mention-chip.on{background:#E8EEF9;border-color:#CAD7EF;color:var(--host-blue);font-weight:800}
+.mention-chip.team.on{background:#E5F4EB;border-color:#BFE0C9;color:#10663C}
 .comment-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}
 .comment-msg{font-size:12.5px;color:var(--host-red);min-height:18px}
 .comments{display:grid;gap:10px}
@@ -242,6 +251,9 @@ body:not(.locked) .access-gate{display:none}
 .comment.replying .reply-form{display:flex}
 .reply-form .phrase-group{grid-template-columns:54px 1fr;gap:6px}
 .reply-form .phrase-chip{font-size:12px;padding:5px 8px}
+.reply-form .mention-group{grid-template-columns:54px 1fr;gap:6px}
+.reply-form .mention-options{max-height:92px}
+.reply-form .mention-chip{font-size:11.5px;padding:4px 7px}
 .reply-tools{display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
 .comment-empty{font-size:13px;color:var(--ink-soft);padding:8px 0}
 .foot{max-width:1080px;margin:0 auto;padding:0 20px 50px;font-size:12px;color:var(--ink-soft);text-align:center}
@@ -291,6 +303,8 @@ body:not(.locked) .access-gate{display:none}
   .reply-form{flex-direction:column}
   .phrase-group{grid-template-columns:1fr;gap:5px}
   .phrase-title{padding-top:0}
+  .mention-group{grid-template-columns:1fr;gap:5px}
+  .mention-title{padding-top:0}
   .panel{padding:16px 14px;margin-top:24px;border-radius:10px}
   .panel h2{font-size:16px}
   .rank-table{min-width:560px}
@@ -499,8 +513,9 @@ body:not(.locked) .access-gate{display:none}
     <h2>💬 留言板 <span class="lb-date">礼貌交流 · 支持回复</span></h2>
     <div class="comment-board">
       <div class="comment-form">
-        <label>只能从下方世界杯看球常用语中选择发布，避免自由输入带来的不友善或不安全内容。</label>
+        <label>先选择世界杯看球常用语，再按需追加 @球队 或 #球星 标签；不开放自由输入和图片上传。</label>
         <div class="phrase-picker" id="commentPhrasePicker" aria-label="选择留言语句"></div>
+        <div class="mention-picker" id="commentMentionPicker" aria-label="选择球队或球星标签"></div>
         <div class="selected-phrase" id="commentSelected">未选择语句</div>
         <div class="comment-actions">
           <span class="comment-msg" id="commentMsg"></span>
@@ -559,7 +574,7 @@ body:not(.locked) .access-gate{display:none}
       ⑦ 世界排名依据 FIFA/Coca-Cola 男足世界排名，官方更新时间为 2026年6月11日，下一次官方更新为 2026年7月20日；48 支参赛队名次按 FIFA 官方页面与 ESPN 对 June 2026 排名转述核对。<br>
       ⑧ 中国大陆收看：中央广播电视总台持有 2026 世界杯独家全媒体转播权及分许可权利，CCTV-5、CCTV-5+、央视频、央视体育等提供赛事直播与内容服务；咪咕和小红书为官方持权转播合作方。<br>
       ⑨ 竞猜娱乐系统：限 50 名玩家，每人初始 1000 虚拟币，仅开放意大利时间今天和明天、且对阵已确定的未开赛比赛；比赛开球即停止竞猜，比赛结束并写入最终比分后自动结算。可投注「胜平负 / 猜比分」。单注下限 10 币、上限为当前余额的 50%。竞猜窗口内优先使用云端同步的 Pinnacle 赛前胜平负赔率；未取得 Pinnacle 快照的比赛，回退到基于 2026年6月11日 FIFA 官方世界排名的泊松模型赔率（含约 6% 抽水）。排行榜按虚拟币实时刷新并记录每日涨跌；未登录访客也可查看当前榜单。云端同步会更新 50 名玩家的公开昵称、余额、投注、留言和榜单；密码校验信息仅保留在当前设备。竞猜仅供朋友间娱乐，无真实货币。<br>
-      ⑩ 留言板支持登录用户发布留言和互相回复；为保持友善和安全，留言与回复只能从内置世界杯看球常用语中选择，不开放自由输入和图片上传。<br>
+      ⑩ 留言板支持登录用户发布留言和互相回复；为保持友善和安全，留言与回复只能从内置世界杯看球常用语中选择，并可追加内置 @48支球队 与 #球星 标签，不开放自由输入和图片上传。<br>
       ⑪ 赔率快照来源：Pinnacle，GitHub Actions 周期性抓取并写入 Supabase；页面读取云端最新快照，不需要重新发布 GitHub Pages。Pinnacle 页面不可访问或无法解析时，会保留既有快照并使用模型赔率兜底。
     </div>
   </section>
@@ -1466,43 +1481,93 @@ const BLOCK_PATTERNS=[
 ];
 function commentId(){return `c_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;}
 function cleanText(s,max){return String(s||"").replace(/\s+/g," ").trim().slice(0,max);}
-let commentDraft="";
-const replyDrafts={};
+const COMMENT_TEAM_TAGS=TEAM_ROWS.map(([nameZh,flag,,fifaCode])=>({text:`@${flag}${nameZh}`,title:`${nameZh} ${fifaCode}`}));
+const COMMENT_STAR_TAGS=[...new Set([...TEAM_ROWS.flatMap(r=>r[6]||[]),...SQUADS.flatMap(s=>s.core||[])])]
+  .map(name=>({text:`#${SQUAD_NAME_ZH[name]||STAR_ZH[name]||name}`,title:name}))
+  .filter(x=>x.text.length<=18)
+  .slice(0,72);
+let commentDraft="",commentMentions=[];
+const replyDrafts={},replyMentions={};
 function allowedPhrases(){return COMMENT_PHRASE_PACKS.flatMap(g=>g.items);}
 function isAllowedPhrase(text){return allowedPhrases().includes(text);}
+function allowedMentionTexts(){return new Set([...COMMENT_TEAM_TAGS,...COMMENT_STAR_TAGS].map(x=>x.text));}
+function composeComment(phrase,tags=[]){return [phrase,...tags].filter(Boolean).join(" ");}
+function splitAllowedComment(text){
+  const phrase=allowedPhrases().find(p=>text===p||text.startsWith(p+" "));
+  if(!phrase)return null;
+  const rest=text.slice(phrase.length).trim();
+  const tags=rest?rest.split(/\s+/):[];
+  const allowed=allowedMentionTexts();
+  if(tags.some(t=>!allowed.has(t)))return null;
+  return {phrase,tags};
+}
 function renderPhrasePicker(target,compact=false,selected=""){
   const groups=compact?COMMENT_PHRASE_PACKS.map(g=>({...g,items:g.items.slice(0,3)})):COMMENT_PHRASE_PACKS;
   return groups.map(g=>`<div class="phrase-group"><div class="phrase-title">${esc(g.name)}</div><div class="phrase-options">${
     g.items.map(x=>`<button type="button" class="phrase-chip ${x===selected?"on":""}" data-phrase="${esc(x)}" data-target="${esc(target)}">${esc(x)}</button>`).join("")
   }</div></div>`).join("");
 }
+function renderMentionPicker(target,selected=[],compact=false){
+  const selectedSet=new Set(selected);
+  const teams=COMMENT_TEAM_TAGS;
+  const stars=compact?COMMENT_STAR_TAGS.slice(0,48):COMMENT_STAR_TAGS;
+  const group=(title,items,cls)=>`<div class="mention-group"><div class="mention-title">${title}</div><div class="mention-options">${
+    items.map(x=>`<button type="button" class="mention-chip ${cls} ${selectedSet.has(x.text)?"on":""}" data-mention="${esc(x.text)}" data-target="${esc(target)}" title="${esc(x.title)}">${esc(x.text)}</button>`).join("")
+  }</div></div>`;
+  return group("@球队",teams,"team")+group("#球星",stars,"star");
+}
+function updateMainCommentPreview(){
+  document.getElementById("commentSelected").innerHTML=commentDraft?`已选择：<b>${esc(composeComment(commentDraft,commentMentions))}</b>`:"未选择语句";
+}
 function setMainPhrase(text){
   commentDraft=text;
-  document.getElementById("commentSelected").innerHTML=text?`已选择：<b>${esc(text)}</b>`:"未选择语句";
   document.getElementById("commentPhrasePicker").innerHTML=renderPhrasePicker("main",false,commentDraft);
+  document.getElementById("commentMentionPicker").innerHTML=renderMentionPicker("main",commentMentions);
+  updateMainCommentPreview();
   emojify(document.getElementById("commentPhrasePicker"));
+  emojify(document.getElementById("commentMentionPicker"));
 }
 function setReplyPhrase(id,text){
   replyDrafts[id]=text;
   const box=[...document.querySelectorAll("[data-comment]")].find(x=>x.dataset.comment===id);
   if(!box)return;
-  box.querySelector(".reply-selected").innerHTML=text?`已选择：<b>${esc(text)}</b>`:"未选择回复语句";
+  box.querySelector(".reply-selected").innerHTML=text?`已选择：<b>${esc(composeComment(text,replyMentions[id]||[]))}</b>`:"未选择回复语句";
   box.querySelector(".reply-picker").innerHTML=renderPhrasePicker(`reply:${id}`,true,text);
+  box.querySelector(".reply-mentions").innerHTML=renderMentionPicker(`reply:${id}`,replyMentions[id]||[],true);
   emojify(box.querySelector(".reply-picker"));
+  emojify(box.querySelector(".reply-mentions"));
+}
+function toggleMention(target,tag){
+  if(target==="main"){
+    const set=new Set(commentMentions);
+    set.has(tag)?set.delete(tag):set.add(tag);
+    commentMentions=[...set].slice(0,4);
+    document.getElementById("commentMentionPicker").innerHTML=renderMentionPicker("main",commentMentions);
+    updateMainCommentPreview();emojify(document.getElementById("commentMentionPicker"));
+    return;
+  }
+  if(target.startsWith("reply:")){
+    const id=target.slice(6),set=new Set(replyMentions[id]||[]);
+    set.has(tag)?set.delete(tag):set.add(tag);
+    replyMentions[id]=[...set].slice(0,3);
+    setReplyPhrase(id,replyDrafts[id]||"");
+  }
 }
 function commentCheck(text){
   const t=cleanText(text,160);
   if(!curUser())return {ok:false,msg:"请先登录后再留言。"};
   if(!t)return {ok:false,msg:"请先选择一条语句。"};
-  if(!isAllowedPhrase(t))return {ok:false,msg:"只能发布系统内置的世界杯看球语句。"};
+  if(!splitAllowedComment(t))return {ok:false,msg:"只能发布系统内置语句，并可附带选定的 @球队 / #球星 标签。"};
   if(BLOCK_PATTERNS.some(r=>r.test(t)))return {ok:false,msg:"请调整措辞，避免脏话、攻击、违法或不安全内容。"};
   return {ok:true,text:t};
 }
 function renderComments(){
   const list=document.getElementById("commentsList");
   const mainPicker=document.getElementById("commentPhrasePicker");
+  const mainMentions=document.getElementById("commentMentionPicker");
   if(mainPicker){mainPicker.innerHTML=renderPhrasePicker("main",false,commentDraft);emojify(mainPicker);}
-  document.getElementById("commentSelected").innerHTML=commentDraft?`已选择：<b>${esc(commentDraft)}</b>`:"未选择语句";
+  if(mainMentions){mainMentions.innerHTML=renderMentionPicker("main",commentMentions);emojify(mainMentions);}
+  updateMainCommentPreview();
   const comments=(DB.comments||[]).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,200);
   if(!comments.length){list.innerHTML=`<div class="comment-empty">还没有留言。登录后写下第一句赛前宣言吧。</div>`;return;}
   list.innerHTML=comments.map(c=>{
@@ -1512,7 +1577,7 @@ function renderComments(){
       <div class="txt">${esc(c.text)}</div>
       ${replies.length?`<div class="reply-list">${replies.map(r=>`<div class="reply"><div class="meta"><span><span class="author">${esc(r.user||"匿名")}</span> 回复</span><span>${fmtTime(r.createdAt)}</span></div><div class="txt">${esc(r.text)}</div></div>`).join("")}</div>`:""}
       <div class="comment-actions"><button class="bet-btn sm ghost" data-reply="${esc(c.id)}" type="button">回复</button></div>
-      <div class="reply-form"><div class="reply-picker phrase-picker">${renderPhrasePicker(`reply:${c.id}`,true,replyDrafts[c.id]||"")}</div><div class="selected-phrase reply-selected">${replyDrafts[c.id]?`已选择：<b>${esc(replyDrafts[c.id])}</b>`:"未选择回复语句"}</div><div class="reply-tools"><button class="bet-btn sm" data-send-reply="${esc(c.id)}" type="button">发送回复</button></div></div>
+      <div class="reply-form"><div class="reply-picker phrase-picker">${renderPhrasePicker(`reply:${c.id}`,true,replyDrafts[c.id]||"")}</div><div class="reply-mentions mention-picker">${renderMentionPicker(`reply:${c.id}`,replyMentions[c.id]||[],true)}</div><div class="selected-phrase reply-selected">${replyDrafts[c.id]?`已选择：<b>${esc(composeComment(replyDrafts[c.id],replyMentions[c.id]||[]))}</b>`:"未选择回复语句"}</div><div class="reply-tools"><button class="bet-btn sm" data-send-reply="${esc(c.id)}" type="button">发送回复</button></div></div>
     </article>`;
   }).join("");
   emojify(list);
@@ -1525,20 +1590,21 @@ function fmtTime(ms){
 function postComment(){
   const msg=document.getElementById("commentMsg");
   msg.textContent="";
-  const ck=commentCheck(commentDraft);
+  const ck=commentCheck(composeComment(commentDraft,commentMentions));
   if(!ck.ok){msg.textContent=ck.msg;if(!curUser())openModal("loginMask");return;}
   DB.comments=[{id:commentId(),user:curUser(),text:ck.text,createdAt:Date.now(),updatedAt:Date.now(),replies:[]},...(DB.comments||[])].slice(0,200);
-  commentDraft="";saveDB();refreshAll();
+  commentDraft="";commentMentions=[];saveDB();refreshAll();
 }
 function sendReply(id){
   const msg=document.getElementById("commentMsg");msg.textContent="";
-  const ck=commentCheck(replyDrafts[id]||"");
+  const ck=commentCheck(composeComment(replyDrafts[id]||"",replyMentions[id]||[]));
   if(!ck.ok){msg.textContent=ck.msg;if(!curUser())openModal("loginMask");return;}
   const c=(DB.comments||[]).find(x=>x.id===id);
   if(!c){msg.textContent="这条留言已刷新，请稍后重试。";return;}
   c.replies=[...(c.replies||[]),{id:commentId(),user:curUser(),text:ck.text,createdAt:Date.now()}].slice(-20);
   c.updatedAt=Date.now();
   delete replyDrafts[id];
+  delete replyMentions[id];
   saveDB();refreshAll();
 }
 function refreshAll(){applyResults();settleBets();renderLoginBar();renderWallet();renderLeaderboard();renderComments();updateTournamentProgress();updateResultSummary();render();emojify(document.body);}
@@ -1562,9 +1628,15 @@ document.getElementById("commentPhrasePicker").addEventListener("click",e=>{
   if(!b)return;
   setMainPhrase(b.dataset.phrase);
 });
+document.getElementById("commentMentionPicker").addEventListener("click",e=>{
+  const b=e.target.closest("[data-mention]");
+  if(b)toggleMention(b.dataset.target,b.dataset.mention);
+});
 document.getElementById("commentsList").addEventListener("click",e=>{
   const pb=e.target.closest("[data-phrase]");
   if(pb&&pb.dataset.target?.startsWith("reply:")){setReplyPhrase(pb.dataset.target.slice(6),pb.dataset.phrase);return;}
+  const mb=e.target.closest("[data-mention]");
+  if(mb&&mb.dataset.target?.startsWith("reply:")){toggleMention(mb.dataset.target,mb.dataset.mention);return;}
   const rb=e.target.closest("[data-reply]");
   if(rb){[...document.querySelectorAll("[data-comment]")].find(x=>x.dataset.comment===rb.dataset.reply)?.classList.toggle("replying");return;}
   const sb=e.target.closest("[data-send-reply]");
