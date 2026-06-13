@@ -898,20 +898,30 @@ function teamHtml(team,raw){
   return `<span class="team" title="${esc(`${team.nameEnShort} · ${team.fifaCode}${rank?` · FIFA #${rank}`:""}`)}"><span class="flag">${team.flag}</span><span class="name">${esc(team.nameZh)}</span><span class="code">${team.fifaCode}</span>${rankHtml}</span>`;
 }
 function importanceLabel(m){return m.importance===3?"必看":(m.importance===2?"重点":"普通");}
+function statusChip(m){
+  const state=matchLiveState(m);
+  if(state==="done")return `<span class="chip done">已结束</span>`;
+  if(state==="live")return `<span class="chip live">进行中</span>`;
+  if(state==="awaiting-result")return `<span class="chip done">赛果待更新</span>`;
+  if(state==="unknown")return `<span class="chip">待定</span>`;
+  return `<span class="chip">待赛</span>`;
+}
 function updateTournamentProgress(){
   const total=M.length,done=M.filter(m=>m.status==="done"||m.score).length,remain=total-done;
+  const pending=M.filter(m=>matchLiveState(m)==="awaiting-result").length;
   const pct=total?Math.round(done/total*100):0;
   document.getElementById("progressPct").textContent=`${pct}%`;
   document.getElementById("progressBar").style.width=`${pct}%`;
-  document.getElementById("progressDetail").textContent=`已完成 ${done} 场 · 剩余 ${remain} 场`;
+  document.getElementById("progressDetail").textContent=`已完成 ${done} 场 · 剩余 ${remain} 场${pending?` · ${pending} 场赛果待更新`:""}`;
 }
 function updateResultSummary(){
   const el=document.getElementById("resultSummary");
   if(!el)return;
   const total=M.length,done=M.filter(m=>m.status==="done"||m.score).length,remain=total-done;
+  const pending=M.filter(m=>matchLiveState(m)==="awaiting-result").length;
   const cloud=DB?.resultSync?.lastCheckedAt?`；官方结果最近核对：${DB.resultSync.lastCheckedAt}`:"";
   const odds=DB?.oddsSync?.lastCheckedAt?`；Pinnacle 赔率最近核对：${DB.oddsSync.lastCheckedAt}`:"";
-  el.textContent=`已录入 ${done} 场赛果，剩余 ${remain} 场${cloud}${odds}`;
+  el.textContent=`已录入 ${done} 场赛果，剩余 ${remain} 场${pending?`，其中 ${pending} 场赛果待更新`:""}${cloud}${odds}`;
 }
 
 function render(){
@@ -940,7 +950,7 @@ function render(){
     const chip=m.st==="group"
       ?`<span class="chip g">${m.g} 组</span>`
       :`<span class="chip ${fin?"f":"k"}">${STAGE_NAME[m.st]} · ${esc(m.g)}</span>`;
-    const status=m.status==="done"?`<span class="chip done">已结束</span>`:`<span class="chip">待赛</span>`;
+    const status=statusChip(m);
     const level=`<span class="tag ${m.importance===3?"hot":""}">${importanceLabel(m)}</span>`;
     const tags=m.tags.slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join("");
     const mid=m.score?`<span class="score">${m.score}</span>`:`<span class="vs">VS</span>`;
@@ -1102,14 +1112,28 @@ function matchKickoffTime(m){
   return new Date(Date.UTC(2026,mo-1,dd,hh-2,mm));
 }
 function hasKickedOff(m){return Date.now()>=matchKickoffTime(m).getTime();}
+function expectedFinalTime(m){
+  const minutes=m.st==="group"?135:180;
+  return new Date(matchKickoffTime(m).getTime()+minutes*60_000);
+}
+function matchLiveState(m){
+  if(m.s||m.score||m.status==="done")return "done";
+  if(!(teamOf(m.h)&&teamOf(m.a)))return "unknown";
+  const now=Date.now(),kick=matchKickoffTime(m).getTime(),final=expectedFinalTime(m).getTime();
+  if(now<kick)return "scheduled";
+  if(now<final)return "live";
+  return "awaiting-result";
+}
 function inBetWindow(m){
   const md=matchDateKey(m),tomorrow=addDays(todayRome,1);
   return md===todayRome||md===tomorrow;
 }
 function betLockReason(m){
-  if(m.s)return "已结束";
-  if(!(teamOf(m.h)&&teamOf(m.a)))return "对阵确定后开放竞猜";
-  if(hasKickedOff(m))return "比赛已开始，竞猜停止";
+  const state=matchLiveState(m);
+  if(state==="done")return "已结束";
+  if(state==="unknown")return "对阵确定后开放竞猜";
+  if(state==="awaiting-result")return "赛果待更新，竞猜已关闭";
+  if(state==="live")return "比赛进行中，竞猜停止";
   if(!inBetWindow(m))return "仅开放今天/明天场次";
   return "";
 }
@@ -1208,14 +1232,12 @@ async function pullRemoteDB(){
     remoteStatus="连接正常，约 6 秒自动同步";
     if(rowData){
       const ts=Date.parse(rowData.__remoteUpdatedAt)||0;
-      if(ts>remoteLastWrite){
-        remoteLastWrite=ts;
-        DB=mergeDB(DB,rowData);
-        localStorage.setItem(DB_KEY,JSON.stringify(DB));
-        applyResults();
-        settleBets();
-        if(typeof refreshAll==="function")refreshAll();
-      }
+      if(ts>remoteLastWrite)remoteLastWrite=ts;
+      DB=mergeDB(DB,rowData);
+      localStorage.setItem(DB_KEY,JSON.stringify(DB));
+      applyResults();
+      settleBets();
+      if(typeof refreshAll==="function")refreshAll();
     }
   }catch(e){remoteStatus="暂时不可用，请稍后刷新";console.warn("远程同步拉取失败",e);}
   finally{remotePulling=false;}
