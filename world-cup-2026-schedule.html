@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<script src="remote-sync.js"></script>
 <style>
 :root{
   --pitch:#0B3B2A;        /* 深草皮绿 */
@@ -1166,14 +1167,13 @@ async function pullRemoteDB(){
   if(!remoteEnabled()||remotePulling)return;
   remotePulling=true;
   try{
-    const rows=await remoteFetch("GET",`${REMOTE_SYNC.table}?id=eq.${encodeURIComponent(REMOTE_SYNC.rowId)}&select=data,updated_at`);
+    const rowData=window.WC2026_REMOTE?await window.WC2026_REMOTE.pull(REMOTE_SYNC):null;
     remoteStatus="连接正常，约 6 秒自动同步";
-    const row=Array.isArray(rows)?rows[0]:null;
-    if(row?.data&&row.updated_at){
-      const ts=Date.parse(row.updated_at)||0;
+    if(rowData){
+      const ts=Date.parse(rowData.__remoteUpdatedAt)||0;
       if(ts>remoteLastWrite){
         remoteLastWrite=ts;
-        DB=mergeDB(DB,row.data);
+        DB=mergeDB(DB,rowData);
         localStorage.setItem(DB_KEY,JSON.stringify(DB));
         applyResults();
         settleBets();
@@ -1189,9 +1189,8 @@ function scheduleRemotePush(){
   remotePushTimer=setTimeout(async()=>{
     try{
       await pullRemoteDB();
-      const updated_at=new Date().toISOString();
-      await remoteFetch("POST",REMOTE_SYNC.table,{id:REMOTE_SYNC.rowId,data:publicDB(DB),updated_at});
-      remoteLastWrite=Date.parse(updated_at);
+      const pushed=window.WC2026_REMOTE?await window.WC2026_REMOTE.push(REMOTE_SYNC,publicDB(DB)):null;
+      remoteLastWrite=Date.parse(pushed?.updatedAt)||Date.now();
       remoteStatus="写入正常，约 6 秒自动同步";
     }catch(e){remoteStatus="暂时不可用，请稍后重试";console.warn("远程同步写入失败",e);}
   },250);

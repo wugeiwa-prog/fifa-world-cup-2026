@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import {makeClient} from "./supabase-state.mjs";
 
 const FIFA_URL = "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures";
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://dngazmrtmtdahbrlazcj.supabase.co";
@@ -192,25 +193,9 @@ async function getOfficialText(){
     await browser.close();
   }
 }
-async function remoteFetch(method, path, body){
-  const url = `${SUPABASE_URL.replace(/\/$/,"")}/rest/v1/${path}`;
-  const headers = {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    ...(body ? {"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=representation"} : {})
-  };
-  const res = await fetch(url,{method,headers,body:body?JSON.stringify(body):undefined});
-  if(!res.ok)throw new Error(`Supabase ${method} ${res.status}: ${await res.text()}`);
-  return res.status === 204 ? null : res.json();
-}
-async function loadState(){
-  const rows = await remoteFetch("GET",`${SUPABASE_TABLE}?id=eq.${encodeURIComponent(SUPABASE_ROW_ID)}&select=data`);
-  return Array.isArray(rows) && rows[0]?.data ? rows[0].data : {users:{},bets:[],daily:{},results:{},resultSync:{}};
-}
-async function saveState(data){
-  const updated_at = new Date().toISOString();
-  await remoteFetch("POST",SUPABASE_TABLE,{id:SUPABASE_ROW_ID,data,updated_at});
-}
+const stateClient=makeClient({url:SUPABASE_URL,anonKey:SUPABASE_ANON_KEY,legacyTable:SUPABASE_TABLE,rowId:SUPABASE_ROW_ID});
+const loadState=()=>stateClient.loadState();
+const saveState=data=>stateClient.saveState(data);
 function parseScore(score){
   const parts = String(score || "").split(/[–-]/).map(x => Number.parseInt(x.trim(), 10));
   return parts.length === 2 && parts.every(Number.isFinite) ? parts : null;

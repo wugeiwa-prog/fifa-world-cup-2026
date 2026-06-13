@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import {makeClient} from "./supabase-state.mjs";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://dngazmrtmtdahbrlazcj.supabase.co";
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "sb_publishable_-bRXY4XdE8-mbyEHVnxvGw_EfCd8RuY";
@@ -182,25 +183,9 @@ async function loadPageTexts(urls){
   }
   return texts;
 }
-async function remoteFetch(method, path, body){
-  const url = `${SUPABASE_URL.replace(/\/$/,"")}/rest/v1/${path}`;
-  const headers = {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    ...(body ? {"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=representation"} : {})
-  };
-  const res = await fetch(url,{method,headers,body:body?JSON.stringify(body):undefined});
-  if(!res.ok)throw new Error(`Supabase ${method} ${res.status}: ${await res.text()}`);
-  return res.status === 204 ? null : res.json();
-}
-async function loadState(){
-  const rows = await remoteFetch("GET",`${SUPABASE_TABLE}?id=eq.${encodeURIComponent(SUPABASE_ROW_ID)}&select=data`);
-  return Array.isArray(rows) && rows[0]?.data ? rows[0].data : {users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{}};
-}
-async function saveState(data){
-  const updated_at = new Date().toISOString();
-  await remoteFetch("POST",SUPABASE_TABLE,{id:SUPABASE_ROW_ID,data,updated_at});
-}
+const stateClient=makeClient({url:SUPABASE_URL,anonKey:SUPABASE_ANON_KEY,legacyTable:SUPABASE_TABLE,rowId:SUPABASE_ROW_ID});
+const loadState=()=>stateClient.loadState();
+const saveState=data=>stateClient.saveState(data);
 
 const matches = loadMatches();
 const candidates = matches.filter(m => isOddsCandidate(m));
