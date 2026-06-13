@@ -1,12 +1,7 @@
-# Supabase 多表同步
+-- 2026 World Cup betting/comment Supabase multi-table setup
+-- Run this file in Supabase SQL Editor.
+-- It creates the new tables/RLS policies, then migrates data from wc2026_state if present.
 
-纯 SQL 版本见 [BACKEND_SYNC.sql](BACKEND_SYNC.sql)，更适合直接复制到 Supabase SQL Editor 执行。
-
-当前代码优先读写多表；如果新表未创建，会自动回退旧的 `wc2026_state` 单行 JSON。
-
-在 Supabase SQL Editor 执行：
-
-```sql
 create table if not exists public.wc2026_users (
   name text primary key,
   balance integer not null default 1000,
@@ -102,11 +97,9 @@ begin
     execute format('create policy "public update %1$s" on public.%1$I for update to anon using (true) with check (true)', t);
   end loop;
 end $$;
-```
 
-如旧 `wc2026_state` 里已有数据，继续执行一次迁移：
+-- ===== migrate existing wc2026_state data =====
 
-```sql
 with s as (select data from public.wc2026_state where id='global')
 insert into public.wc2026_users(name,balance,created_at,updated_at)
 select key, coalesce((value->>'balance')::int,1000), coalesce((value->>'createdAt')::bigint,0), coalesce((value->>'updatedAt')::bigint,0)
@@ -167,6 +160,3 @@ select 'resultSync', coalesce(data->'resultSync','{}'::jsonb), now() from s
 union all
 select 'oddsSync', coalesce(data->'oddsSync','{}'::jsonb), now() from s
 on conflict (key) do update set data=excluded.data, updated_at=excluded.updated_at;
-```
-
-说明：这是朋友间娱乐项目，前端仍使用 anon public key；RLS 允许公开读写这些竞猜表，不适合作为严肃防作弊系统。
