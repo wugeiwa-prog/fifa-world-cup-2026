@@ -40,7 +40,7 @@ function rawName(name){
 function matchId(m){return `${m.d}#${m.t}#${rawName(m.h)}#${rawName(m.a)}`;}
 function loadMatches(){
   const html = fs.readFileSync("world-cup-2026-schedule.html","utf8");
-  const block = html.match(/const RAW_MATCHES=\[([\s\S]*?)\];\n\nconst GROUPS=/);
+  const block = html.match(/const RAW_MATCHES\s*=\s*\[([\s\S]*?)\]\s*;\s*const GROUPS=/);
   if(!block)throw new Error("RAW_MATCHES block not found");
   const src = `[${block[1]}]`;
   return Function(`"use strict";return (${src});`)();
@@ -211,6 +211,60 @@ async function saveState(data){
   const updated_at = new Date().toISOString();
   await remoteFetch("POST",SUPABASE_TABLE,{id:SUPABASE_ROW_ID,data,updated_at});
 }
+function parseScore(score){
+  const parts = String(score || "").split(/[–-]/).map(x => Number.parseInt(x.trim(), 10));
+  return parts.length === 2 && parts.every(Number.isFinite) ? parts : null;
+}
+function resultScore(entry){
+  if(!entry)return "";
+  if(typeof entry === "string")return entry;
+  const status = String(entry.status || "").toLowerCase();
+  return entry.score && ["final","done","full-time","ft"].includes(status) ? entry.score : "";
+}
+function todayRomeKey(){
+  return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome"}).format(new Date());
+}
+function snapshotDaily(state){
+  state.daily ||= {};
+  const key = todayRomeKey();
+  state.daily[key] = Object.values(state.users || {})
+    .map(u => ({user:u.name,balance:u.balance}))
+    .sort((a,b) => b.balance - a.balance);
+}
+function settleBets(state,matches){
+  state.users ||= {};
+  state.bets = Array.isArray(state.bets) ? state.bets : [];
+  state.results ||= {};
+  const matchById = Object.fromEntries(matches.map(m => [matchId(m), m]));
+  let settled = 0;
+  for(const bet of state.bets){
+    if(bet.status !== "open")continue;
+    const match = matchById[bet.mid];
+    const score = resultScore(state.results[bet.mid]) || (match?.s || "");
+    const parsed = parseScore(score);
+    if(!parsed)continue;
+    const user = state.users[bet.user];
+    if(!user)continue;
+    const [home,away] = parsed;
+    const winningPick = home > away ? "h" : home < away ? "a" : "d";
+    const won = bet.type === "1x2" ? bet.pick === winningPick : bet.pick === `${home}-${away}`;
+    const now = Date.now();
+    if(won){
+      bet.payout = Math.round((bet.stake || 0) * (bet.odds || 0));
+      user.balance = (user.balance || 0) + bet.payout;
+      bet.status = "won";
+    }else{
+      bet.payout = 0;
+      bet.status = "lost";
+    }
+    bet.settledAt = now;
+    bet.updatedAt = now;
+    user.updatedAt = now;
+    settled += 1;
+  }
+  if(settled)snapshotDaily(state);
+  return settled;
+}
 
 const matches = loadMatches();
 const state = await loadState();
@@ -220,7 +274,8 @@ state.resultSync ||= {};
 const candidates = matches.filter(m => isCandidate(m) && (FORCE_ALL || !state.results[matchId(m)]));
 console.log(`Candidate matches: ${candidates.length}`);
 if(!candidates.length){
-  state.resultSync = {source:"FIFA", mode:"post-match-only", lastCheckedAt:new Date().toISOString(), updated:0};
+  const settled = settleBets(state,matches);
+  state.resultSync = {source:"FIFA", mode:"post-match-only", lastCheckedAt:new Date().toISOString(), updated:0, settled};
   if(!DRY_RUN)await saveState(state);
   process.exit(0);
 }
@@ -259,10 +314,11 @@ for(const m of candidates){
   updated += 1;
   console.log(`Final: ${home} ${score} ${away}`);
 }
-state.resultSync = {source:"FIFA", mode:"post-match-only", lastCheckedAt:new Date().toISOString(), updated};
+const settled = settleBets(state,matches);
+state.resultSync = {source:"FIFA", mode:"post-match-only", lastCheckedAt:new Date().toISOString(), updated, settled};
 if(DRY_RUN){
   console.log("DRY_RUN=1, not writing Supabase");
 }else{
   await saveState(state);
-  console.log(`Supabase updated. New results: ${updated}`);
+  console.log(`Supabase updated. New results: ${updated}; settled bets: ${settled}`);
 }

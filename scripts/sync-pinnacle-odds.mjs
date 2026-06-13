@@ -38,7 +38,7 @@ function matchId(m){return `${m.d}#${m.t}#${rawName(m.h)}#${rawName(m.a)}`;}
 function oddsKey(m){return `${rawName(m.h)}-${rawName(m.a)}`;}
 function loadMatches(){
   const html = fs.readFileSync("world-cup-2026-schedule.html","utf8");
-  const block = html.match(/const RAW_MATCHES=\[([\s\S]*?)\];\n\nconst GROUPS=/);
+  const block = html.match(/const RAW_MATCHES\s*=\s*\[([\s\S]*?)\]\s*;\s*const GROUPS=/);
   if(!block)throw new Error("RAW_MATCHES block not found");
   return Function(`"use strict";return ([${block[1]}]);`)();
 }
