@@ -8,6 +8,9 @@ const SUPABASE_TABLE = process.env.SUPABASE_TABLE || "wc2026_state";
 const SUPABASE_ROW_ID = process.env.SUPABASE_ROW_ID || "global";
 const DRY_RUN = process.env.DRY_RUN === "1";
 const FORCE_ALL = process.env.FORCE_ALL === "1";
+const PLAN_ONLY = process.env.RESULT_PLAN_ONLY === "1";
+const LIVE_SCORE_SYNC = process.env.LIVE_SCORE_SYNC !== "0";
+const FINAL_LOOKBACK_HOURS = Number(process.env.RESULT_FINAL_LOOKBACK_HOURS || 10);
 
 const TEAM_EN = {
   "墨西哥":"Mexico","南非":"South Africa","韩国":"Korea Republic","捷克":"Czechia","加拿大":"Canada","波黑":"Bosnia and Herzegovina",
@@ -68,6 +71,36 @@ function isCandidate(m, now = new Date()){
   if(!FORCE_ALL && m.s)return false;
   const delayMin = m.st === "group" ? 120 : 180;
   return now.getTime() >= romeKickoffUtc(m).getTime() + delayMin * 60_000;
+}
+function expectedFinalUtc(m){
+  const delayMin = m.st === "group" ? 120 : 180;
+  return new Date(romeKickoffUtc(m).getTime() + delayMin * 60_000);
+}
+function existingResultStatus(state,m){
+  return String(state?.results?.[matchId(m)]?.status || "").toLowerCase();
+}
+function hasFinalResult(state,m){
+  const r = state?.results?.[matchId(m)];
+  const status = String(r?.status || "").toLowerCase();
+  return Boolean(r?.score && ["final","done","full-time","ft"].includes(status));
+}
+function isLiveCandidate(m,state,now = new Date()){
+  if(!LIVE_SCORE_SYNC && !FORCE_ALL)return false;
+  if(!FORCE_ALL && (m.s || hasFinalResult(state,m)))return false;
+  const kick = romeKickoffUtc(m).getTime();
+  const end = expectedFinalUtc(m).getTime();
+  return FORCE_ALL || (now.getTime() >= kick && now.getTime() < end);
+}
+function isFinalCandidate(m,state,now = new Date()){
+  if(!FORCE_ALL && (m.s || hasFinalResult(state,m)))return false;
+  const end = expectedFinalUtc(m).getTime();
+  const max = end + FINAL_LOOKBACK_HOURS * 3_600_000;
+  return FORCE_ALL || (now.getTime() >= end && now.getTime() <= max);
+}
+function setGithubOutput(values){
+  const out = process.env.GITHUB_OUTPUT;
+  if(!out)return;
+  fs.appendFileSync(out, Object.entries(values).map(([k,v]) => `${k}=${String(v).replace(/\r?\n/g," ")}`).join("\n") + "\n");
 }
 function norm(s){
   return String(s||"")
@@ -160,19 +193,32 @@ function matchEspnEvent(event, home, away){
   return null;
 }
 async function fetchEspnScore(m){
+  const found = await fetchEspnMatch(m,{allowLive:false});
+  return found?.status === "final" ? found : null;
+}
+async function fetchEspnMatch(m,{allowLive = true} = {}){
   const home = rawName(m.h), away = rawName(m.a);
   for(const dateKey of candidateEspnDates(m)){
     try{
       const board = await espnScoreboard(dateKey);
       for(const event of board.events){
         const status = event.status?.type || event.competitions?.[0]?.status?.type || {};
-        if(!status.completed && String(status.state || "").toLowerCase() !== "post")continue;
         const matched = matchEspnEvent(event, home, away);
         if(!matched)continue;
         const hs = Number(matched.homeComp.score), as = Number(matched.awayComp.score);
         if(!Number.isFinite(hs) || !Number.isFinite(as))continue;
+        const state = String(status.state || "").toLowerCase();
+        const completed = Boolean(status.completed || state === "post");
+        const live = !completed && (state === "in" || /progress|halftime|live/i.test(status.description || status.detail || ""));
+        if(!completed && !(allowLive && live))continue;
         const link = event.links?.find(l => l.rel?.includes("summary"))?.href || board.url;
-        return {score:`${hs}-${as}`,source:"ESPN",url:link};
+        return {
+          score:`${hs}-${as}`,
+          status:completed ? "final" : "live",
+          source:completed ? "ESPN" : "ESPN live",
+          url:link,
+          detail:status.shortDetail || status.detail || status.description || ""
+        };
       }
     }catch(e){
       console.warn(`ESPN scoreboard failed ${dateKey}: ${e.message}`);
@@ -256,23 +302,66 @@ const state = await loadState();
 state.results ||= {};
 state.resultSync ||= {};
 
-const candidates = matches.filter(m => isCandidate(m) && (FORCE_ALL || !state.results[matchId(m)]));
-console.log(`Candidate matches: ${candidates.length}`);
-if(!candidates.length){
+const liveCandidates = matches.filter(m => isLiveCandidate(m,state));
+const finalCandidates = matches.filter(m => isFinalCandidate(m,state));
+const shouldFetch = Boolean(FORCE_ALL || liveCandidates.length || finalCandidates.length);
+console.log(`Live score candidates: ${liveCandidates.length}`);
+console.log(`Final result candidates: ${finalCandidates.length}`);
+setGithubOutput({
+  should_fetch: shouldFetch ? "true" : "false",
+  live_candidates: liveCandidates.length,
+  final_candidates: finalCandidates.length,
+  need_playwright: finalCandidates.length ? "true" : "false"
+});
+if(PLAN_ONLY){
+  console.log(JSON.stringify({shouldFetch,liveCandidates:liveCandidates.length,finalCandidates:finalCandidates.length},null,2));
+  process.exit(0);
+}
+if(!shouldFetch){
   const settled = settleBets(state,matches);
-  state.resultSync = {source:"FIFA", mode:"post-match-only", lastCheckedAt:new Date().toISOString(), updated:0, settled};
-  if(!DRY_RUN)await saveState(state);
+  if(settled && !DRY_RUN){
+    state.resultSync = {...state.resultSync, source:"FIFA + ESPN", mode:"smart-live-and-final", lastCheckedAt:new Date().toISOString(), updated:0, liveUpdated:0, finalUpdated:0, settled};
+    await saveState(state);
+  }
   process.exit(0);
 }
 
 let officialText = "";
-try{
-  officialText = await getOfficialText();
-}catch(e){
-  console.warn(`FIFA page fetch failed: ${e.message}`);
+if(finalCandidates.length){
+  try{
+    officialText = await getOfficialText();
+  }catch(e){
+    console.warn(`FIFA page fetch failed: ${e.message}`);
+  }
 }
-let updated = 0;
-for(const m of candidates){
+let liveUpdated = 0;
+let finalUpdated = 0;
+let unchanged = 0;
+const checkedAt = new Date().toISOString();
+for(const m of liveCandidates){
+  const home = rawName(m.h), away = rawName(m.a);
+  const live = await fetchEspnMatch(m,{allowLive:true});
+  if(!live || live.status !== "live"){
+    console.log(`No live score found: ${home} vs ${away}`);
+    continue;
+  }
+  const old = state.results[matchId(m)];
+  if(old?.score === live.score && String(old?.status || "").toLowerCase() === "live"){
+    unchanged += 1;
+    continue;
+  }
+  state.results[matchId(m)] = {
+    score:live.score,
+    status:"live",
+    source:live.source,
+    sourceUrl:live.url,
+    detail:live.detail,
+    updatedAt:checkedAt
+  };
+  liveUpdated += 1;
+  console.log(`Live: ${home} ${live.score} ${away} ${live.detail || ""}`.trim());
+}
+for(const m of finalCandidates){
   const home = rawName(m.h), away = rawName(m.a);
   let score = officialText ? scoreFromWindow(officialText, TEAM_EN[home] || home, TEAM_EN[away] || away) : null;
   let source = "FIFA";
@@ -294,16 +383,16 @@ for(const m of candidates){
     status:"final",
     source,
     sourceUrl,
-    updatedAt:new Date().toISOString()
+    updatedAt:checkedAt
   };
-  updated += 1;
+  finalUpdated += 1;
   console.log(`Final: ${home} ${score} ${away}`);
 }
 const settled = settleBets(state,matches);
-state.resultSync = {source:"FIFA", mode:"post-match-only", lastCheckedAt:new Date().toISOString(), updated, settled};
+state.resultSync = {source:"FIFA + ESPN", mode:"smart-live-and-final", lastCheckedAt:checkedAt, updated:liveUpdated + finalUpdated, liveUpdated, finalUpdated, unchanged, settled, liveCandidates:liveCandidates.length, finalCandidates:finalCandidates.length};
 if(DRY_RUN){
   console.log("DRY_RUN=1, not writing Supabase");
 }else{
   await saveState(state);
-  console.log(`Supabase updated. New results: ${updated}; settled bets: ${settled}`);
+  console.log(`Supabase updated. Live scores: ${liveUpdated}; final results: ${finalUpdated}; settled bets: ${settled}`);
 }

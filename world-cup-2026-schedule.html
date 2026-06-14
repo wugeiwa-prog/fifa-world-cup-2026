@@ -481,9 +481,9 @@ body:not(.locked) .access-gate{display:none}
 <main class="wrap">
   <section class="panel reset-notice" id="resetNotice" aria-label="当前使用说明">
     <h2>当前使用说明</h2>
-    <p class="lead">赛程、竞猜榜单和留言动态都可以未登录浏览；登录 / 注册后可以参与竞猜和留言互动。比赛结束后，云端会写入最终比分并结算相关竞猜，页面会自动同步比分、进度和排行榜。</p>
+    <p class="lead">赛程、竞猜榜单和留言动态都可以未登录浏览；登录 / 注册后可以参与竞猜和留言互动。比赛进行中云端会按赛程窗口同步实时比分；比赛结束后写入最终比分并结算相关竞猜，页面会自动同步比分、进度和排行榜。</p>
     <div class="reset-grid">
-      <div class="reset-item"><b>竞猜规则</b><span>仅开放意大利时间今天和明天、且对阵已确定的未开赛比赛；开赛即停止，完赛写入比分后自动结算。</span></div>
+      <div class="reset-item"><b>竞猜规则</b><span>仅开放意大利时间今天和明天、且对阵已确定的未开赛比赛；开赛即停止，最终比分写入后自动结算。</span></div>
       <div class="reset-item"><b>云端同步</b><span>账号、下注、榜单、留言、赛果和赔率已拆表存储；未登录也可查看实时榜单与留言，登录后才能提交互动。</span></div>
       <div class="reset-item"><b>赔率说明</b><span>优先读取云端 Pinnacle 赛前快照；解析不到时尝试 ESPN/DraftKings 备用赔率；仍无快照再使用 FIFA 世界排名模型兜底。</span></div>
     </div>
@@ -539,7 +539,7 @@ body:not(.locked) .access-gate{display:none}
   <section class="panel" id="notesPanel">
     <h2>说明</h2>
     <div class="status-grid">
-      <div class="status-card"><b>赛果进度</b><span id="resultSummary">云端赛果会自动同步；当前已录入 5 场赛果，剩余 99 场。</span></div>
+      <div class="status-card"><b>赛果进度</b><span id="resultSummary">云端会按比赛窗口同步实时/最终比分；页面打开后自动读取最新进度。</span></div>
       <div class="status-card"><b>竞猜同步</b><span>云端同步已启用，未登录也可查看实时余额榜和留言动态。</span></div>
       <div class="status-card"><b>竞猜开放</b><span>仅开放意大利时间今天和明天、且对阵已确定的未开赛比赛；开赛即停止，完赛后结算。</span></div>
       <div class="status-card"><b>账号与留言</b><span>最多 50 名玩家；登录后可竞猜和留言，密码校验仅保留在当前设备。</span></div>
@@ -550,7 +550,7 @@ body:not(.locked) .access-gate{display:none}
       ② 每组前 2 名 + 8 个成绩最好的小组第 3 名晋级 32 强；淘汰赛"最佳第3"对手待小组赛结束后确定。<br>
       ③ 淘汰赛平局进行 2×15 分钟加时，仍平则点球决胜。<br>
       ④ 每场主时间为意大利时间 CEST（UTC+2），中国时间为北京时间 CST（UTC+8），本页按 +6 小时换算并自动标注次日。<br>
-      ⑤ 本页赛程与阵容为静态快照，不在浏览器内抓取 FIFA；比赛结束后由云端任务写入最终比分，页面会自动更新比分、赛事进度、剩余场次并结算相关竞猜。当前已录入：墨西哥 2-0 南非、韩国 2-1 捷克、加拿大 1-1 波黑、美国 4-1 巴拉圭、卡塔尔 1-1 瑞士。<br>
+      ⑤ 本页赛程与阵容为静态快照，不在浏览器内抓取 FIFA；云端任务会根据开球时间判断同步窗口，比赛中约每 5 分钟同步一次实时比分，预计完赛后补抓最终比分，页面会自动更新比分、赛事进度、剩余场次并结算相关竞猜；实际已录入场次以页面进度条和云端同步结果为准。<br>
       ⑥ 强队阵容为官方名单中的核心球员摘录，完整名单请点击各队 FIFA 球队页核验。<br>
       ⑦ 世界排名依据 FIFA/Coca-Cola 男足世界排名，官方更新时间为 2026年6月11日，下一次官方更新为 2026年7月20日；48 支参赛队名次按 FIFA 官方页面与 ESPN 对 June 2026 排名转述核对。<br>
       ⑧ 中国大陆收看：中央广播电视总台持有 2026 世界杯独家全媒体转播权及分许可权利，CCTV-5、CCTV-5+、央视频、央视体育等提供赛事直播与内容服务；咪咕和小红书为官方持权转播合作方。<br>
@@ -846,7 +846,7 @@ function enrichMatch(m){
   const matchupText=home&&away?`${home.nameZh} ${home.fifaCode} 对阵 ${away.nameZh} ${away.fifaCode}`:"";
   const watchNote=m.n||((importance>=2&&stars.length)?`看点：${matchupText}，关注 ${starText} 的发挥。`:"");
   const searchText=[m.h,m.a,homeName,awayName,home?.nameEnShort,away?.nameEnShort,home?.fifaCode,away?.fifaCode,...stars,...zhStars(stars),...tags,watchNote].filter(Boolean).join(" ").toLowerCase();
-  return {...m,home,away,status:m.s?"done":"scheduled",score:m.s||"",importance,tags,stars,watchNote,searchText,sourceUpdatedAt:SNAPSHOT_AT};
+  return {...m,_baseScore:m.s||"",home,away,status:m.s?"done":"scheduled",score:m.s||"",importance,tags,stars,watchNote,searchText,sourceUpdatedAt:SNAPSHOT_AT};
 }
 const M=RAW_MATCHES.map(enrichMatch);
 const STATIC_RESULTS=Object.fromEntries(M.filter(m=>m.score).map(m=>[matchId(m),{score:m.score,status:"final",source:"static",updatedAt:SNAPSHOT_AT}]));
@@ -857,15 +857,30 @@ function resultScore(entry){
   if(entry.score&&(status==="final"||status==="done"||status==="full-time"||status==="ft"))return entry.score;
   return "";
 }
+function resultDisplayScore(entry){
+  if(!entry)return "";
+  if(typeof entry==="string")return entry;
+  return entry.score||"";
+}
+function resultEntryStatus(entry){
+  if(!entry)return "";
+  if(typeof entry==="string")return "final";
+  return String(entry.status||"").toLowerCase();
+}
 function resultUpdatedAt(entry){
   return typeof entry==="object"&&entry?entry.updatedAt||entry.sourceUpdatedAt||"":SNAPSHOT_AT;
 }
 function applyResults(){
   M.forEach(m=>{
     const id=matchId(m),entry=(DB?.results&&DB.results[id])||STATIC_RESULTS[id];
-    const s=resultScore(entry);
-    if(!s)return;
-    m.s=s;m.score=s;m.status="done";m.sourceUpdatedAt=resultUpdatedAt(entry)||SNAPSHOT_AT;
+    m.s=m._baseScore||"";m.score=m._baseScore||"";m.status=m._baseScore?"done":"scheduled";
+    const display=resultDisplayScore(entry);
+    if(!display)return;
+    const status=resultEntryStatus(entry);
+    const finalStatus=status==="final"||status==="done"||status==="full-time"||status==="ft";
+    m.score=display;m.sourceUpdatedAt=resultUpdatedAt(entry)||SNAPSHOT_AT;
+    if(finalStatus){m.s=display;m.status="done";}
+    else if(status==="live"||status==="in"||status==="in-progress"){m.status="live";}
   });
 }
 
@@ -907,7 +922,7 @@ function statusChip(m){
   return `<span class="chip">待赛</span>`;
 }
 function updateTournamentProgress(){
-  const total=M.length,done=M.filter(m=>m.status==="done"||m.score).length,remain=total-done;
+  const total=M.length,done=M.filter(m=>m.status==="done"||m.s).length,remain=total-done;
   const pending=M.filter(m=>matchLiveState(m)==="awaiting-result").length;
   const pct=total?Math.round(done/total*100):0;
   document.getElementById("progressPct").textContent=`${pct}%`;
@@ -917,9 +932,9 @@ function updateTournamentProgress(){
 function updateResultSummary(){
   const el=document.getElementById("resultSummary");
   if(!el)return;
-  const total=M.length,done=M.filter(m=>m.status==="done"||m.score).length,remain=total-done;
+  const total=M.length,done=M.filter(m=>m.status==="done"||m.s).length,remain=total-done;
   const pending=M.filter(m=>matchLiveState(m)==="awaiting-result").length;
-  const cloud=DB?.resultSync?.lastCheckedAt?`；官方结果最近核对：${DB.resultSync.lastCheckedAt}`:"";
+  const cloud=DB?.resultSync?.lastCheckedAt?`；赛果最近核对：${DB.resultSync.lastCheckedAt}`:"";
   const oddsSource=DB?.oddsSync?.source||"Pinnacle/ESPN";
   const odds=DB?.oddsSync?.lastCheckedAt?`；${oddsSource} 赔率最近核对：${DB.oddsSync.lastCheckedAt}`:"";
   el.textContent=`已录入 ${done} 场赛果，剩余 ${remain} 场${pending?`，其中 ${pending} 场赛果待更新`:""}${cloud}${odds}`;
@@ -1118,9 +1133,10 @@ function expectedFinalTime(m){
   return new Date(matchKickoffTime(m).getTime()+minutes*60_000);
 }
 function matchLiveState(m){
-  if(m.s||m.score||m.status==="done")return "done";
+  if(m.s||m.status==="done")return "done";
   if(!(teamOf(m.h)&&teamOf(m.a)))return "unknown";
   const now=Date.now(),kick=matchKickoffTime(m).getTime(),final=expectedFinalTime(m).getTime();
+  if(m.status==="live"&&now<final)return "live";
   if(now<kick)return "scheduled";
   if(now<final)return "live";
   return "awaiting-result";

@@ -1,8 +1,9 @@
-name: Sync FIFA final results
+name: Sync live and final results
 
 on:
   workflow_dispatch:
   schedule:
+    - cron: "*/5 * * * *"
     - cron: "10 21 11 6 *"
     - cron: "10 4 12 6 *"
     - cron: "10 21 12 6 *"
@@ -115,16 +116,30 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install Playwright
-        run: |
-          npm init -y
-          npm install playwright
-          npx playwright install chromium --with-deps
-
-      - name: Sync final results to Supabase
+      - name: Plan result sync window
+        id: plan
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_TABLE: wc2026_state
           SUPABASE_ROW_ID: global
+          RESULT_PLAN_ONLY: "1"
+          LIVE_SCORE_SYNC: "1"
+        run: node scripts/sync-fifa-results.mjs
+
+      - name: Install Playwright
+        if: steps.plan.outputs.should_fetch == 'true' && steps.plan.outputs.need_playwright == 'true'
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install chromium --with-deps
+
+      - name: Sync live/final results to Supabase
+        if: steps.plan.outputs.should_fetch == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_TABLE: wc2026_state
+          SUPABASE_ROW_ID: global
+          LIVE_SCORE_SYNC: "1"
         run: node scripts/sync-fifa-results.mjs
