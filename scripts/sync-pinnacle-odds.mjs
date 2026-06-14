@@ -11,11 +11,13 @@ const LOOKAHEAD_HOURS = Number(process.env.ODDS_LOOKAHEAD_HOURS || 48);
 const FORCE_ALL = process.env.FORCE_ALL === "1";
 const FORCE_SYNC = process.env.ODDS_FORCE_SYNC === "1" || process.env.ODDS_FORCE_SYNC === "true" || FORCE_ALL;
 const ALLOW_MATCHUPS_PARSE = process.env.PINNACLE_ALLOW_MATCHUPS_PARSE === "1";
+const ESPN_ODDS_BACKUP = process.env.ESPN_ODDS_BACKUP !== "0";
 
 const PINNACLE_MATCHUPS_URLS = [
   "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/",
   "https://www.pinnacle.bet/en/soccer/fifa-world-cup/matchups/"
 ];
+const ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
 const PINNACLE_URLS = {
   "06-12#21:00#加拿大#波黑":"https://www.pinnacle.com/en/soccer/fifa-world-cup/canada-vs-bosnia-and-herzegovina/1627278050/",
   "06-13#03:00#美国#巴拉圭":"https://www.pinnacle.bet/en/soccer/fifa-world-cup/usa-vs-paraguay/1620858178/",
@@ -68,13 +70,13 @@ function isOddsCandidate(m, now = new Date()){
   const home = rawName(m.h), away = rawName(m.a);
   if(!TEAM_EN[home] || !TEAM_EN[away])return false;
   if(!FORCE_ALL && !inBetWindow(m, now))return false;
-  if(!PINNACLE_URLS[matchId(m)] && !ALLOW_MATCHUPS_PARSE)return false;
+  if(!PINNACLE_URLS[matchId(m)] && !ALLOW_MATCHUPS_PARSE && !ESPN_ODDS_BACKUP)return false;
   const kick = romeKickoffUtc(m).getTime();
   const diffHours = (kick - now.getTime()) / 3_600_000;
   return FORCE_ALL || (diffHours > 0 && diffHours <= LOOKAHEAD_HOURS);
 }
 function syncCadenceMinutes(candidates, now = new Date()){
-  if(!candidates.length)return {minutes:360, tier:"no-direct-match"};
+  if(!candidates.length)return {minutes:360, tier:"no-odds-candidate"};
   const nextHours = Math.min(...candidates.map(m => (romeKickoffUtc(m).getTime() - now.getTime()) / 3_600_000));
   if(nextHours <= 6)return {minutes:60, tier:"kickoff-within-6h"};
   if(nextHours <= 24)return {minutes:120, tier:"matchday-minus-1"};
@@ -83,7 +85,7 @@ function syncCadenceMinutes(candidates, now = new Date()){
 function shouldFetchOdds(state, candidates, now = new Date()){
   const cadence = syncCadenceMinutes(candidates, now);
   if(FORCE_SYNC)return {...cadence, shouldFetch:true, reason:"forced"};
-  if(!candidates.length)return {...cadence, shouldFetch:false, reason:"no direct Pinnacle URL in lookahead window"};
+  if(!candidates.length)return {...cadence, shouldFetch:false, reason:"no odds candidate in lookahead window"};
   const last = Date.parse(state?.oddsSync?.lastCheckedAt || state?.oddsSync?.lastAttemptAt || "") || 0;
   if(!last)return {...cadence, shouldFetch:true, reason:"no previous odds sync"};
   const elapsedMinutes = (now.getTime() - last) / 60_000;
@@ -109,10 +111,99 @@ function candidateNames(zh){
   if(zh === "韩国")names.push("South Korea", "Korea Republic");
   if(zh === "波黑")names.push("Bosnia", "Bosnia-Herzegovina");
   if(zh === "刚果（金）")names.push("DR Congo", "Congo DR");
+  if(zh === "科特迪瓦")names.push("Ivory Coast", "Cote d Ivoire");
+  if(zh === "佛得角")names.push("Cape Verde", "Cabo Verde");
   return [...new Set(names.map(norm))];
 }
 function numericOdds(values){
   return values.map(Number).filter(x => Number.isFinite(x) && x >= 1.01 && x <= 80);
+}
+function americanToDecimal(value){
+  const n = Number(String(value ?? "").replace(/[^\d+-]/g,""));
+  if(!Number.isFinite(n) || n === 0)return null;
+  return Math.round((n > 0 ? 1 + n / 100 : 1 + 100 / Math.abs(n)) * 1000) / 1000;
+}
+function ymd(date){
+  return `${date.getUTCFullYear()}${String(date.getUTCMonth()+1).padStart(2,"0")}${String(date.getUTCDate()).padStart(2,"0")}`;
+}
+function candidateEspnDates(matches){
+  const dates = new Set();
+  for(const m of matches){
+    const kick = romeKickoffUtc(m);
+    dates.add(ymd(kick));
+    dates.add(ymd(new Date(kick.getTime() - 6 * 60 * 60_000)));
+    dates.add(ymd(new Date(kick.getTime() + 6 * 60 * 60_000)));
+  }
+  return [...dates].sort();
+}
+function namesMatch(zh, espnTeam){
+  const hay = norm([
+    espnTeam?.displayName,
+    espnTeam?.shortDisplayName,
+    espnTeam?.name,
+    espnTeam?.abbreviation
+  ].filter(Boolean).join(" "));
+  return candidateNames(zh).some(name => hay.includes(name));
+}
+function oddsValue(side){
+  return americanToDecimal(side?.close?.odds ?? side?.open?.odds ?? side?.moneyLine ?? side?.odds);
+}
+function parseEspnEventOdds(event,m){
+  const comp = event?.competitions?.[0];
+  const market = (comp?.odds || []).filter(Boolean).find(o => o.moneyline);
+  if(!comp || !market)return null;
+  const competitors = comp.competitors || [];
+  const espnHome = competitors.find(c => c.homeAway === "home")?.team;
+  const espnAway = competitors.find(c => c.homeAway === "away")?.team;
+  const homeName = rawName(m.h), awayName = rawName(m.a);
+  const hasTeams =
+    ((namesMatch(homeName,espnHome) && namesMatch(awayName,espnAway)) ||
+     (namesMatch(homeName,espnAway) && namesMatch(awayName,espnHome)));
+  if(!hasTeams)return null;
+  const eventTime = Date.parse(event.date || comp.date || "");
+  if(Number.isFinite(eventTime)){
+    const diffHours = Math.abs(eventTime - romeKickoffUtc(m).getTime()) / 3_600_000;
+    if(diffHours > 4)return null;
+  }
+  const homeSide = namesMatch(homeName,espnHome) ? market.moneyline.home : market.moneyline.away;
+  const awaySide = namesMatch(awayName,espnAway) ? market.moneyline.away : market.moneyline.home;
+  const h = oddsValue(homeSide);
+  const d = oddsValue(market.moneyline.draw || market.drawOdds);
+  const a = oddsValue(awaySide);
+  if(!(h > 1 && d > 1 && a > 1))return null;
+  return {
+    h,d,a,
+    source:`ESPN/DraftKings`,
+    url:event.links?.[0]?.href || ESPN_SCOREBOARD_URL,
+    market:"1X2"
+  };
+}
+async function loadEspnOdds(matches){
+  if(!ESPN_ODDS_BACKUP || !matches.length)return new Map();
+  const byMid = new Map();
+  const dates = candidateEspnDates(matches);
+  for(const date of dates){
+    const url = `${ESPN_SCOREBOARD_URL}?dates=${date}&limit=100`;
+    try{
+      const res = await fetch(url,{headers:{"user-agent":"Mozilla/5.0 odds-sync"}});
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      for(const m of matches){
+        if(byMid.has(matchId(m)))continue;
+        for(const event of json.events || []){
+          const found = parseEspnEventOdds(event,m);
+          if(found){
+            byMid.set(matchId(m), {...found, updatedAt:new Date().toISOString()});
+            break;
+          }
+        }
+      }
+      console.log(`Fetched ESPN odds date: ${date}`);
+    }catch(e){
+      console.warn(`ESPN odds fetch failed: ${date}: ${e.message}`);
+    }
+  }
+  return byMid;
 }
 function parseOddsFromText(text, m){
   const clean = String(text || "").replace(/\s+/g," ");
@@ -189,7 +280,7 @@ const saveState=data=>stateClient.saveState(data);
 
 const matches = loadMatches();
 const candidates = matches.filter(m => isOddsCandidate(m));
-console.log(`Pinnacle odds candidate matches: ${candidates.length}`);
+console.log(`Bookmaker odds candidate matches: ${candidates.length}`);
 
 const state = await loadState();
 state.odds ||= {};
@@ -217,6 +308,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
       cadenceTier:plan.tier,
       skipReason:plan.reason,
       matchupsParse:ALLOW_MATCHUPS_PARSE,
+      espnBackup:ESPN_ODDS_BACKUP,
       lookaheadHours:LOOKAHEAD_HOURS
     };
     await saveState(state);
@@ -227,8 +319,11 @@ if(PLAN_ONLY || !plan.shouldFetch){
     ...candidates.map(m => PINNACLE_URLS[matchId(m)]).filter(Boolean)
   ])];
   const pageTexts = await loadPageTexts(urls);
+  const espnOdds = await loadEspnOdds(candidates);
   let updated = 0;
   let pruned = 0;
+  let espnUpdated = 0;
+  let pinnacleUpdated = 0;
   const warnings = [];
   const checkedAt = new Date().toISOString();
 
@@ -255,26 +350,36 @@ if(PLAN_ONLY || !plan.shouldFetch){
       }
     }
     if(!found){
-      warnings.push(`No Pinnacle 1X2 odds parsed: ${oddsKey(m)}`);
-      continue;
+      const backup = espnOdds.get(matchId(m));
+      if(backup){
+        found = {...backup, updatedAt:checkedAt};
+      }else{
+        warnings.push(`No bookmaker 1X2 odds parsed: ${oddsKey(m)}`);
+        continue;
+      }
     }
     state.odds[matchId(m)] = found;
     updated += 1;
-    console.log(`Pinnacle odds: ${oddsKey(m)} ${found.h}/${found.d}/${found.a}`);
+    if(found.source === "Pinnacle")pinnacleUpdated += 1;
+    if(found.source?.includes("ESPN"))espnUpdated += 1;
+    console.log(`${found.source} odds: ${oddsKey(m)} ${found.h}/${found.d}/${found.a}`);
   }
 
   state.oddsSync = {
-    source:"Pinnacle",
+    source:ESPN_ODDS_BACKUP ? "Pinnacle + ESPN/DraftKings" : "Pinnacle",
     mode:"pre-match-periodic",
     lastAttemptAt:checkedAt,
     lastCheckedAt:checkedAt,
     checked:candidates.length,
     updated,
+    pinnacleUpdated,
+    espnUpdated,
     pruned,
     cadenceMinutes:plan.minutes,
     cadenceTier:plan.tier,
     syncReason:plan.reason,
     matchupsParse:ALLOW_MATCHUPS_PARSE,
+    espnBackup:ESPN_ODDS_BACKUP,
     lookaheadHours:LOOKAHEAD_HOURS,
     warnings:warnings.slice(0,20)
   };
