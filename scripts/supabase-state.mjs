@@ -15,6 +15,54 @@ function normalize(db){
   db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};db.odds=db.odds||{};db.oddsSync=db.oddsSync||{};db.comments=Array.isArray(db.comments)?db.comments:[];
   return db;
 }
+function ts(v){const n=typeof v==="number"?v:Date.parse(v||"");return Number.isFinite(n)?n:0;}
+function rowTs(o){return Math.max(ts(o?.updatedAt),ts(o?.updated_at),ts(o?.settledAt),ts(o?.settled_at),ts(o?.placedAt),ts(o?.createdAt));}
+function mergeDaily(a,b){
+  const out={...a};
+  Object.entries(b||{}).forEach(([day,rows])=>{
+    const byUser={};
+    [...(out[day]||[]),...(rows||[])].forEach(r=>{if(r?.user)byUser[r.user]=r;});
+    out[day]=Object.values(byUser).sort((x,y)=>(y.balance||0)-(x.balance||0));
+  });
+  return out;
+}
+function mergeDBSources(...sources){
+  const db=normalize({});
+  sources.filter(Boolean).map(normalize).forEach(src=>{
+    Object.entries(src.users||{}).forEach(([name,u])=>{
+      const old=db.users[name];
+      db.users[name]=!old||rowTs(u)>=rowTs(old)?{...old,...u}:old;
+    });
+    const betMap=Object.fromEntries(db.bets.map(b=>[b.id,b]));
+    (src.bets||[]).forEach(b=>{
+      if(!b?.id)return;
+      const old=betMap[b.id];
+      betMap[b.id]=!old||rowTs(b)>=rowTs(old)?{...old,...b}:old;
+    });
+    db.bets=Object.values(betMap).sort((a,b)=>(a.placedAt||0)-(b.placedAt||0));
+    db.daily=mergeDaily(db.daily,src.daily);
+    Object.entries(src.results||{}).forEach(([mid,r])=>{
+      const old=db.results[mid];
+      db.results[mid]=!old||rowTs(r)>=rowTs(old)?{...old,...r}:old;
+    });
+    Object.entries(src.odds||{}).forEach(([mid,o])=>{
+      const old=db.odds[mid];
+      db.odds[mid]=!old||rowTs(o)>=rowTs(old)?{...old,...o}:old;
+    });
+    db.resultSync={...db.resultSync,...(src.resultSync||{})};
+    db.oddsSync={...db.oddsSync,...(src.oddsSync||{})};
+    const commentMap=Object.fromEntries(db.comments.map(c=>[c.id,c]));
+    (src.comments||[]).forEach(c=>{
+      if(!c?.id)return;
+      const old=commentMap[c.id];
+      const replies={};
+      [...(old?.replies||[]),...(c.replies||[])].forEach(r=>{if(r?.id)replies[r.id]=r;});
+      commentMap[c.id]=!old||rowTs(c)>=rowTs(old)?{...old,...c,replies:Object.values(replies)}:{...c,...old,replies:Object.values(replies)};
+    });
+    db.comments=Object.values(commentMap).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,200);
+  });
+  return db;
+}
 function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
   const base=String(url||"").replace(/\/$/,"");
   const headers=body=>({
@@ -91,11 +139,15 @@ function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
     await rest("POST",legacyTable,{id:rowId,data:normalize(db),updated_at:new Date().toISOString()});
   }
   return {
-    async loadState(){try{
-      const tableDb=await pullTables();
-      const hasTableData=Object.keys(tableDb.users||{}).length||tableDb.bets.length||tableDb.comments.length||Object.keys(tableDb.results||{}).length||Object.keys(tableDb.odds||{}).length;
-      return hasTableData?tableDb:await pullLegacy();
-    }catch(e){return await pullLegacy();}},
+    async loadState(){
+      let tableDb=null,legacyDb=null,tableErr=null,legacyErr=null;
+      try{tableDb=await pullTables();}catch(e){tableErr=e;}
+      try{legacyDb=await pullLegacy();}catch(e){legacyErr=e;}
+      if(tableDb&&legacyDb)return mergeDBSources(legacyDb,tableDb);
+      if(tableDb)return tableDb;
+      if(legacyDb)return legacyDb;
+      throw tableErr||legacyErr||new Error("Supabase load failed");
+    },
     async saveState(db){try{await pushTables(db);try{await pushLegacy(db);}catch(e){}}catch(e){await pushLegacy(db);}}
   };
 }

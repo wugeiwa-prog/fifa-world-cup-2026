@@ -1421,15 +1421,16 @@ function renderWallet(){
   sl.innerHTML=`<div class="bet-slips">`+mine.slice().sort((a,b)=>b.placedAt-a.placedAt).map(b=>{
     const m=MID2M[b.mid],t=m?`${teamOf(m.h)?.nameZh||rawName(m.h)} vs ${teamOf(m.a)?.nameZh||rawName(m.a)}`:b.mid;
     const pickTxt=b.type==="1x2"?({h:"主胜",d:"平局",a:"客胜"})[b.pick]:`比分 ${b.pick.replace("-","–")}`;
-    const rtxt=b.status==="open"?"进行中":b.status==="won"?`+${b.payout}`:`-${b.stake}`;
+    const net=(b.payout||0)-(b.stake||0);
+    const rtxt=b.status==="open"?"进行中":b.status==="won"?`返还 ${b.payout}（净 +${net}）`:`未返还（净 -${b.stake}）`;
     return `<div class="bet-slip"><div class="meta"><div>${esc(t)}</div><div class="bet-empty">${pickTxt} @${b.odds.toFixed(2)} · 押 ${b.stake} 币</div></div><div class="res ${b.status}">${rtxt}</div></div>`;
   }).join("")+`</div>`;
 }
 function renderLeaderboard(){
   const box=document.getElementById("leaderboard");
-  document.getElementById("lbDate").textContent=`实时余额榜 · 每日记录涨跌 · ${todayRome}`;
+  document.getElementById("lbDate").textContent=`实时余额榜 · 注单统计按云端记录 · ${todayRome}`;
   document.getElementById("syncNote").textContent=remoteEnabled()
-    ?`未登录也可查看榜单。云端同步：${remoteStatus}。`
+    ?`未登录也可查看榜单。榜单按当前余额排序；注单、返还和未结占用按云端已同步记录统计。云端同步：${remoteStatus}。`
     :"未登录也可查看榜单。当前设备会自动保存竞猜记录。";
   const users=Object.values(DB.users).sort((a,b)=>b.balance-a.balance||a.name.localeCompare(b.name));
   if(!users.length){box.innerHTML=`<div class="bet-empty">还没有玩家。点击右上角「竞猜登录」注册（限 ${MAX_USERS} 人），开始竞猜吧。</div>`;return;}
@@ -1445,12 +1446,12 @@ function renderLeaderboard(){
     const settledStake=settled.reduce((s,b)=>s+(b.stake||0),0);
     const openStake=open.reduce((s,b)=>s+(b.stake||0),0);
     const totalStake=bets.reduce((s,b)=>s+(b.stake||0),0);
-    const returned=won.reduce((s,b)=>s+(b.payout||0),0);
-    const settledProfit=returned-settledStake;
-    const totalProfit=balance-INIT_BAL;
+    const returned=settled.reduce((s,b)=>s+(b.payout||0),0);
+    const settledNet=returned-settledStake;
+    const balanceChange=balance-INIT_BAL;
     const winRate=settled.length?won.length/settled.length*100:NaN;
-    const roi=settledStake?settledProfit/settledStake*100:NaN;
-    return {bets,open,settled,won,lost,settledStake,openStake,totalStake,settledProfit,totalProfit,winRate,roi};
+    const roi=settledStake?settledNet/settledStake*100:NaN;
+    return {bets,open,settled,won,lost,settledStake,openStake,totalStake,returned,settledNet,balanceChange,winRate,roi};
   }
   const rows=users.map((u,i)=>{
     let chg;
@@ -1458,17 +1459,17 @@ function renderLeaderboard(){
       chg=dlt>0?`<span class="chg up">▲${dlt}</span>`:dlt<0?`<span class="chg down">▼${-dlt}</span>`:`<span class="chg same">—</span>`;}
     else chg=`<span class="chg same">NEW</span>`;
     const rk=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
-    const s=leaderStats(u.name,u.balance),pc=signedClass(s.totalProfit),rc=signedClass(s.settledProfit);
+    const s=leaderStats(u.name,u.balance),pc=signedClass(s.balanceChange),rc=signedClass(s.settledNet);
     return `<tr class="${u.name===me?"me":""}">
       <td class="rk">${rk}</td>
       <td>${esc(u.name)}${chg}</td>
       <td class="bal">${u.balance} 币</td>
-      <td class="num profit ${pc}">${fmtProfit(s.totalProfit)}</td>
-      <td class="num">${s.won.length}-${s.lost.length}</td>
-      <td class="num">${pct(s.winRate)}</td>
-      <td class="num profit ${rc}">${pct(s.roi)}</td>
-      <td class="num">${s.open.length} 注 / ${s.openStake} 币</td>
-      <td class="num">${s.totalStake} 币</td>
+      <td class="num profit ${pc}">${fmtProfit(s.balanceChange)}</td>
+      <td class="num">${s.bets.length} 注</td>
+      <td class="num">${s.settled.length} / ${s.open.length}</td>
+      <td class="num profit ${rc}">${fmtProfit(s.settledNet)}</td>
+      <td class="num">${s.returned} 币</td>
+      <td class="num">${s.openStake} 币</td>
     </tr>`;
   }).join("");
   const cards=users.map((u,i)=>{
@@ -1477,20 +1478,23 @@ function renderLeaderboard(){
       chg=dlt>0?`<span class="chg up">▲${dlt}</span>`:dlt<0?`<span class="chg down">▼${-dlt}</span>`:`<span class="chg same">—</span>`;}
     else chg=`<span class="chg same">NEW</span>`;
     const rk=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
-    const s=leaderStats(u.name,u.balance),pc=signedClass(s.totalProfit),rc=signedClass(s.settledProfit);
+    const s=leaderStats(u.name,u.balance),pc=signedClass(s.balanceChange),rc=signedClass(s.settledNet);
     return `<article class="lb-card ${u.name===me?"me":""}">
       <div class="top"><div class="player"><span class="rank">${rk}</span>${esc(u.name)}${chg}</div><div class="coins">${u.balance} 币</div></div>
       <div class="stats">
-        <div class="stat"><span>盈亏</span><b class="profit ${pc}">${fmtProfit(s.totalProfit)}</b></div>
-        <div class="stat"><span>战绩</span><b>${s.won.length}-${s.lost.length}</b></div>
+        <div class="stat"><span>余额变化</span><b class="profit ${pc}">${fmtProfit(s.balanceChange)}</b></div>
+        <div class="stat"><span>可追溯注单</span><b>${s.bets.length} 注</b></div>
+        <div class="stat"><span>已结/未结</span><b>${s.settled.length}/${s.open.length}</b></div>
+        <div class="stat"><span>已结净额</span><b class="profit ${rc}">${fmtProfit(s.settledNet)}</b></div>
+        <div class="stat"><span>结算返还</span><b>${s.returned} 币</b></div>
+        <div class="stat"><span>未结占用</span><b>${s.openStake} 币</b></div>
         <div class="stat"><span>命中率</span><b>${pct(s.winRate)}</b></div>
         <div class="stat"><span>ROI</span><b class="profit ${rc}">${pct(s.roi)}</b></div>
-        <div class="stat"><span>进行中</span><b>${s.open.length} 注</b></div>
         <div class="stat"><span>总押注</span><b>${s.totalStake} 币</b></div>
       </div>
     </article>`;
   }).join("");
-  box.innerHTML=`<table class="lb"><thead><tr><th>名次</th><th>玩家</th><th style="text-align:right">余额</th><th style="text-align:right">盈亏</th><th style="text-align:right">战绩</th><th style="text-align:right">命中率</th><th style="text-align:right">ROI</th><th style="text-align:right">进行中</th><th style="text-align:right">总押注</th></tr></thead><tbody>${rows}</tbody></table><div class="lb-cards">${cards}</div>`;
+  box.innerHTML=`<table class="lb"><thead><tr><th>名次</th><th>玩家</th><th style="text-align:right">余额</th><th style="text-align:right">余额变化</th><th style="text-align:right">可追溯注单</th><th style="text-align:right">已结/未结</th><th style="text-align:right">已结净额</th><th style="text-align:right">结算返还</th><th style="text-align:right">未结占用</th></tr></thead><tbody>${rows}</tbody></table><div class="lb-cards">${cards}</div>`;
 }
 function betButtonHtml(m){
   const lock=betLockReason(m);
