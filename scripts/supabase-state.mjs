@@ -15,6 +15,22 @@ function normalize(db){
   db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};db.odds=db.odds||{};db.oddsSync=db.oddsSync||{};db.comments=Array.isArray(db.comments)?db.comments:[];
   return db;
 }
+const INIT_BALANCE=Number(process.env.INIT_BALANCE || 1000);
+function canonicalBalance(name,db){
+  const bets=(db.bets||[]).filter(b=>b.user===name);
+  const staked=bets.reduce((s,b)=>s+(Number(b.stake)||0),0);
+  const returned=bets.reduce((s,b)=>s+(Number(b.payout)||0),0);
+  return INIT_BALANCE-staked+returned;
+}
+function normalizeBalances(db){
+  db=normalize(db);
+  Object.values(db.users).forEach(u=>{
+    u.balance=canonicalBalance(u.name,db);
+    if(!u.createdAt)u.createdAt=Date.now();
+    if(!u.updatedAt)u.updatedAt=u.createdAt;
+  });
+  return db;
+}
 function ts(v){const n=typeof v==="number"?v:Date.parse(v||"");return Number.isFinite(n)?n:0;}
 function rowTs(o){return Math.max(ts(o?.updatedAt),ts(o?.updated_at),ts(o?.settledAt),ts(o?.settled_at),ts(o?.placedAt),ts(o?.createdAt));}
 function mergeDaily(a,b){
@@ -61,7 +77,7 @@ function mergeDBSources(...sources){
     });
     db.comments=Object.values(commentMap).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,200);
   });
-  return db;
+  return normalizeBalances(db);
 }
 function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
   const base=String(url||"").replace(/\/$/,"");
@@ -91,7 +107,7 @@ function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
     (rows.replies||[]).forEach(r=>{(repliesByComment[r.comment_id] ||= []).push({id:r.id,user:r.user_name,text:r.text,createdAt:Number(r.created_at)||0});});
     db.comments=(rows.comments||[]).map(r=>({id:r.id,user:r.user_name,text:r.text,createdAt:Number(r.created_at)||0,updatedAt:Number(r.updated_at)||0,replies:(repliesByComment[r.id]||[]).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,200);
     (rows.meta||[]).forEach(r=>{if(r.key==="resultSync")db.resultSync=r.data||{};if(r.key==="oddsSync")db.oddsSync=r.data||{};});
-    return db;
+    return normalizeBalances(db);
   }
   async function pullTables(){
     const [users,bets,daily,results,odds,comments,replies,meta]=await Promise.all([
@@ -107,7 +123,7 @@ function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
     return fromRows({users,bets,daily,results,odds,comments,replies,meta});
   }
   function rowsFromDB(db){
-    db=normalize(db);
+    db=normalizeBalances(db);
     const nowIso=new Date().toISOString();
     return {
       users:Object.values(db.users).map(u=>({name:u.name,balance:u.balance||0,created_at:u.createdAt||Date.now(),updated_at:u.updatedAt||Date.now()})),
@@ -148,8 +164,8 @@ function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
       if(legacyDb)return legacyDb;
       throw tableErr||legacyErr||new Error("Supabase load failed");
     },
-    async saveState(db){try{await pushTables(db);try{await pushLegacy(db);}catch(e){}}catch(e){await pushLegacy(db);}}
+    async saveState(db){db=normalizeBalances(db);try{await pushTables(db);try{await pushLegacy(db);}catch(e){}}catch(e){await pushLegacy(db);}}
   };
 }
 
-export {makeClient,TABLES};
+export {makeClient,TABLES,canonicalBalance,normalizeBalances};

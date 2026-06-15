@@ -26,6 +26,22 @@
     db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};db.odds=db.odds||{};db.oddsSync=db.oddsSync||{};db.comments=Array.isArray(db.comments)?db.comments:[];
     return db;
   }
+  const INIT_BALANCE=1000;
+  function canonicalBalance(name,db){
+    const bets=(db.bets||[]).filter(b=>b.user===name);
+    const staked=bets.reduce((s,b)=>s+(Number(b.stake)||0),0);
+    const returned=bets.reduce((s,b)=>s+(Number(b.payout)||0),0);
+    return INIT_BALANCE-staked+returned;
+  }
+  function normalizeBalances(db){
+    db=normalize(db);
+    Object.values(db.users).forEach(u=>{
+      u.balance=canonicalBalance(u.name,db);
+      if(!u.createdAt)u.createdAt=Date.now();
+      if(!u.updatedAt)u.updatedAt=u.createdAt;
+    });
+    return db;
+  }
   function ts(v){const n=typeof v==="number"?v:Date.parse(v||"");return Number.isFinite(n)?n:0;}
   function rowTs(o){return Math.max(ts(o?.updatedAt),ts(o?.updated_at),ts(o?.settledAt),ts(o?.settled_at),ts(o?.placedAt),ts(o?.createdAt));}
   function mergeDaily(a,b){
@@ -72,7 +88,7 @@
       });
       db.comments=Object.values(commentMap).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,200);
     });
-    return db;
+    return normalizeBalances(db);
   }
   function maxTs(values){
     return values.reduce((m,v)=>{
@@ -129,7 +145,8 @@
     return copy;
   }
   function rowsFromDB(db){
-    db=clean(db);
+    const commentOnly=Boolean(db?.__commentOnly);
+    db=commentOnly?clean(db):normalizeBalances(clean(db));
     const nowIso=new Date().toISOString();
     return {
       users:Object.values(db.users).map(u=>({name:u.name,balance:u.balance||0,created_at:u.createdAt||Date.now(),updated_at:u.updatedAt||Date.now()})),
@@ -176,6 +193,10 @@
     throw tableErr||legacyErr||new Error("remote pull failed");
   }
   async function push(c,db){
+    if(db?.__commentOnly){
+      const out=await pushTables(c,db);
+      return out;
+    }
     try{
       const out=await pushTables(c,db);
       try{await pushLegacy(c,db);}catch(e){}

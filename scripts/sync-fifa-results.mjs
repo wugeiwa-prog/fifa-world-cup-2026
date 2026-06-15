@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import {makeClient} from "./supabase-state.mjs";
+import {makeClient,normalizeBalances} from "./supabase-state.mjs";
 
 const FIFA_URL = "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures";
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://dngazmrtmtdahbrlazcj.supabase.co";
@@ -256,6 +256,7 @@ function todayRomeKey(){
   return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome"}).format(new Date());
 }
 function snapshotDaily(state){
+  normalizeBalances(state);
   state.daily ||= {};
   const key = todayRomeKey();
   state.daily[key] = Object.values(state.users || {})
@@ -282,7 +283,6 @@ function settleBets(state,matches){
     const now = Date.now();
     if(won){
       bet.payout = Math.round((bet.stake || 0) * (bet.odds || 0));
-      user.balance = (user.balance || 0) + bet.payout;
       bet.status = "won";
     }else{
       bet.payout = 0;
@@ -293,7 +293,7 @@ function settleBets(state,matches){
     user.updatedAt = now;
     settled += 1;
   }
-  if(settled)snapshotDaily(state);
+  if(settled){normalizeBalances(state);snapshotDaily(state);}
   return settled;
 }
 
