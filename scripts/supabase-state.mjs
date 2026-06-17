@@ -16,6 +16,8 @@ function normalize(db){
   return db;
 }
 const INIT_BALANCE=Number(process.env.INIT_BALANCE || 1000);
+const DELETED_TEXT="[已由管理员删除]";
+function isDeletedText(text){return String(text||"").startsWith(DELETED_TEXT);}
 function canonicalBalance(name,db){
   const bets=(db.bets||[]).filter(b=>b.user===name);
   const staked=bets.reduce((s,b)=>s+(Number(b.stake)||0),0);
@@ -72,8 +74,10 @@ function mergeDBSources(...sources){
       if(!c?.id)return;
       const old=commentMap[c.id];
       const replies={};
-      [...(old?.replies||[]),...(c.replies||[])].forEach(r=>{if(r?.id)replies[r.id]=r;});
-      commentMap[c.id]=!old||rowTs(c)>=rowTs(old)?{...old,...c,replies:Object.values(replies)}:{...c,...old,replies:Object.values(replies)};
+      [...(old?.replies||[]),...(c.replies||[])].forEach(r=>{if(!r?.id)return;const prev=replies[r.id];replies[r.id]=prev&&isDeletedText(prev.text)?prev:(isDeletedText(r.text)?r:r);});
+      const merged=!old||rowTs(c)>=rowTs(old)?{...old,...c,replies:Object.values(replies)}:{...c,...old,replies:Object.values(replies)};
+      if(isDeletedText(old?.text)||isDeletedText(c.text))merged.text=DELETED_TEXT;
+      commentMap[c.id]=merged;
     });
     db.comments=Object.values(commentMap).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,200);
   });

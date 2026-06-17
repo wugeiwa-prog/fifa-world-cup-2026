@@ -129,6 +129,9 @@ body:not(.locked) .access-gate{display:none}
 .day .today{font-size:12px;font-weight:700;color:#fff;background:var(--host-red);
   border-radius:999px;padding:2px 10px;letter-spacing:.1em}
 .day .count{margin-left:auto;font-family:var(--num);font-size:13px;color:var(--ink-soft)}
+.day .fold-btn{border:1px solid var(--line);background:#fff;border-radius:999px;color:var(--pitch);font-size:12px;font-weight:800;padding:3px 9px;cursor:pointer;font-family:var(--cjk)}
+.day.old{border-bottom-color:#BDB7A9;color:var(--ink-soft)}
+.grid.folded{display:none}
 
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:760px){.grid{grid-template-columns:1fr}}
@@ -209,6 +212,7 @@ body:not(.locked) .access-gate{display:none}
 .focus-actions button,.focus-actions a{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--pitch);padding:6px 12px;font-size:12.5px;font-weight:800;text-decoration:none;font-family:var(--cjk);cursor:pointer}
 .focus-actions .primary{background:var(--pitch);border-color:var(--pitch);color:#fff}
 .focus-empty{font-size:13px;color:var(--ink-soft);line-height:1.75}
+.quick-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.quick-strip button{border:1px solid var(--line);background:#fff;color:var(--pitch);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;font-family:var(--cjk);cursor:pointer}.quick-strip button:hover{border-color:var(--grass)}
 .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:10px}
 .gcard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#FCFBF7}
 .gcard .gl{font-family:var(--num);font-weight:700;font-size:15px;color:var(--pitch);margin-bottom:3px}
@@ -351,6 +355,7 @@ body:not(.locked) .access-gate{display:none}
 .bet-slips{margin-top:14px;display:grid;gap:8px}
 .bet-slip{border:1px solid var(--line);border-radius:9px;padding:9px 12px;background:#FCFBF7;font-size:13px;
   display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.bet-history{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px 11px}.bet-history summary{cursor:pointer;font-size:13px;font-weight:800;color:var(--pitch)}.bet-history .bet-slips{margin-top:8px}
 .bet-slip .meta{min-width:0}
 .bet-slip .res{font-family:var(--num);font-weight:700;font-size:14px;white-space:nowrap}
 .bet-slip .res.open{color:var(--host-blue)}
@@ -485,6 +490,7 @@ body:not(.locked) .access-gate{display:none}
       <span class="nav-label">导航</span>
       <div class="tabs" id="pageTabs">
         <button class="tab link primary" data-target="focusPanel">焦点</button>
+        <button class="tab link" data-action="jump-today">今天</button>
         <button class="tab link" data-action="open-bettable">下注</button>
         <button class="tab link" data-target="betHall">我的</button>
         <button class="tab link" data-target="betBoard">榜单</button>
@@ -531,6 +537,7 @@ body:not(.locked) .access-gate{display:none}
       <button class="primary" type="button" data-login="1" data-target="betHall">登录 / 注册参与</button>
       <button type="button" data-target="betBoard">查看当前榜单</button>
       <button type="button" data-target="focusPanel">今日焦点</button>
+      <button type="button" data-action="jump-today">今天赛程</button>
       <a href="comments.html">去留言板</a>
     </div>
   </section>
@@ -931,6 +938,7 @@ const STAGE_NAME={group:"小组赛",r32:"32强",r16:"16强",qf:"1/4决赛",fin:"
 const todayRome=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome"}).format(new Date()); // YYYY-MM-DD
 
 let curStage="all",curQ="";
+const expandedOldDays=new Set();
 const list=document.getElementById("list"),empty=document.getElementById("empty");
 const toTop=document.getElementById("toTop");
 
@@ -992,6 +1000,7 @@ function renderFocusPanel(){
   if(!box)return;
   const tomorrow=addDays(todayRome,1);
   const todayTomorrow=M.filter(m=>[todayRome,tomorrow].includes(matchDateKey(m)));
+  const todayMatches=M.filter(m=>matchDateKey(m)===todayRome);
   const live=todayTomorrow.filter(m=>matchLiveState(m)==="live");
   const bettableRows=todayTomorrow.filter(bettable);
   const awaiting=todayTomorrow.filter(m=>matchLiveState(m)==="awaiting-result");
@@ -1002,6 +1011,7 @@ function renderFocusPanel(){
   const nextBet=bettableRows[0],nextHot=hot[0],nextMine=myOpen[0],lastDone=recentFinal[recentFinal.length-1];
   const card=(k,v,s,cls="")=>`<article class="focus-card ${cls}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></article>`;
   const cards=[
+    card("今天赛程",`${todayMatches.length} 场`,todayMatches[0]?`${shortMatchName(todayMatches[0])} · ${todayMatches[0].t} CEST`:"今天暂无比赛"),
     card("可竞猜",`${bettableRows.length} 场`,nextBet?`${shortMatchName(nextBet)} · ${nextBet.t} CEST`:"今天/明天暂无开放场次","mine"),
     card("进行中",`${live.length} 场`,live[0]?`${shortMatchName(live[0])} · ${live[0].score||"实时比分"}`:"当前没有进行中的比赛",live.length?"hot":""),
     card("我的未结",`${myOpen.length} 注`,nextMine?`${shortMatchName(nextMine)} · 等待赛果`:(curUser()?"暂无未结注单":"登录后显示个人焦点"),"mine"),
@@ -1011,6 +1021,7 @@ function renderFocusPanel(){
     ?`<div class="focus-empty">有 ${awaiting.length} 场比赛已开赛且赛果待确认，比分确认后会结算相关竞猜。</div>`
     :(lastDone?`<div class="focus-empty">最近赛果：${shortMatchName(lastDone)} ${lastDone.score||lastDone.s||""}</div>`:"");
   box.innerHTML=`<div class="focus-grid">${cards}</div>${extra}<div class="focus-actions">
+    <button type="button" data-action="jump-today">今天赛程</button>
     <button class="primary" type="button" data-action="open-bettable">查看可竞猜</button>
     <button type="button" data-target="betHall">我的注单</button>
     <button type="button" data-target="betBoard">当前榜单</button>
@@ -1035,17 +1046,21 @@ function render(){
   list.innerHTML="";
   empty.style.display=rows.length?"none":"block";
   let day=null,grid=null;
+  const oldCutoff=addDays(todayRome,-2);
   rows.forEach(m=>{
     if(m.d!==day){
       day=m.d;
       const[mo,dd]=day.split("-").map(Number);
       const isToday=("2026-"+day)===todayRome;
+      const dateKey=`2026-${day}`,isOld=dateKey<oldCutoff&&!curQ;
+      const folded=isOld&&!expandedOldDays.has(day);
       const n=rows.filter(r=>r.d===day).length;
-      const h=document.createElement("div");h.className="day";
+      const h=document.createElement("div");h.className="day"+(isOld?" old":"");h.dataset.day=dateKey;
       h.innerHTML=`<span class="date">${mo}月${dd}日</span><span class="week">${weekday(day)}</span>`+
-        (isToday?`<span class="today">今天</span>`:"")+`<span class="count">${n} 场</span>`;
+        (isToday?`<span class="today">今天</span>`:"")+`<span class="count">${n} 场</span>`+
+        (isOld?`<button class="fold-btn" type="button" data-toggle-day="${day}">${folded?"展开":"收起"}</button>`:"");
       list.appendChild(h);
-      grid=document.createElement("div");grid.className="grid";list.appendChild(grid);
+      grid=document.createElement("div");grid.className="grid"+(folded?" folded":"");grid.dataset.dayGrid=day;list.appendChild(grid);
     }
     const kn=m.st!=="group",fin=m.st==="fin";
     const chip=m.st==="group"
@@ -1094,9 +1109,19 @@ function jumpToBettable(){
   const first=list.querySelector("[data-bet]");
   (first?.closest(".m")||document.getElementById("schedulePanel"))?.scrollIntoView({behavior:"smooth",block:"center"});
 }
+function jumpToToday(){
+  curStage="all";curQ="";document.getElementById("q").value="";
+  document.querySelectorAll("#tabs .tab").forEach(t=>t.classList.toggle("on",t.dataset.st==="all"));
+  render();
+  const today=list.querySelector(`.day[data-day="${todayRome}"]`);
+  const next=list.querySelector(".day:not(.old)");
+  (today||next||document.getElementById("schedulePanel"))?.scrollIntoView({behavior:"smooth",block:"start"});
+}
 document.addEventListener("click",e=>{
   const act=e.target.closest("[data-action='open-bettable']");
   if(act){e.preventDefault();jumpToBettable();return;}
+  const today=e.target.closest("[data-action='jump-today']");
+  if(today){e.preventDefault();jumpToToday();return;}
   const target=e.target.closest(".focus-actions [data-target]");
   if(target){document.getElementById(target.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});}
 });
@@ -1557,13 +1582,17 @@ function renderWallet(){
     <button class="bet-btn ghost sm" id="walletOut" style="margin-left:auto">登出（${esc(u.name)}）</button></div>`;
   document.getElementById("walletOut").addEventListener("click",()=>{setCur(null);refreshAll();});
   if(!mine.length){sl.innerHTML=`<div class="bet-empty">还没有竞猜。在下方赛程里点任意「竞猜」按钮即可开始。</div>`;return;}
-  sl.innerHTML=`<div class="bet-slips">`+mine.slice().sort((a,b)=>b.placedAt-a.placedAt).map(b=>{
+  const sorted=mine.slice().sort((a,b)=>b.placedAt-a.placedAt),cutoff=Date.now()-2*24*60*60*1000;
+  const recent=sorted.filter(b=>(b.placedAt||0)>=cutoff||b.status==="open"),old=sorted.filter(b=>(b.placedAt||0)<cutoff&&b.status!=="open");
+  const slipHtml=b=>{
     const m=MID2M[b.mid],t=m?`${teamOf(m.h)?.nameZh||rawName(m.h)} vs ${teamOf(m.a)?.nameZh||rawName(m.a)}`:b.mid;
     const pickTxt=b.type==="1x2"?({h:"主胜",d:"平局",a:"客胜"})[b.pick]:`比分 ${b.pick.replace("-","–")}`;
     const net=(b.payout||0)-(b.stake||0);
     const rtxt=b.status==="open"?"进行中":b.status==="won"?`返还 ${b.payout}（净 +${net}）`:`未返还（净 -${b.stake}）`;
     return `<div class="bet-slip"><div class="meta"><div>${esc(t)}</div><div class="bet-empty">${pickTxt} @${b.odds.toFixed(2)} · 押 ${b.stake} 币</div></div><div class="res ${b.status}">${rtxt}</div></div>`;
-  }).join("")+`</div>`;
+  };
+  sl.innerHTML=(recent.length?`<div class="bet-slips">${recent.map(slipHtml).join("")}</div>`:`<div class="bet-empty">近两天没有新的已结注单。</div>`)+
+    (old.length?`<details class="bet-history"><summary>两天前记录 · ${old.length} 注</summary><div class="bet-slips">${old.map(slipHtml).join("")}</div></details>`:"");
 }
 function renderLeaderboard(){
   const box=document.getElementById("leaderboard");
@@ -1675,6 +1704,7 @@ document.getElementById("betPicks").addEventListener("click",e=>{const b=e.targe
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
 document.querySelectorAll(".bet-mask").forEach(mask=>mask.addEventListener("click",e=>{if(e.target===mask)closeModal(mask.id);}));
 document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-bet]");if(b)openBet(b.dataset.bet);});
+document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-toggle-day]");if(!b)return;expandedOldDays.has(b.dataset.toggleDay)?expandedOldDays.delete(b.dataset.toggleDay):expandedOldDays.add(b.dataset.toggleDay);render();});
 
 /* ---- 启动 ---- */
 snapshotDaily();
