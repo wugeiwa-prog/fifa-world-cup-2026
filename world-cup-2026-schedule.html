@@ -213,6 +213,17 @@ body:not(.locked) .access-gate{display:none}
 .focus-actions .primary{background:var(--pitch);border-color:var(--pitch);color:#fff}
 .focus-empty{font-size:13px;color:var(--ink-soft);line-height:1.75}
 .quick-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.quick-strip button{border:1px solid var(--line);background:#fff;color:var(--pitch);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;font-family:var(--cjk);cursor:pointer}.quick-strip button:hover{border-color:var(--grass)}
+.standings{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.stand-card{border:1px solid var(--line);border-radius:11px;background:#FCFBF7;padding:12px;min-width:0}
+.stand-card h3{font-family:var(--num);font-size:17px;color:var(--pitch);margin-bottom:8px;letter-spacing:.04em}
+.stand-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.stand-table th,.stand-table td{border-bottom:1px solid var(--line);padding:6px 5px;text-align:right;white-space:nowrap}
+.stand-table th:first-child,.stand-table td:first-child{text-align:left}
+.stand-table th{font-size:11px;color:var(--ink-soft);font-weight:800}
+.stand-table .team-cell{display:flex;align-items:center;gap:6px;font-weight:800;min-width:0}
+.stand-table .team-cell span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stand-table .pts{font-family:var(--num);font-weight:800;color:var(--pitch);font-size:15px}
+.stand-note{font-size:11.5px;color:var(--ink-soft);margin-top:8px}
 .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:10px}
 .gcard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#FCFBF7}
 .gcard .gl{font-family:var(--num);font-weight:700;font-size:15px;color:var(--pitch);margin-bottom:3px}
@@ -428,11 +439,27 @@ body:not(.locked) .access-gate{display:none}
 .bet-msg{font-size:12.5px;color:var(--host-red);min-height:17px;margin-top:8px}
 .bet-modal .ft{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px}
 .bet-modal .ft .bet-btn{flex:1;text-align:center;padding:10px}
+.detail-modal{width:min(760px,100%)}
+.detail-modal .bd{display:grid;gap:14px}
+.detail-head{border:1px solid var(--line);border-radius:12px;background:#FCFBF7;padding:12px 13px}
+.detail-score{font-family:var(--num);font-size:28px;font-weight:800;color:var(--host-red);margin:4px 0}
+.detail-meta,.detail-note{font-size:12.5px;color:var(--ink-soft);line-height:1.7}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.team-brief,.match-mini{border:1px solid var(--line);border-radius:11px;background:#fff;padding:12px;min-width:0}
+.team-brief h4{font-size:15px;display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.team-brief p,.match-mini li{font-size:12.5px;color:var(--ink-soft);line-height:1.7}
+.team-brief b{color:var(--ink)}
+.match-mini h4{font-size:13px;margin-bottom:6px;color:var(--pitch)}
+.match-mini ul{list-style:none;display:grid;gap:5px}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap}
+.detail-btn{border:1px solid var(--line);background:#fff;color:var(--pitch)}
 @media(max-width:480px){.bet-picks.scores{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:760px){
   .leader-insights{grid-template-columns:1fr 1fr}
   .lb{display:none}
   .lb-cards{display:block}
+  .detail-grid{grid-template-columns:1fr}
+  .standings{grid-template-columns:1fr}
 }
 @media(max-width:420px){
   .focus-grid,.leader-insights{grid-template-columns:1fr}
@@ -498,6 +525,7 @@ body:not(.locked) .access-gate{display:none}
         <a class="tab link" href="comments.html">留言</a>
         <button class="tab link" data-target="schedulePanel">赛程</button>
         <button class="tab link" data-target="rankings">排名</button>
+        <button class="tab link" data-target="standingsPanel">积分</button>
         <button class="tab link" data-target="groupsPanel">小组</button>
         <button class="tab link" data-target="squadsPanel">阵容</button>
         <button class="tab link" data-target="broadcastPanel">收看</button>
@@ -531,7 +559,7 @@ body:not(.locked) .access-gate{display:none}
     <div class="reset-grid">
       <div class="reset-item"><b>竞猜</b><span>只开放今天和明天、且尚未开赛的比赛；开赛后停止竞猜。</span></div>
       <div class="reset-item"><b>比分</b><span>比赛中会更新比分，确认完赛后结算竞猜并刷新榜单。</span></div>
-      <div class="reset-item"><b>留言</b><span>留言板可浏览，登录后用内置短句、@球队 和 #球星 互动。</span></div>
+      <div class="reset-item"><b>留言</b><span>留言板可浏览，登录后可自由留言，并用 @球队 和 #球星 快速补充。</span></div>
     </div>
     <div class="reset-actions">
       <button class="primary" type="button" data-login="1" data-target="betHall">登录 / 注册参与</button>
@@ -574,6 +602,12 @@ body:not(.locked) .access-gate{display:none}
     <div id="rankingList"></div>
   </section>
 
+  <section class="panel" id="standingsPanel">
+    <h2>小组积分</h2>
+    <div class="rank-meta">按当前已录入完赛比分自动计算；未完赛比赛不计入积分。</div>
+    <div class="standings" id="standingsList"></div>
+  </section>
+
   <section class="panel" id="groupsPanel">
     <h2>12 个小组</h2>
     <div class="groups" id="groups"></div>
@@ -598,14 +632,14 @@ body:not(.locked) .access-gate{display:none}
     <div class="status-grid">
       <div class="status-card"><b>赛果进度</b><span id="resultSummary">页面打开后自动读取最新比分和进度。</span></div>
       <div class="status-card"><b>竞猜开放</b><span>仅开放今天和明天、且尚未开赛的比赛；开赛即停止，完赛后结算。</span></div>
-      <div class="status-card"><b>留言互动</b><span>未登录可浏览留言；登录后可用内置短句发布或回复。</span></div>
+      <div class="status-card"><b>留言互动</b><span>未登录可浏览留言；登录后可自由发布或回复，支持 @球队 与 #球星。</span></div>
       <div class="status-card"><b>排名来源</b><span>FIFA 男足世界排名官方更新时间：2026年6月11日；下一次：2026年7月20日。</span></div>
     </div>
     <div class="notes">
       ① 主时间为意大利时间 CEST，中国时间会在每场比赛旁自动标注。<br>
       ② 小组赛每组前 2 名 + 8 个成绩最好的小组第 3 名晋级 32 强；淘汰赛平局进入加时和点球。<br>
       ③ 竞猜只供朋友间娱乐，无真实货币；开赛后停止竞猜，完赛确认比分后结算。<br>
-      ④ 留言板只允许选择内置看球短句，并可追加 @球队 与 #球星 标签，请友善互动。<br>
+      ④ 留言板支持自由输入，并可追加 @球队 与 #球星 标签，请友善互动。<br>
       ⑤ 赛程、排名、阵容和收看信息以官方及公开来源为准，页面会尽量保持比分和榜单为最新状态。
     </div>
   </section>
@@ -644,6 +678,14 @@ body:not(.locked) .access-gate{display:none}
       <button class="bet-btn ghost" data-close="betMask">取消</button>
       <button class="bet-btn" id="betConfirm">确认下注</button>
     </div>
+  </div>
+</div>
+
+<!-- 比赛详情弹窗 -->
+<div class="bet-mask" id="matchDetailMask">
+  <div class="bet-modal detail-modal">
+    <div class="hd"><h3 id="matchDetailTitle">比赛详情</h3><button class="x" data-close="matchDetailMask" aria-label="关闭">×</button></div>
+    <div class="bd" id="matchDetailBody"></div>
   </div>
 </div>
 
@@ -943,7 +985,8 @@ const list=document.getElementById("list"),empty=document.getElementById("empty"
 const toTop=document.getElementById("toTop");
 
 function weekday(d){const[m,dd]=d.split("-").map(Number);return WK[new Date(2026,m-1,dd).getDay()];}
-function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function esc(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function attr(s){return esc(String(s??"")).replace(/"/g,"&quot;");}
 function chinaTime(d,t){
   const[mo,dd]=d.split("-").map(Number);
   const[hh,mm]=t.split(":").map(Number);
@@ -973,6 +1016,52 @@ function statusChip(m){
 }
 function shortMatchName(m){
   return `${teamOf(m.h)?.nameZh||rawName(m.h)} vs ${teamOf(m.a)?.nameZh||rawName(m.a)}`;
+}
+function matchLine(m){
+  const score=m.score||m.s||"VS";
+  return `${m.d} ${m.t} · ${shortMatchName(m)} · ${score}`;
+}
+function teamMatchRows(teamName,ref,dir){
+  if(!teamName)return [];
+  const refTime=matchKickoffTime(ref).getTime(),refId=matchId(ref);
+  return M.filter(m=>matchId(m)!==refId&&(rawName(m.h)===teamName||rawName(m.a)===teamName))
+    .filter(m=>dir==="past"?(matchKickoffTime(m).getTime()<refTime&&matchLiveState(m)==="done"):matchKickoffTime(m).getTime()>refTime)
+    .sort((a,b)=>dir==="past"?matchKickoffTime(b)-matchKickoffTime(a):matchKickoffTime(a)-matchKickoffTime(b))
+    .slice(0,3);
+}
+function teamBriefHtml(team,raw,ref){
+  if(!team)return `<article class="team-brief"><h4>${esc(rawName(raw))}</h4><p>对阵确定后补充球队资料、近期战绩和未来对局。</p></article>`;
+  const squad=SQUADS.find(s=>s.team===team.nameZh);
+  const coach=TEAM_COACH_ZH[team.nameZh]||COACH_ZH[squad?.coach]||"待官方确认";
+  const stars=(squad?.core||team.stars||[]).slice(0,4).map(x=>SQUAD_NAME_ZH[x]||STAR_ZH[x]||x).join(" · ")||"待官方确认";
+  const past=teamMatchRows(team.nameZh,ref,"past"),future=teamMatchRows(team.nameZh,ref,"future");
+  const list=rows=>rows.length?rows.map(x=>`<li>${esc(matchLine(x))}</li>`).join(""):`<li>暂无更多已确认记录</li>`;
+  return `<article class="team-brief">
+    <h4><span>${team.flag}</span><span>${esc(team.nameZh)} ${team.fifaCode}</span></h4>
+    <p><b>世界排名：</b>#${FIFA_RANK[team.nameZh]||"—"} · <b>小组：</b>${team.group}</p>
+    <p><b>主教练：</b>${esc(coach)}</p>
+    <p><b>核心球员：</b>${esc(stars)}</p>
+    <div class="match-mini"><h4>最近战绩</h4><ul>${list(past)}</ul></div>
+    <div class="match-mini"><h4>未来对局</h4><ul>${list(future)}</ul></div>
+  </article>`;
+}
+function openMatchDetail(mid){
+  const m=MID2M[mid];if(!m)return;
+  const home=teamOf(m.h),away=teamOf(m.a),score=m.score||m.s||"未开赛";
+  document.getElementById("matchDetailTitle").textContent=shortMatchName(m);
+  document.getElementById("matchDetailBody").innerHTML=`<section class="detail-head">
+    <div class="detail-meta">${STAGE_NAME[m.st]}${m.st==="group"?` · ${m.g} 组`:` · ${esc(m.g)}`} · ${m.d} ${m.t} CEST · ${chinaTime(m.d,m.t)}</div>
+    <div class="detail-score">${esc(score)}</div>
+    <div class="detail-meta">📍 ${esc(m.v)} ${m.c} · ${statusChip(m).replace(/<[^>]+>/g,"")}</div>
+    ${m.watchNote?`<div class="detail-note">${esc(m.watchNote)}</div>`:""}
+  </section>
+  <div class="detail-grid">${teamBriefHtml(home,m.h,m)}${teamBriefHtml(away,m.a,m)}</div>
+  <div class="detail-actions">
+    ${bettable(m)?`<button class="bet-btn sm" data-bet="${attr(mid)}">竞猜这场</button>`:""}
+    <button class="bet-btn ghost sm" data-close="matchDetailMask">关闭</button>
+  </div>`;
+  emojify(document.getElementById("matchDetailBody"));
+  openModal("matchDetailMask");
 }
 function myBetsForMatch(m){
   const u=curUser();
@@ -1046,7 +1135,7 @@ function render(){
   list.innerHTML="";
   empty.style.display=rows.length?"none":"block";
   let day=null,grid=null;
-  const oldCutoff=addDays(todayRome,-2);
+  const oldCutoff=addDays(todayRome,-1);
   rows.forEach(m=>{
     if(m.d!==day){
       day=m.d;
@@ -1192,6 +1281,33 @@ function renderRankings(){
   }</tbody></table>`;
 }
 renderRankings();
+function groupStats(){
+  const stats={};
+  Object.values(TEAMS).forEach(t=>{
+    stats[t.nameZh]={team:t,p:0,w:0,d:0,l:0,gf:0,ga:0,gd:0,pts:0};
+  });
+  M.filter(m=>m.st==="group"&&(m.s||m.status==="done")).forEach(m=>{
+    const sc=parseScore(m.s||m.score||"");if(!sc)return;
+    const h=teamOf(m.h),a=teamOf(m.a);if(!h||!a||!stats[h.nameZh]||!stats[a.nameZh])return;
+    const hs=stats[h.nameZh],as=stats[a.nameZh],hg=sc[0],ag=sc[1];
+    hs.p++;as.p++;hs.gf+=hg;hs.ga+=ag;as.gf+=ag;as.ga+=hg;
+    if(hg>ag){hs.w++;as.l++;hs.pts+=3;}
+    else if(hg<ag){as.w++;hs.l++;as.pts+=3;}
+    else{hs.d++;as.d++;hs.pts++;as.pts++;}
+  });
+  Object.values(stats).forEach(s=>s.gd=s.gf-s.ga);
+  return stats;
+}
+function renderStandings(){
+  const box=document.getElementById("standingsList");if(!box)return;
+  const stats=groupStats();
+  box.innerHTML="ABCDEFGHIJKL".split("").map(g=>{
+    const rows=Object.values(stats).filter(s=>s.team.group===g).sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||(FIFA_RANK[a.team.nameZh]||99)-(FIFA_RANK[b.team.nameZh]||99));
+    return `<article class="stand-card"><h3>GROUP ${g}</h3><table class="stand-table"><thead><tr><th>球队</th><th>赛</th><th>胜</th><th>平</th><th>负</th><th>净</th><th>分</th></tr></thead><tbody>${
+      rows.map(s=>`<tr><td><div class="team-cell"><span>${s.team.flag}</span><span>${esc(s.team.nameZh)}</span></div></td><td>${s.p}</td><td>${s.w}</td><td>${s.d}</td><td>${s.l}</td><td>${s.gd>0?`+${s.gd}`:s.gd}</td><td class="pts">${s.pts}</td></tr>`).join("")
+    }</tbody></table><div class="stand-note">同分暂按净胜球、进球数、FIFA 排名辅助排序。</div></article>`;
+  }).join("");
+}
 const HOST_ADV=70, BASE_TOTAL=2.65, ELO_PER_GOAL=130, MARGIN=0.94, GRID=7;
 function ratingOf(nameZh){return 2120-150*Math.log(FIFA_RANK[nameZh]||90);}
 const BOOK_ODDS_UPDATED="2026-06-12 20:20 Europe/Rome";
@@ -1582,7 +1698,7 @@ function renderWallet(){
     <button class="bet-btn ghost sm" id="walletOut" style="margin-left:auto">登出（${esc(u.name)}）</button></div>`;
   document.getElementById("walletOut").addEventListener("click",()=>{setCur(null);refreshAll();});
   if(!mine.length){sl.innerHTML=`<div class="bet-empty">还没有竞猜。在下方赛程里点任意「竞猜」按钮即可开始。</div>`;return;}
-  const sorted=mine.slice().sort((a,b)=>b.placedAt-a.placedAt),cutoff=Date.now()-2*24*60*60*1000;
+  const sorted=mine.slice().sort((a,b)=>b.placedAt-a.placedAt),cutoff=Date.now()-24*60*60*1000;
   const recent=sorted.filter(b=>(b.placedAt||0)>=cutoff||b.status==="open"),old=sorted.filter(b=>(b.placedAt||0)<cutoff&&b.status!=="open");
   const slipHtml=b=>{
     const m=MID2M[b.mid],t=m?`${teamOf(m.h)?.nameZh||rawName(m.h)} vs ${teamOf(m.a)?.nameZh||rawName(m.a)}`:b.mid;
@@ -1591,8 +1707,8 @@ function renderWallet(){
     const rtxt=b.status==="open"?"进行中":b.status==="won"?`返还 ${b.payout}（净 +${net}）`:`未返还（净 -${b.stake}）`;
     return `<div class="bet-slip"><div class="meta"><div>${esc(t)}</div><div class="bet-empty">${pickTxt} @${b.odds.toFixed(2)} · 押 ${b.stake} 币</div></div><div class="res ${b.status}">${rtxt}</div></div>`;
   };
-  sl.innerHTML=(recent.length?`<div class="bet-slips">${recent.map(slipHtml).join("")}</div>`:`<div class="bet-empty">近两天没有新的已结注单。</div>`)+
-    (old.length?`<details class="bet-history"><summary>两天前记录 · ${old.length} 注</summary><div class="bet-slips">${old.map(slipHtml).join("")}</div></details>`:"");
+  sl.innerHTML=(recent.length?`<div class="bet-slips">${recent.map(slipHtml).join("")}</div>`:`<div class="bet-empty">近一天没有新的已结注单。</div>`)+
+    (old.length?`<details class="bet-history"><summary>一天前记录 · ${old.length} 注</summary><div class="bet-slips">${old.map(slipHtml).join("")}</div></details>`:"");
 }
 function renderLeaderboard(){
   const box=document.getElementById("leaderboard");
@@ -1683,13 +1799,14 @@ function betButtonHtml(m){
   const lock=betLockReason(m);
   const mine=myBetSummary(m);
   const note=mine?`<span class="bet-note">我的 ${mine.count} 注 · ${mine.stake} 币${mine.open?` · ${mine.open} 未结`:""}</span>`:"";
-  if(lock)return `<div class="betline ${mine?"mine":""}"><span class="bet-locked ${matchLiveState(m)==="live"?"live":""}">🔒 ${esc(lock)}</span>${note}</div>`;
+  const detail=`<button class="bet-btn ghost sm detail-btn" data-detail="${attr(matchId(m))}" type="button">详情</button>`;
+  if(lock)return `<div class="betline ${mine?"mine":""}"><span class="bet-locked ${matchLiveState(m)==="live"?"live":""}">🔒 ${esc(lock)}</span>${note}${detail}</div>`;
   const o=odds1x2(m);
   const src=o.source?`<span class="src">赔率快照</span>`:`<span class="src">参考赔率</span>`;
-  return `<div class="betline ${mine?"mine":""}"><span class="odds"><span>主 <b>${o.h.toFixed(2)}</b></span><span>平 <b>${o.d.toFixed(2)}</b></span><span>客 <b>${o.a.toFixed(2)}</b></span>${src}</span>${note}<button class="bet-btn sm" data-bet="${matchId(m)}">竞猜</button></div>`;
+  return `<div class="betline ${mine?"mine":""}"><span class="odds"><span>主 <b>${o.h.toFixed(2)}</b></span><span>平 <b>${o.d.toFixed(2)}</b></span><span>客 <b>${o.a.toFixed(2)}</b></span>${src}</span>${note}${detail}<button class="bet-btn sm" data-bet="${attr(matchId(m))}">竞猜</button></div>`;
 }
 
-function refreshAll(){applyResults();settleBets();renderLoginBar();renderWallet();renderFocusPanel();renderLeaderboard();updateTournamentProgress();updateResultSummary();render();emojify(document.body);}
+function refreshAll(){applyResults();settleBets();renderLoginBar();renderWallet();renderFocusPanel();renderLeaderboard();renderStandings();updateTournamentProgress();updateResultSummary();render();emojify(document.body);}
 
 /* ---- 事件绑定（一次）---- */
 document.getElementById("loginGo").addEventListener("click",doLogin);
@@ -1703,7 +1820,9 @@ document.getElementById("betPicks").addEventListener("click",e=>{const b=e.targe
   slip.pick=b.dataset.pick;slip.odds=parseFloat(b.dataset.odds);updatePayout();});
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
 document.querySelectorAll(".bet-mask").forEach(mask=>mask.addEventListener("click",e=>{if(e.target===mask)closeModal(mask.id);}));
-document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-bet]");if(b)openBet(b.dataset.bet);});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-close]");if(b)closeModal(b.dataset.close);});
+document.getElementById("list").addEventListener("click",e=>{const d=e.target.closest("[data-detail]");if(d){openMatchDetail(d.dataset.detail);return;}const b=e.target.closest("[data-bet]");if(b)openBet(b.dataset.bet);});
+document.getElementById("matchDetailBody").addEventListener("click",e=>{const b=e.target.closest("[data-bet]");if(b){closeModal("matchDetailMask");openBet(b.dataset.bet);}});
 document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-toggle-day]");if(!b)return;expandedOldDays.has(b.dataset.toggleDay)?expandedOldDays.delete(b.dataset.toggleDay):expandedOldDays.add(b.dataset.toggleDay);render();});
 
 /* ---- 启动 ---- */
