@@ -111,9 +111,11 @@ body:not(.locked) .access-gate{display:none}
 .tab:hover{border-color:var(--grass)}
 .tab.on{background:var(--pitch);border-color:var(--pitch);color:var(--chalk);font-weight:600}
 .tab.hot.on{background:var(--host-red);border-color:var(--host-red)}
-.tab.link{border-radius:7px;padding:6px 10px}
+.tab.link{position:relative;border-radius:7px;padding:6px 10px}
 .tab.link.primary{background:#E5F4EB;border-color:#BFE0C9;color:#10663C;font-weight:800}
 .tab.link.on{background:#E8EEF9;border-color:#CAD7EF;color:var(--host-blue)}
+.notify-badge{display:none;min-width:18px;height:18px;border-radius:999px;background:var(--host-red);color:#fff;font-family:var(--num);font-size:12px;font-weight:800;line-height:18px;text-align:center;padding:0 5px;margin-left:4px}
+.notify-badge.show{display:inline-flex;align-items:center;justify-content:center}
 .search{flex:0 0 auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line);
   background:#fff;border-radius:999px;padding:6px 12px}
 .search input{border:none;outline:none;font-size:13.5px;width:130px;background:transparent;font-family:var(--cjk)}
@@ -366,6 +368,7 @@ body:not(.locked) .access-gate{display:none}
 .bet-slips{margin-top:14px;display:grid;gap:8px}
 .bet-slip{border:1px solid var(--line);border-radius:9px;padding:9px 12px;background:#FCFBF7;font-size:13px;
   display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.bet-slip.unread{border-color:#F0C0B8;background:#FFF8F6;box-shadow:0 0 0 2px rgba(200,55,45,.08)}
 .bet-history{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px 11px}.bet-history summary{cursor:pointer;font-size:13px;font-weight:800;color:var(--pitch)}.bet-history .bet-slips{margin-top:8px}
 .bet-slip .meta{min-width:0}
 .bet-slip .res{font-family:var(--num);font-weight:700;font-size:14px;white-space:nowrap}
@@ -519,10 +522,10 @@ body:not(.locked) .access-gate{display:none}
         <button class="tab link primary" data-target="focusPanel">焦点</button>
         <button class="tab link" data-action="jump-today">今天</button>
         <button class="tab link" data-action="open-bettable">下注</button>
-        <button class="tab link" data-target="betHall">我的</button>
+        <button class="tab link" data-target="betHall">我的 <span class="notify-badge" id="betNotifyBadge">0</span></button>
         <button class="tab link" data-target="betBoard">榜单</button>
         <button class="tab link" data-target="resetNotice">公告</button>
-        <a class="tab link" href="comments.html">留言</a>
+        <a class="tab link" href="comments.html?focus=replies">留言 <span class="notify-badge" id="commentNotifyBadge">0</span></a>
         <button class="tab link" data-target="schedulePanel">赛程</button>
         <button class="tab link" data-target="rankings">排名</button>
         <button class="tab link" data-target="standingsPanel">积分</button>
@@ -1187,8 +1190,11 @@ document.getElementById("tabs").addEventListener("click",e=>{
 });
 document.getElementById("pageTabs").addEventListener("click",e=>{
   const b=e.target.closest("[data-target]");if(!b)return;
+  markTargetSeen(b.dataset.target);
   document.querySelectorAll("#pageTabs .tab").forEach(t=>t.classList.remove("on"));
   b.classList.add("on");
+  if(b.dataset.target==="betHall")renderWallet();
+  renderNotifyBadges();
   document.getElementById(b.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});
 });
 function jumpToBettable(){
@@ -1212,10 +1218,11 @@ document.addEventListener("click",e=>{
   const today=e.target.closest("[data-action='jump-today']");
   if(today){e.preventDefault();jumpToToday();return;}
   const target=e.target.closest(".focus-actions [data-target]");
-  if(target){document.getElementById(target.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});}
+  if(target){markTargetSeen(target.dataset.target);if(target.dataset.target==="betHall")renderWallet();renderNotifyBadges();document.getElementById(target.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});}
 });
 document.getElementById("resetNotice")?.addEventListener("click",e=>{
   const b=e.target.closest("[data-target]");if(!b)return;
+  markTargetSeen(b.dataset.target);if(b.dataset.target==="betHall")renderWallet();renderNotifyBadges();
   document.getElementById(b.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});
   if(b.dataset.login)openModal("loginMask");
 });
@@ -1562,6 +1569,26 @@ function setCur(u){
   if(u){sessionStorage.setItem(USER_KEY,u);localStorage.setItem(USER_KEY,u);}
   else{sessionStorage.removeItem(USER_KEY);localStorage.removeItem(USER_KEY);}
 }
+function seenKey(type,user=curUser()){return `wc2026_seen_${type}_${user||"guest"}`;}
+function seenAt(type){const u=curUser();return u?Number(localStorage.getItem(seenKey(type,u))||0):Date.now();}
+function markSeen(type,ts=Date.now()){const u=curUser();if(u)localStorage.setItem(seenKey(type,u),String(ts));}
+function badgeText(n){return n>99?"99+":String(n);}
+function replyNotifications(){
+  const u=curUser(),since=seenAt("replies");if(!u)return [];
+  return (DB.comments||[]).flatMap(c=>(c.replies||[]).filter(r=>c.user===u&&r.user!==u&&(r.createdAt||0)>since).map(r=>({comment:c,reply:r})));
+}
+function betNotifications(){
+  const u=curUser(),since=seenAt("bets");if(!u)return [];
+  return (DB.bets||[]).filter(b=>b.user===u&&(b.status==="won"||b.status==="lost")&&((b.settledAt||b.updatedAt||0)>since));
+}
+function renderNotifyBadges(){
+  const bets=betNotifications().length,comments=replyNotifications().length;
+  const set=(id,n)=>{const el=document.getElementById(id);if(!el)return;el.textContent=badgeText(n);el.classList.toggle("show",n>0);};
+  set("betNotifyBadge",bets);set("commentNotifyBadge",comments);
+}
+function markTargetSeen(target){
+  if(target==="betHall"){const notes=betNotifications();if(notes.length)markSeen("bets",Math.max(...notes.map(b=>b.settledAt||b.updatedAt||0),Date.now()));}
+}
 async function sha(s){
   if(crypto&&crypto.subtle){try{
     const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
@@ -1691,12 +1718,16 @@ function renderWallet(){
   const mine=DB.bets.filter(b=>b.user===u.name);
   const open=mine.filter(b=>b.status==="open"),won=mine.filter(b=>b.status==="won"),lost=mine.filter(b=>b.status==="lost");
   const staked=open.reduce((s,b)=>s+b.stake,0);
+  const unreadSet=new Set(betNotifications().map(b=>b.id));
+  const unreadHint=unreadSet.size?`<button class="bet-btn sm" id="markBetSeen" type="button">查看 ${unreadSet.size} 条新结算</button>`:"";
   w.innerHTML=`<div class="bet-wallet">
     <div class="bal">${u.balance}<small>当前余额（币）</small></div>
     <div class="bet-coins"><b>${open.length}</b> 注进行中（押 ${staked} 币）</div>
     <div class="bet-coins">战绩 <b>${won.length}</b> 胜 / <b>${lost.length}</b> 负</div>
+    ${unreadHint}
     <button class="bet-btn ghost sm" id="walletOut" style="margin-left:auto">登出（${esc(u.name)}）</button></div>`;
   document.getElementById("walletOut").addEventListener("click",()=>{setCur(null);refreshAll();});
+  document.getElementById("markBetSeen")?.addEventListener("click",()=>{markTargetSeen("betHall");renderWallet();renderNotifyBadges();});
   if(!mine.length){sl.innerHTML=`<div class="bet-empty">还没有竞猜。在下方赛程里点任意「竞猜」按钮即可开始。</div>`;return;}
   const sorted=mine.slice().sort((a,b)=>b.placedAt-a.placedAt),cutoff=Date.now()-24*60*60*1000;
   const recent=sorted.filter(b=>(b.placedAt||0)>=cutoff||b.status==="open"),old=sorted.filter(b=>(b.placedAt||0)<cutoff&&b.status!=="open");
@@ -1705,7 +1736,7 @@ function renderWallet(){
     const pickTxt=b.type==="1x2"?({h:"主胜",d:"平局",a:"客胜"})[b.pick]:`比分 ${b.pick.replace("-","–")}`;
     const net=(b.payout||0)-(b.stake||0);
     const rtxt=b.status==="open"?"进行中":b.status==="won"?`返还 ${b.payout}（净 +${net}）`:`未返还（净 -${b.stake}）`;
-    return `<div class="bet-slip"><div class="meta"><div>${esc(t)}</div><div class="bet-empty">${pickTxt} @${b.odds.toFixed(2)} · 押 ${b.stake} 币</div></div><div class="res ${b.status}">${rtxt}</div></div>`;
+    return `<div class="bet-slip ${unreadSet.has(b.id)?"unread":""}"><div class="meta"><div>${unreadSet.has(b.id)?"新结算 · ":""}${esc(t)}</div><div class="bet-empty">${pickTxt} @${b.odds.toFixed(2)} · 押 ${b.stake} 币</div></div><div class="res ${b.status}">${rtxt}</div></div>`;
   };
   sl.innerHTML=(recent.length?`<div class="bet-slips">${recent.map(slipHtml).join("")}</div>`:`<div class="bet-empty">近一天没有新的已结注单。</div>`)+
     (old.length?`<details class="bet-history"><summary>一天前记录 · ${old.length} 注</summary><div class="bet-slips">${old.map(slipHtml).join("")}</div></details>`:"");
@@ -1806,7 +1837,7 @@ function betButtonHtml(m){
   return `<div class="betline ${mine?"mine":""}"><span class="odds"><span>主 <b>${o.h.toFixed(2)}</b></span><span>平 <b>${o.d.toFixed(2)}</b></span><span>客 <b>${o.a.toFixed(2)}</b></span>${src}</span>${note}${detail}<button class="bet-btn sm" data-bet="${attr(matchId(m))}">竞猜</button></div>`;
 }
 
-function refreshAll(){applyResults();settleBets();renderLoginBar();renderWallet();renderFocusPanel();renderLeaderboard();renderStandings();updateTournamentProgress();updateResultSummary();render();emojify(document.body);}
+function refreshAll(){applyResults();settleBets();renderLoginBar();renderWallet();renderFocusPanel();renderLeaderboard();renderStandings();updateTournamentProgress();updateResultSummary();render();renderNotifyBadges();emojify(document.body);}
 
 /* ---- 事件绑定（一次）---- */
 document.getElementById("loginGo").addEventListener("click",doLogin);
