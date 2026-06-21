@@ -983,7 +983,11 @@ const STAGE_NAME={group:"小组赛",r32:"32强",r16:"16强",qf:"1/4决赛",fin:"
 const todayRome=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome"}).format(new Date()); // YYYY-MM-DD
 
 let curStage="all",curQ="";
-const expandedOldDays=new Set();
+const OLD_DAYS_KEY="wc2026_expanded_old_days",BET_HISTORY_KEY="wc2026_bet_history_open";
+const expandedOldDays=new Set(JSON.parse(sessionStorage.getItem(OLD_DAYS_KEY)||"[]"));
+let betHistoryOpen=sessionStorage.getItem(BET_HISTORY_KEY)==="1";
+function saveExpandedOldDays(){sessionStorage.setItem(OLD_DAYS_KEY,JSON.stringify([...expandedOldDays]));}
+function saveBetHistoryOpen(){sessionStorage.setItem(BET_HISTORY_KEY,betHistoryOpen?"1":"0");}
 const list=document.getElementById("list"),empty=document.getElementById("empty");
 const toTop=document.getElementById("toTop");
 
@@ -1729,7 +1733,7 @@ function renderWallet(){
   document.getElementById("walletOut").addEventListener("click",()=>{setCur(null);refreshAll();});
   document.getElementById("markBetSeen")?.addEventListener("click",()=>{markTargetSeen("betHall");renderWallet();renderNotifyBadges();});
   if(!mine.length){sl.innerHTML=`<div class="bet-empty">还没有竞猜。在下方赛程里点任意「竞猜」按钮即可开始。</div>`;return;}
-  const sorted=mine.slice().sort((a,b)=>b.placedAt-a.placedAt),cutoff=Date.now()-24*60*60*1000;
+  const sorted=mine.slice().sort((a,b)=>b.placedAt-a.placedAt),cutoff=Date.now()-2*24*60*60*1000;
   const recent=sorted.filter(b=>(b.placedAt||0)>=cutoff||b.status==="open"),old=sorted.filter(b=>(b.placedAt||0)<cutoff&&b.status!=="open");
   const slipHtml=b=>{
     const m=MID2M[b.mid],t=m?`${teamOf(m.h)?.nameZh||rawName(m.h)} vs ${teamOf(m.a)?.nameZh||rawName(m.a)}`:b.mid;
@@ -1738,8 +1742,9 @@ function renderWallet(){
     const rtxt=b.status==="open"?"进行中":b.status==="won"?`返还 ${b.payout}（净 +${net}）`:`未返还（净 -${b.stake}）`;
     return `<div class="bet-slip ${unreadSet.has(b.id)?"unread":""}"><div class="meta"><div>${unreadSet.has(b.id)?"新结算 · ":""}${esc(t)}</div><div class="bet-empty">${pickTxt} @${b.odds.toFixed(2)} · 押 ${b.stake} 币</div></div><div class="res ${b.status}">${rtxt}</div></div>`;
   };
-  sl.innerHTML=(recent.length?`<div class="bet-slips">${recent.map(slipHtml).join("")}</div>`:`<div class="bet-empty">近一天没有新的已结注单。</div>`)+
-    (old.length?`<details class="bet-history"><summary>一天前记录 · ${old.length} 注</summary><div class="bet-slips">${old.map(slipHtml).join("")}</div></details>`:"");
+  sl.innerHTML=(recent.length?`<div class="bet-slips">${recent.map(slipHtml).join("")}</div>`:`<div class="bet-empty">近两天没有新的已结注单。</div>`)+
+    (old.length?`<details class="bet-history" ${betHistoryOpen?"open":""}><summary>两天前记录 · ${old.length} 注</summary><div class="bet-slips">${old.map(slipHtml).join("")}</div></details>`:"");
+  sl.querySelector(".bet-history")?.addEventListener("toggle",e=>{betHistoryOpen=e.currentTarget.open;saveBetHistoryOpen();});
 }
 function renderLeaderboard(){
   const box=document.getElementById("leaderboard");
@@ -1854,7 +1859,7 @@ document.querySelectorAll(".bet-mask").forEach(mask=>mask.addEventListener("clic
 document.addEventListener("click",e=>{const b=e.target.closest("[data-close]");if(b)closeModal(b.dataset.close);});
 document.getElementById("list").addEventListener("click",e=>{const d=e.target.closest("[data-detail]");if(d){openMatchDetail(d.dataset.detail);return;}const b=e.target.closest("[data-bet]");if(b)openBet(b.dataset.bet);});
 document.getElementById("matchDetailBody").addEventListener("click",e=>{const b=e.target.closest("[data-bet]");if(b){closeModal("matchDetailMask");openBet(b.dataset.bet);}});
-document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-toggle-day]");if(!b)return;expandedOldDays.has(b.dataset.toggleDay)?expandedOldDays.delete(b.dataset.toggleDay):expandedOldDays.add(b.dataset.toggleDay);render();});
+document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-toggle-day]");if(!b)return;expandedOldDays.has(b.dataset.toggleDay)?expandedOldDays.delete(b.dataset.toggleDay):expandedOldDays.add(b.dataset.toggleDay);saveExpandedOldDays();render();});
 
 /* ---- 启动 ---- */
 snapshotDaily();
