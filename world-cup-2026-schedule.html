@@ -214,6 +214,17 @@ body:not(.locked) .access-gate{display:none}
 .focus-actions button,.focus-actions a{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--pitch);padding:6px 12px;font-size:12.5px;font-weight:800;text-decoration:none;font-family:var(--cjk);cursor:pointer}
 .focus-actions .primary{background:var(--pitch);border-color:var(--pitch);color:#fff}
 .focus-empty{font-size:13px;color:var(--ink-soft);line-height:1.75}
+.focus-matches{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}
+.focus-match{border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px 11px;min-width:0}
+.focus-match.hot{border-color:#F0C0B8;background:#FFF8F6}
+.focus-match .top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}
+.focus-match .when{font-family:var(--num);font-size:15px;font-weight:800;color:var(--pitch);white-space:nowrap}
+.focus-match .when small{display:block;font-family:var(--cjk);font-size:10.5px;font-weight:600;color:var(--ink-soft)}
+.focus-match .pair{display:flex;align-items:center;gap:7px;min-width:0;font-size:13px;font-weight:800}
+.focus-match .pair .team{min-width:0}
+.focus-match .pair .team .name{max-width:120px}
+.focus-match .pair .vs{font-family:var(--num);font-size:14px;color:var(--ink-soft)}
+.focus-match .meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
 .quick-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.quick-strip button{border:1px solid var(--line);background:#fff;color:var(--pitch);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;font-family:var(--cjk);cursor:pointer}.quick-strip button:hover{border-color:var(--grass)}
 .standings{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
 .stand-card{border:1px solid var(--line);border-radius:11px;background:#FCFBF7;padding:12px;min-width:0}
@@ -265,13 +276,18 @@ body:not(.locked) .access-gate{display:none}
 .rank-table .pill.host{background:#E5F4EB;color:#10663C}
 #rankingList{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .story-banner{position:relative;overflow:hidden;border-radius:14px;border:1px solid #D8E6D9;
-  background:linear-gradient(135deg,#0B3B2A 0%,#154B3B 46%,#F7F1E1 46.2%,#FFFFFF 100%);
+  background:linear-gradient(135deg,#082D21 0%,#0B3B2A 56%,#154B3B 100%);
   color:#fff;padding:22px;margin-top:8px}
-.story-banner::after{content:"";position:absolute;right:20px;top:18px;width:92px;height:92px;border-radius:50%;
-  border:2px solid rgba(11,59,42,.18);box-shadow:inset 0 0 0 18px rgba(26,161,95,.09)}
+.story-banner::after{content:"";position:absolute;right:-80px;top:-120px;width:310px;height:310px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.18);box-shadow:inset 0 0 0 42px rgba(255,255,255,.06)}
 .story-kicker{font-family:var(--num);font-size:13px;font-weight:800;letter-spacing:.16em;color:#8DE0AC;text-transform:uppercase}
 .story-banner h3{font-size:clamp(21px,4vw,34px);line-height:1.15;margin:7px 0 8px;max-width:620px}
 .story-banner p{font-size:14px;color:rgba(255,255,255,.82);max-width:620px}
+.story-photo-strip{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;max-width:720px}
+.story-photo{position:relative;overflow:hidden;border-radius:10px;border:1px solid rgba(255,255,255,.25);aspect-ratio:4/3;background:rgba(255,255,255,.08)}
+.story-photo > img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.06) contrast(1.02)}
+.story-photo span{position:absolute;left:7px;bottom:6px;border-radius:999px;background:rgba(8,45,33,.76);color:#fff;font-size:11px;font-weight:800;padding:2px 7px}
+.story-photo span img.emoji{width:1.05em;height:1.05em;vertical-align:-.16em}
 .star-strip{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;max-width:700px}
 .star-strip span{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.1);
   border-radius:999px;padding:4px 9px;font-size:12.5px;font-weight:800}
@@ -284,6 +300,8 @@ body:not(.locked) .access-gate{display:none}
 .story-card b{display:block;font-size:14px;color:var(--pitch);margin-bottom:4px}
 .story-card span{display:block;font-size:12.5px;color:var(--ink-soft);line-height:1.6}
 .story-card a{display:inline-flex;margin-top:7px;font-size:12.5px;font-weight:800;color:var(--host-blue);text-decoration:none}
+.story-source-note{font-size:11.5px;color:rgba(255,255,255,.62);margin-top:8px}
+.story-source-note a{color:#CDEFD8;text-decoration:none;font-weight:800}
 .sync-note{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .foot{max-width:1080px;margin:0 auto;padding:4px 20px 52px;text-align:center;color:var(--ink-soft)}
 .brand-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:7px;font-family:var(--num);font-weight:700;
@@ -350,9 +368,12 @@ body:not(.locked) .access-gate{display:none}
   .focus-grid{grid-template-columns:1fr 1fr;gap:8px}
   .focus-card{padding:10px}
   .focus-card .v{font-size:15px}
+  .focus-matches{grid-template-columns:1fr}
+  .focus-match .pair .team .name{max-width:140px}
   .focus-actions a,.focus-actions button{flex:1 1 45%;padding:7px 8px}
-  .story-banner{padding:18px 14px;background:linear-gradient(155deg,#0B3B2A 0%,#154B3B 68%,#FFFFFF 68.3%,#FFFFFF 100%)}
+  .story-banner{padding:18px 14px;background:linear-gradient(155deg,#082D21 0%,#0B3B2A 62%,#154B3B 100%)}
   .story-banner::after{display:none}
+  .story-photo-strip{grid-template-columns:repeat(2,1fr)}
   .star-strip span{font-size:11.5px}
   .story-grid{grid-template-columns:1fr}
   .rank-table{min-width:940px}
@@ -548,15 +569,15 @@ body:not(.locked) .access-gate{display:none}
         <button class="tab link" data-action="open-bettable">下注</button>
         <button class="tab link" data-target="betHall">我的 <span class="notify-badge" id="betNotifyBadge">0</span></button>
         <button class="tab link" data-target="betBoard">榜单</button>
-        <button class="tab link" data-target="resetNotice">公告</button>
-        <a class="tab link" href="comments.html?focus=replies">留言 <span class="notify-badge" id="commentNotifyBadge">0</span></a>
-        <a class="tab link" href="stories.html">故事</a>
         <button class="tab link" data-target="standingsPanel">小组形势</button>
+        <a class="tab link" href="stories.html">故事</a>
+        <a class="tab link" href="comments.html?focus=replies">留言 <span class="notify-badge" id="commentNotifyBadge">0</span></a>
         <button class="tab link" data-target="schedulePanel">赛程</button>
         <button class="tab link" data-target="rankings">排名</button>
         <button class="tab link" data-target="groupsPanel">小组</button>
         <button class="tab link" data-target="squadsPanel">阵容</button>
         <button class="tab link" data-target="broadcastPanel">收看</button>
+        <button class="tab link" data-target="resetNotice">规则</button>
         <button class="tab link" data-target="notesPanel">说明</button>
       </div>
     </div>
@@ -581,23 +602,6 @@ body:not(.locked) .access-gate{display:none}
 </nav>
 
 <main class="wrap">
-  <section class="panel reset-notice" id="resetNotice" aria-label="看球与竞猜说明">
-    <h2>看球与竞猜</h2>
-    <p class="lead">这里可以查看赛程、比分、榜单和留言。未登录可浏览，登录后可参与竞猜和留言互动。</p>
-    <div class="reset-grid">
-      <div class="reset-item"><b>竞猜</b><span>只开放今天和明天、且尚未开赛的比赛；开赛后停止竞猜。</span></div>
-      <div class="reset-item"><b>比分</b><span>比赛中会更新比分，确认完赛后结算竞猜并刷新榜单。</span></div>
-      <div class="reset-item"><b>留言</b><span>留言板可浏览，登录后可自由留言，并用 @球队 和 #球星 快速补充。</span></div>
-    </div>
-    <div class="reset-actions">
-      <button class="primary" type="button" data-login="1" data-target="betHall">登录 / 注册参与</button>
-      <button type="button" data-target="betBoard">查看当前榜单</button>
-      <button type="button" data-target="focusPanel">今日焦点</button>
-      <button type="button" data-action="jump-today">今天赛程</button>
-      <a href="comments.html">去留言板</a>
-    </div>
-  </section>
-
   <section class="panel focus-panel" id="focusPanel">
     <div class="focus-head">
       <h2>今日焦点</h2>
@@ -631,6 +635,13 @@ body:not(.locked) .access-gate{display:none}
       <div class="story-kicker">World Cup stories</div>
       <h3>巨星登场，故事也在场边发生</h3>
       <p>这里精选球星焦点、人文故事和 FIFA 官方动态标题快照，适合赛前预热、赛后复盘，也适合朋友间留言找话题。</p>
+      <div class="story-photo-strip" aria-label="球星照片">
+        <div class="story-photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Kylian%20Mbapp%C3%A9%202018.jpg?width=420" alt="姆巴佩"><span>🇫🇷 姆巴佩</span></div>
+        <div class="story-photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Lamine%20Yamal%20in%202025%20(cropped).jpg?width=420" alt="拉明·亚马尔"><span>🇪🇸 亚马尔</span></div>
+        <div class="story-photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Erling%20Haaland%20June%202025.jpg?width=420" alt="哈兰德"><span>🇳🇴 哈兰德</span></div>
+        <div class="story-photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Jude%20Bellingham%20Birmingham%202019.jpg?width=420" alt="贝林厄姆"><span>🏴 贝林厄姆</span></div>
+      </div>
+      <div class="story-source-note">照片来自 <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a> 可复用媒体，完整来源见故事页。</div>
       <div class="star-strip">
         <span>🇦🇷 梅西</span><span>🇫🇷 姆巴佩</span><span>🇵🇹 C罗</span><span>🇳🇴 哈兰德</span><span>🏴 贝林厄姆</span><span>🇨🇻 Ryan Mendes</span>
       </div>
@@ -673,6 +684,23 @@ body:not(.locked) .access-gate{display:none}
       <div class="bc"><b>🇨🇳 CCTV-5 · CCTV-5+ · 央视频</b><p>中国大陆：中央广播电视总台持有 2026 世界杯独家全媒体转播权；CCTV-5 直播 92 场，CCTV-5+ 并机播出小组赛末轮 12 场关键赛事，央视频/央视体育等客户端跟进。</p></div>
       <div class="bc"><b>📺 DAZN</b><p>全部 104 场比赛直播（订阅）</p></div>
       <div class="bc"><b>📡 Rai · RaiPlay</b><p>35 场免费直播，含揭幕战、半决赛与决赛</p></div>
+    </div>
+  </section>
+
+  <section class="panel reset-notice" id="resetNotice" aria-label="看球与竞猜说明">
+    <h2>看球与竞猜</h2>
+    <p class="lead">这里可以查看赛程、比分、榜单和留言。未登录可浏览，登录后可参与竞猜和留言互动。</p>
+    <div class="reset-grid">
+      <div class="reset-item"><b>竞猜</b><span>只开放今天和明天、且尚未开赛的比赛；开赛后停止竞猜。</span></div>
+      <div class="reset-item"><b>比分</b><span>比赛中会更新比分，确认完赛后结算竞猜并刷新榜单。</span></div>
+      <div class="reset-item"><b>留言</b><span>留言板可浏览，登录后可自由留言，并用 @球队 和 #球星 快速补充。</span></div>
+    </div>
+    <div class="reset-actions">
+      <button class="primary" type="button" data-login="1" data-target="betHall">登录 / 注册参与</button>
+      <button type="button" data-target="betBoard">查看当前榜单</button>
+      <button type="button" data-target="focusPanel">今日焦点</button>
+      <button type="button" data-action="jump-today">今天赛程</button>
+      <a href="comments.html">去留言板</a>
     </div>
   </section>
 
@@ -1164,7 +1192,18 @@ function renderFocusPanel(){
   const extra=awaiting.length
     ?`<div class="focus-empty">有 ${awaiting.length} 场比赛已开赛且赛果待确认，比分确认后会结算相关竞猜。</div>`
     :(lastDone?`<div class="focus-empty">最近赛果：${shortMatchName(lastDone)} ${lastDone.score||lastDone.s||""}</div>`:"");
-  box.innerHTML=`<div class="focus-grid">${cards}</div>${extra}<div class="focus-actions">
+  const nearRows=(todayTomorrow.length?todayTomorrow:M.filter(m=>matchDateKey(m)>=todayRome)).slice(0,4);
+  const near=nearRows.length?`<div class="focus-matches">${nearRows.map(m=>{
+    const score=m.score||m.s||"VS";
+    const hotCls=m.importance>=2?" hot":"";
+    const bet=bettable(m)?`<span class="tag mine">可竞猜</span>`:`<span class="tag">${importanceLabel(m)}</span>`;
+    return `<article class="focus-match${hotCls}">
+      <div class="top"><div class="when">${m.t}<small>${chinaTime(m.d,m.t)}</small></div>${statusChip(m)}</div>
+      <div class="pair">${teamHtml(m.home,m.h)}<span class="vs">${esc(score)}</span>${teamHtml(m.away,m.a)}</div>
+      <div class="meta">${bet}<span class="tag">${esc(m.g)}${m.st==="group"?" 组":""}</span></div>
+    </article>`;
+  }).join("")}</div>`:"";
+  box.innerHTML=`<div class="focus-grid">${cards}</div>${near}${extra}<div class="focus-actions">
     <button type="button" data-action="jump-today">今天赛程</button>
     <button class="primary" type="button" data-action="open-bettable">查看可竞猜</button>
     <button type="button" data-target="betHall">我的注单</button>
