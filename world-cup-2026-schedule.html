@@ -264,6 +264,26 @@ body:not(.locked) .access-gate{display:none}
 .rank-table .pill.strong{background:#E8EEF9;color:var(--host-blue)}
 .rank-table .pill.host{background:#E5F4EB;color:#10663C}
 #rankingList{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.story-banner{position:relative;overflow:hidden;border-radius:14px;border:1px solid #D8E6D9;
+  background:linear-gradient(135deg,#0B3B2A 0%,#154B3B 46%,#F7F1E1 46.2%,#FFFFFF 100%);
+  color:#fff;padding:22px;margin-top:8px}
+.story-banner::after{content:"";position:absolute;right:20px;top:18px;width:92px;height:92px;border-radius:50%;
+  border:2px solid rgba(11,59,42,.18);box-shadow:inset 0 0 0 18px rgba(26,161,95,.09)}
+.story-kicker{font-family:var(--num);font-size:13px;font-weight:800;letter-spacing:.16em;color:#8DE0AC;text-transform:uppercase}
+.story-banner h3{font-size:clamp(21px,4vw,34px);line-height:1.15;margin:7px 0 8px;max-width:620px}
+.story-banner p{font-size:14px;color:rgba(255,255,255,.82);max-width:620px}
+.star-strip{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;max-width:700px}
+.star-strip span{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.1);
+  border-radius:999px;padding:4px 9px;font-size:12.5px;font-weight:800}
+.story-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.story-actions a{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:8px 13px;
+  text-decoration:none;font-weight:800;font-size:13px;border:1px solid rgba(255,255,255,.28);color:#fff;background:rgba(255,255,255,.12)}
+.story-actions a.primary{background:#fff;color:var(--pitch);border-color:#fff}
+.story-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.story-card{border:1px solid var(--line);border-radius:10px;background:#FCFBF7;padding:12px 13px;min-width:0}
+.story-card b{display:block;font-size:14px;color:var(--pitch);margin-bottom:4px}
+.story-card span{display:block;font-size:12.5px;color:var(--ink-soft);line-height:1.6}
+.story-card a{display:inline-flex;margin-top:7px;font-size:12.5px;font-weight:800;color:var(--host-blue);text-decoration:none}
 .sync-note{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .foot{max-width:1080px;margin:0 auto;padding:4px 20px 52px;text-align:center;color:var(--ink-soft)}
 .brand-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:7px;font-family:var(--num);font-weight:700;
@@ -331,6 +351,10 @@ body:not(.locked) .access-gate{display:none}
   .focus-card{padding:10px}
   .focus-card .v{font-size:15px}
   .focus-actions a,.focus-actions button{flex:1 1 45%;padding:7px 8px}
+  .story-banner{padding:18px 14px;background:linear-gradient(155deg,#0B3B2A 0%,#154B3B 68%,#FFFFFF 68.3%,#FFFFFF 100%)}
+  .story-banner::after{display:none}
+  .star-strip span{font-size:11.5px}
+  .story-grid{grid-template-columns:1fr}
   .rank-table{min-width:940px}
   .lb{font-size:12.5px}
   .lb th,.lb td{padding:7px 6px}
@@ -526,9 +550,10 @@ body:not(.locked) .access-gate{display:none}
         <button class="tab link" data-target="betBoard">榜单</button>
         <button class="tab link" data-target="resetNotice">公告</button>
         <a class="tab link" href="comments.html?focus=replies">留言 <span class="notify-badge" id="commentNotifyBadge">0</span></a>
+        <a class="tab link" href="stories.html">故事</a>
+        <button class="tab link" data-target="standingsPanel">小组形势</button>
         <button class="tab link" data-target="schedulePanel">赛程</button>
         <button class="tab link" data-target="rankings">排名</button>
-        <button class="tab link" data-target="standingsPanel">积分</button>
         <button class="tab link" data-target="groupsPanel">小组</button>
         <button class="tab link" data-target="squadsPanel">阵容</button>
         <button class="tab link" data-target="broadcastPanel">收看</button>
@@ -594,6 +619,33 @@ body:not(.locked) .access-gate{display:none}
     <div id="leaderboard"></div>
   </section>
 
+  <section class="panel" id="standingsPanel">
+    <h2>小组形势 · 积分榜</h2>
+    <div class="rank-meta">按当前已录入完赛比分自动计算；未完赛比赛不计入积分。</div>
+    <div class="standings" id="standingsList"></div>
+  </section>
+
+  <section class="panel" id="storiesTeaser">
+    <h2>球星与 FIFA 动态</h2>
+    <div class="story-banner">
+      <div class="story-kicker">World Cup stories</div>
+      <h3>巨星登场，故事也在场边发生</h3>
+      <p>这里精选球星焦点、人文故事和 FIFA 官方动态标题快照，适合赛前预热、赛后复盘，也适合朋友间留言找话题。</p>
+      <div class="star-strip">
+        <span>🇦🇷 梅西</span><span>🇫🇷 姆巴佩</span><span>🇵🇹 C罗</span><span>🇳🇴 哈兰德</span><span>🏴 贝林厄姆</span><span>🇨🇻 Ryan Mendes</span>
+      </div>
+      <div class="story-actions">
+        <a class="primary" href="stories.html">打开故事与动态</a>
+        <a href="comments.html">去留言板聊球</a>
+      </div>
+    </div>
+    <div class="story-grid">
+      <div class="story-card"><b>球星焦点</b><span>赛前最容易点燃讨论的球员线索，兼顾传统巨星和新生代。</span><a href="stories.html#stars">查看焦点</a></div>
+      <div class="story-card"><b>人文故事</b><span>球迷、城市、志愿者、首次参赛球队和足球连接生活的正向故事。</span><a href="stories.html#human">查看故事</a></div>
+      <div class="story-card"><b>FIFA 动态</b><span>低频同步官方标题、时间、来源和链接；失败时保留旧快照。</span><a href="stories.html#news">查看动态</a></div>
+    </div>
+  </section>
+
   <section id="schedulePanel" aria-label="赛程列表">
     <div id="list"></div>
     <div class="empty" id="empty"><div class="t">⚽</div>没有找到相关比赛，换个球队名试试</div>
@@ -603,12 +655,6 @@ body:not(.locked) .access-gate{display:none}
     <h2>FIFA 世界排名</h2>
     <div class="rank-meta">FIFA/Coca-Cola 男足世界排名 · 2026-06-11 更新 · 下次官方更新 2026-07-20 · 教练与当家球星为页面静态快照</div>
     <div id="rankingList"></div>
-  </section>
-
-  <section class="panel" id="standingsPanel">
-    <h2>小组积分</h2>
-    <div class="rank-meta">按当前已录入完赛比分自动计算；未完赛比赛不计入积分。</div>
-    <div class="standings" id="standingsList"></div>
   </section>
 
   <section class="panel" id="groupsPanel">
@@ -636,6 +682,7 @@ body:not(.locked) .access-gate{display:none}
       <div class="status-card"><b>赛果进度</b><span id="resultSummary">页面打开后自动读取最新比分和进度。</span></div>
       <div class="status-card"><b>竞猜开放</b><span>仅开放今天和明天、且尚未开赛的比赛；开赛即停止，完赛后结算。</span></div>
       <div class="status-card"><b>留言互动</b><span>未登录可浏览留言；登录后可自由发布或回复，支持 @球队 与 #球星。</span></div>
+      <div class="status-card"><b>球星动态</b><span>球星与人文故事为人工精选；FIFA 动态只同步官方标题、时间、来源和链接。</span></div>
       <div class="status-card"><b>排名来源</b><span>FIFA 男足世界排名官方更新时间：2026年6月11日；下一次：2026年7月20日。</span></div>
     </div>
     <div class="notes">
@@ -643,7 +690,8 @@ body:not(.locked) .access-gate{display:none}
       ② 小组赛每组前 2 名 + 8 个成绩最好的小组第 3 名晋级 32 强；淘汰赛平局进入加时和点球。<br>
       ③ 竞猜只供朋友间娱乐，无真实货币；开赛后停止竞猜，完赛确认比分后结算。<br>
       ④ 留言板支持自由输入，并可追加 @球队 与 #球星 标签，请友善互动。<br>
-      ⑤ 赛程、排名、阵容和收看信息以官方及公开来源为准，页面会尽量保持比分和榜单为最新状态。
+      ⑤ 球星故事为精选摘要，FIFA 动态仅展示标题链接快照，不转载全文或图片。<br>
+      ⑥ 赛程、排名、阵容和收看信息以官方及公开来源为准，页面会尽量保持比分和榜单为最新状态。
     </div>
   </section>
 </main>
