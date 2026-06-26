@@ -283,9 +283,9 @@ body:not(.locked) .access-gate{display:none}
 .story-kicker{font-family:var(--num);font-size:13px;font-weight:800;letter-spacing:.16em;color:#8DE0AC;text-transform:uppercase}
 .story-banner h3{font-size:clamp(21px,4vw,34px);line-height:1.15;margin:7px 0 8px;max-width:620px}
 .story-banner p{font-size:14px;color:rgba(255,255,255,.82);max-width:620px}
-.story-photo-strip{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;max-width:720px}
-.story-photo{position:relative;overflow:hidden;border-radius:10px;border:1px solid rgba(255,255,255,.25);aspect-ratio:4/3;background:rgba(255,255,255,.08)}
-.story-photo > img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.06) contrast(1.02)}
+.story-photo-strip{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,120px));gap:8px;margin-top:16px;max-width:560px}
+.story-photo{position:relative;overflow:hidden;border-radius:10px;border:1px solid rgba(255,255,255,.25);aspect-ratio:4/5;background:rgba(255,255,255,.08)}
+.story-photo > img{width:100%;height:100%;object-fit:contain;display:block;filter:saturate(1.06) contrast(1.02);background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04))}
 .story-photo span{position:absolute;left:7px;bottom:6px;border-radius:999px;background:rgba(8,45,33,.76);color:#fff;font-size:11px;font-weight:800;padding:2px 7px}
 .story-photo span img.emoji{width:1.05em;height:1.05em;vertical-align:-.16em}
 .star-strip{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;max-width:700px}
@@ -569,16 +569,14 @@ body:not(.locked) .access-gate{display:none}
         <button class="tab link" data-action="open-bettable">下注</button>
         <button class="tab link" data-target="betHall">我的 <span class="notify-badge" id="betNotifyBadge">0</span></button>
         <button class="tab link" data-target="betBoard">榜单</button>
-        <button class="tab link" data-target="standingsPanel">小组形势</button>
-        <a class="tab link" href="stories.html">故事</a>
+        <button class="tab link" data-target="standingsPanel">小组积分</button>
+        <a class="tab link" href="stories.html">专题</a>
         <a class="tab link" href="comments.html?focus=replies">留言 <span class="notify-badge" id="commentNotifyBadge">0</span></a>
         <button class="tab link" data-target="schedulePanel">赛程</button>
         <button class="tab link" data-target="rankings">排名</button>
         <button class="tab link" data-target="groupsPanel">小组</button>
         <button class="tab link" data-target="squadsPanel">阵容</button>
-        <button class="tab link" data-target="broadcastPanel">收看</button>
-        <button class="tab link" data-target="resetNotice">规则</button>
-        <button class="tab link" data-target="notesPanel">说明</button>
+        <button class="tab link" data-target="infoPanel">信息</button>
       </div>
     </div>
     <div class="nav-group">
@@ -624,17 +622,17 @@ body:not(.locked) .access-gate{display:none}
   </section>
 
   <section class="panel" id="standingsPanel">
-    <h2>小组形势 · 积分榜</h2>
+    <h2>小组积分</h2>
     <div class="rank-meta">按当前已录入完赛比分自动计算；未完赛比赛不计入积分。</div>
     <div class="standings" id="standingsList"></div>
   </section>
 
   <section class="panel" id="storiesTeaser">
-    <h2>球星与 FIFA 动态</h2>
+    <h2>球星专题与 FIFA 动态</h2>
     <div class="story-banner">
       <div class="story-kicker">World Cup stories</div>
-      <h3>巨星登场，故事也在场边发生</h3>
-      <p>这里精选球星焦点、人文故事和 FIFA 官方动态标题快照，适合赛前预热、赛后复盘，也适合朋友间留言找话题。</p>
+      <h3>巨星登场，专题也在场边发生</h3>
+      <p>这里精选球星专题、人文纪事和 FIFA 官方动态标题快照，适合赛前预热、赛后复盘，也适合朋友间留言找话题。</p>
       <div class="story-photo-strip" aria-label="球星照片">
         <div class="story-photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Kylian%20Mbapp%C3%A9%202018.jpg?width=420" alt="姆巴佩"><span>🇫🇷 姆巴佩</span></div>
         <div class="story-photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Lamine%20Yamal%20in%202025%20(cropped).jpg?width=420" alt="拉明·亚马尔"><span>🇪🇸 亚马尔</span></div>
@@ -646,13 +644,13 @@ body:not(.locked) .access-gate{display:none}
         <span>🇦🇷 梅西</span><span>🇫🇷 姆巴佩</span><span>🇵🇹 C罗</span><span>🇳🇴 哈兰德</span><span>🏴 贝林厄姆</span><span>🇨🇻 Ryan Mendes</span>
       </div>
       <div class="story-actions">
-        <a class="primary" href="stories.html">打开故事与动态</a>
+        <a class="primary" href="stories.html">打开专题页</a>
         <a href="comments.html">去留言板聊球</a>
       </div>
     </div>
     <div class="story-grid">
-      <div class="story-card"><b>球星焦点</b><span>赛前最容易点燃讨论的球员线索，兼顾传统巨星和新生代。</span><a href="stories.html#stars">查看焦点</a></div>
-      <div class="story-card"><b>人文故事</b><span>球迷、城市、志愿者、首次参赛球队和足球连接生活的正向故事。</span><a href="stories.html#human">查看故事</a></div>
+      <div class="story-card"><b>球星专题</b><span>赛前最容易点燃讨论的球员线索，兼顾传统巨星和新生代。</span><a href="stories.html#stars">查看专题</a></div>
+      <div class="story-card"><b>人文纪事</b><span>球迷、城市、志愿者、首次参赛球队和足球连接生活的正向故事。</span><a href="stories.html#human">查看纪事</a></div>
       <div class="story-card"><b>FIFA 动态</b><span>低频同步官方标题、时间、来源和链接；失败时保留旧快照。</span><a href="stories.html#news">查看动态</a></div>
     </div>
   </section>
@@ -678,47 +676,33 @@ body:not(.locked) .access-gate{display:none}
     <div class="squads" id="squads"></div>
   </section>
 
-  <section class="panel" id="broadcastPanel">
-    <h2>收看渠道</h2>
+  <section class="panel" id="infoPanel">
+    <h2>观赛信息</h2>
     <div class="bcast">
       <div class="bc"><b>🇨🇳 CCTV-5 · CCTV-5+ · 央视频</b><p>中国大陆：中央广播电视总台持有 2026 世界杯独家全媒体转播权；CCTV-5 直播 92 场，CCTV-5+ 并机播出小组赛末轮 12 场关键赛事，央视频/央视体育等客户端跟进。</p></div>
       <div class="bc"><b>📺 DAZN</b><p>全部 104 场比赛直播（订阅）</p></div>
       <div class="bc"><b>📡 Rai · RaiPlay</b><p>35 场免费直播，含揭幕战、半决赛与决赛</p></div>
     </div>
-  </section>
 
-  <section class="panel reset-notice" id="resetNotice" aria-label="看球与竞猜说明">
-    <h2>看球与竞猜</h2>
-    <p class="lead">这里可以查看赛程、比分、榜单和留言。未登录可浏览，登录后可参与竞猜和留言互动。</p>
-    <div class="reset-grid">
-      <div class="reset-item"><b>竞猜</b><span>只开放今天和明天、且尚未开赛的比赛；开赛后停止竞猜。</span></div>
-      <div class="reset-item"><b>比分</b><span>比赛中会更新比分，确认完赛后结算竞猜并刷新榜单。</span></div>
-      <div class="reset-item"><b>留言</b><span>留言板可浏览，登录后可自由留言，并用 @球队 和 #球星 快速补充。</span></div>
-    </div>
-    <div class="reset-actions">
-      <button class="primary" type="button" data-login="1" data-target="betHall">登录 / 注册参与</button>
-      <button type="button" data-target="betBoard">查看当前榜单</button>
-      <button type="button" data-target="focusPanel">今日焦点</button>
-      <button type="button" data-action="jump-today">今天赛程</button>
-      <a href="comments.html">去留言板</a>
-    </div>
-  </section>
-
-  <section class="panel" id="notesPanel">
-    <h2>说明</h2>
     <div class="status-grid">
       <div class="status-card"><b>赛果进度</b><span id="resultSummary">页面打开后自动读取最新比分和进度。</span></div>
       <div class="status-card"><b>竞猜开放</b><span>仅开放今天和明天、且尚未开赛的比赛；开赛即停止，完赛后结算。</span></div>
       <div class="status-card"><b>留言互动</b><span>未登录可浏览留言；登录后可自由发布或回复，支持 @球队 与 #球星。</span></div>
-      <div class="status-card"><b>球星动态</b><span>球星与人文故事为人工精选；FIFA 动态只同步官方标题、时间、来源和链接。</span></div>
+      <div class="status-card"><b>专题动态</b><span>球星专题与人文纪事为人工精选；FIFA 动态只同步官方标题、时间、来源和链接。</span></div>
       <div class="status-card"><b>排名来源</b><span>FIFA 男足世界排名官方更新时间：2026年6月11日；下一次：2026年7月20日。</span></div>
+    </div>
+    <div class="reset-actions">
+      <button class="primary" type="button" data-login="1" data-target="betHall">登录 / 注册参与</button>
+      <button type="button" data-target="betBoard">查看当前榜单</button>
+      <button type="button" data-action="jump-today">今天赛程</button>
+      <a href="comments.html">去留言板</a>
     </div>
     <div class="notes">
       ① 主时间为意大利时间 CEST，中国时间会在每场比赛旁自动标注。<br>
       ② 小组赛每组前 2 名 + 8 个成绩最好的小组第 3 名晋级 32 强；淘汰赛平局进入加时和点球。<br>
       ③ 竞猜只供朋友间娱乐，无真实货币；开赛后停止竞猜，完赛确认比分后结算。<br>
       ④ 留言板支持自由输入，并可追加 @球队 与 #球星 标签，请友善互动。<br>
-      ⑤ 球星故事为精选摘要，FIFA 动态仅展示标题链接快照，不转载全文或图片。<br>
+      ⑤ 球星专题为精选摘要，FIFA 动态仅展示标题链接快照，不转载全文或图片。<br>
       ⑥ 赛程、排名、阵容和收看信息以官方及公开来源为准，页面会尽量保持比分和榜单为最新状态。
     </div>
   </section>
@@ -1192,7 +1176,21 @@ function renderFocusPanel(){
   const extra=awaiting.length
     ?`<div class="focus-empty">有 ${awaiting.length} 场比赛已开赛且赛果待确认，比分确认后会结算相关竞猜。</div>`
     :(lastDone?`<div class="focus-empty">最近赛果：${shortMatchName(lastDone)} ${lastDone.score||lastDone.s||""}</div>`:"");
-  const nearRows=(todayTomorrow.length?todayTomorrow:M.filter(m=>matchDateKey(m)>=todayRome)).slice(0,4);
+  const upcomingPool=M.filter(m=>matchDateKey(m)>=todayRome&&matchLiveState(m)!=="done");
+  const focusPool=[
+    ...todayTomorrow.filter(m=>matchLiveState(m)!=="done"),
+    ...upcomingPool
+  ];
+  const seenNear=new Set();
+  const nearRows=focusPool.filter(m=>{
+    const id=matchId(m);
+    if(seenNear.has(id))return false;
+    seenNear.add(id);
+    return true;
+  }).sort((a,b)=>{
+    const weight=m=>matchLiveState(m)==="live"?0:(bettable(m)?1:(matchDateKey(m)===todayRome?2:(m.importance>=2?3:4)));
+    return weight(a)-weight(b)||matchDateKey(a).localeCompare(matchDateKey(b))||a.t.localeCompare(b.t);
+  }).slice(0,4);
   const near=nearRows.length?`<div class="focus-matches">${nearRows.map(m=>{
     const score=m.score||m.s||"VS";
     const hotCls=m.importance>=2?" hot":"";
@@ -1311,7 +1309,7 @@ document.addEventListener("click",e=>{
   const target=e.target.closest(".focus-actions [data-target]");
   if(target){markTargetSeen(target.dataset.target);if(target.dataset.target==="betHall")renderWallet();renderNotifyBadges();document.getElementById(target.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});}
 });
-document.getElementById("resetNotice")?.addEventListener("click",e=>{
+document.getElementById("infoPanel")?.addEventListener("click",e=>{
   const b=e.target.closest("[data-target]");if(!b)return;
   markTargetSeen(b.dataset.target);if(b.dataset.target==="betHall")renderWallet();renderNotifyBadges();
   document.getElementById(b.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});
