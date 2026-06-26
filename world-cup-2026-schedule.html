@@ -34,7 +34,7 @@ html{scroll-behavior:smooth}
 body{font-family:var(--cjk);background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
 img.emoji{width:1.15em;height:1.15em;margin:0 .04em;vertical-align:-.18em}
 body.locked{overflow:hidden}
-body.locked header,body.locked nav,body.locked main,body.locked footer,body.locked .to-top,body.locked .bet-mask{display:none!important}
+body.locked header,body.locked nav,body.locked main,body.locked footer,body.locked .to-top,body.locked .prank-ball,body.locked .ball-fx,body.locked .bet-mask{display:none!important}
 
 .access-gate{position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,var(--pitch),var(--pitch-2));
   color:var(--chalk);display:grid;place-items:center;padding:22px}
@@ -347,9 +347,42 @@ body:not(.locked) .access-gate{display:none}
 .to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
 .to-top:hover{background:var(--host-blue)}
 .to-top:focus-visible{outline:3px solid var(--grass);outline-offset:3px}
+.prank-ball{position:fixed;left:0;top:0;z-index:36;width:54px;height:54px;border:0;border-radius:50%;
+  background:transparent;padding:0;cursor:grab;touch-action:none;filter:drop-shadow(0 9px 16px rgba(11,59,42,.24));
+  transform:translate3d(calc(100vw - 96px),calc(100vh - 154px),0);will-change:transform}
+.prank-ball:active{cursor:grabbing}
+.prank-ball:focus-visible{outline:3px solid #FFD56A;outline-offset:5px}
+.ball-art{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:
+  radial-gradient(circle at 36% 28%,rgba(255,255,255,.95),rgba(255,255,255,.05) 18%,transparent 26%),
+  radial-gradient(circle at center,#fff 0 57%,#E9E4D6 76%,#CFC8B8 100%);
+  box-shadow:inset -8px -9px 14px rgba(11,59,42,.18),inset 5px 5px 9px rgba(255,255,255,.85)}
+.ball-art::before{content:"";position:absolute;left:18px;top:15px;width:18px;height:17px;background:#171915;
+  clip-path:polygon(50% 0,100% 36%,82% 100%,18% 100%,0 36%);box-shadow:
+  -17px 3px 0 -5px #171915,17px 3px 0 -5px #171915,0 20px 0 -5px #171915}
+.ball-art::after{content:"";position:absolute;inset:7px;border-radius:50%;
+  background:conic-gradient(from 28deg,transparent 0 14%,#C8372D 14% 18%,transparent 18% 38%,#1F4FA0 38% 42%,transparent 42% 68%,#1AA15F 68% 72%,transparent 72% 100%);
+  opacity:.86;mix-blend-mode:multiply}
+.prank-ball.grabbed .ball-art{animation:ballSquirm .18s infinite alternate}
+.prank-ball.zoom .ball-art{animation:ballZoom .5s ease both}
+.prank-ball.dizzy .ball-art{animation:ballDizzy .62s ease both}
+.prank-ball.flat .ball-art{animation:ballFlat .48s ease both}
+.ball-bubble{position:absolute;right:48px;top:-14px;max-width:150px;min-width:max-content;border:1px solid var(--line);
+  border-radius:999px;background:#fff;color:var(--pitch);padding:5px 10px;font-size:12px;font-weight:800;
+  box-shadow:0 10px 24px rgba(11,59,42,.14);opacity:0;transform:translateY(5px) scale(.95);
+  pointer-events:none;transition:opacity .16s,transform .16s}
+.ball-bubble.show{opacity:1;transform:translateY(0) scale(1)}
+.ball-fx{position:fixed;left:0;top:0;z-index:35;pointer-events:none}
+.ball-pop{position:fixed;width:8px;height:8px;border-radius:50%;background:var(--grass);
+  animation:ballPop .58s ease-out forwards;will-change:transform,opacity}
+.ball-pop.red{background:var(--host-red)}.ball-pop.blue{background:var(--host-blue)}.ball-pop.gold{background:#FFD56A}
+@keyframes ballSquirm{from{transform:rotate(-8deg) scale(1.04,.94)}to{transform:rotate(9deg) scale(.94,1.04)}}
+@keyframes ballZoom{0%{transform:scale(1)}45%{transform:scale(1.48)}100%{transform:scale(1)}}
+@keyframes ballDizzy{0%{transform:rotate(0) scale(1)}55%{transform:rotate(540deg) scale(.92)}100%{transform:rotate(720deg) scale(1)}}
+@keyframes ballFlat{0%{transform:scale(1)}45%{transform:scale(1.28,.55)}100%{transform:scale(1)}}
+@keyframes ballPop{to{transform:translate(var(--dx),var(--dy)) scale(.25);opacity:0}}
 
 @media print{
-  .toolbar,.hero::before,.hero::after,.to-top{display:none}
+  .toolbar,.hero::before,.hero::after,.to-top,.prank-ball,.ball-fx{display:none}
   .hero{background:var(--pitch)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .m{break-inside:avoid}
 }
@@ -358,6 +391,9 @@ body:not(.locked) .access-gate{display:none}
   .hero-in{padding:34px 16px 24px}
   .stats{gap:18px}
   .stat .n{font-size:27px}
+  .prank-ball{width:46px;height:46px}
+  .ball-bubble{right:42px;top:-12px;max-width:128px;font-size:11.5px}
+  .ball-art::before{left:15px;top:13px;width:16px;height:15px;box-shadow:-14px 3px 0 -5px #171915,14px 3px 0 -5px #171915,0 17px 0 -5px #171915}
   .update-strip{padding:11px 12px}
   .update-head{align-items:flex-start}
   .update-list li{grid-template-columns:1fr;gap:2px}
@@ -550,6 +586,9 @@ body:not(.locked) .access-gate{display:none}
 @media(max-width:420px){
   .focus-grid,.leader-insights{grid-template-columns:1fr}
 }
+@media (prefers-reduced-motion: reduce){
+  .prank-ball,.ball-art,.ball-pop{animation:none!important;transition:none!important}
+}
 </style>
 </head>
 <body class="locked">
@@ -589,13 +628,14 @@ body:not(.locked) .access-gate{display:none}
     <section class="update-strip" aria-label="网站最新更新">
       <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
       <ol class="update-list">
+        <li><time datetime="2026-06-26T23:43+02:00">06/26 23:43</time><div class="txt"><span class="taggy">彩蛋</span>新增一只会乱跑的世界杯气氛足球，点击、拖拽都有小反应。</div></li>
         <li><time datetime="2026-06-26T23:34+02:00">06/26 23:34</time><div class="txt"><span class="taggy">竞猜</span>正确比分优先采用真实赔率快照；缺少快照的比分暂不开放下注。</div></li>
         <li><time datetime="2026-06-26T23:14+02:00">06/26 23:14</time><div class="txt"><span class="taggy">比分</span>可选比分数量扩展，覆盖更多常见赛果。</div></li>
-        <li><time datetime="2026-06-26T10:09+02:00">06/26 10:09</time><div class="txt"><span class="taggy">首页</span>焦点、竞猜、榜单与小组积分顺序重新整理，更快找到关心内容。</div></li>
       </ol>
       <details class="update-more">
         <summary>查看更早更新</summary>
         <ol class="update-list">
+          <li><time datetime="2026-06-26T10:09+02:00">06/26 10:09</time><div class="txt"><span class="taggy">首页</span>焦点、竞猜、榜单与小组积分顺序重新整理，更快找到关心内容。</div></li>
           <li><time datetime="2026-06-26T09:45+02:00">06/26 09:45</time><div class="txt"><span class="taggy">信息</span>压缩观赛、规则和说明内容，页面更适合快速浏览。</div></li>
           <li><time datetime="2026-06-25T18:33+02:00">06/25 18:33</time><div class="txt"><span class="taggy">专题</span>优化球星与 FIFA 动态视觉，补充可复用球星缩略图。</div></li>
           <li><time datetime="2026-06-25T18:07+02:00">06/25 18:07</time><div class="txt"><span class="taggy">故事</span>新增球星专题、人文纪事和 FIFA 动态入口。</div></li>
@@ -810,6 +850,11 @@ body:not(.locked) .access-gate{display:none}
   <div class="fine">数据依据 FIFA 官方赛程、比分、球队与阵容页面 · 静态整理于 2026-06-12 20:30 Europe/Rome · 主时间为意大利时间，附中国时间</div>
 </footer>
 <button class="to-top" id="toTop" type="button" aria-label="回到顶部" title="回到顶部">↑</button>
+<button class="prank-ball" id="prankBall" type="button" aria-label="捣蛋足球" title="点我试试">
+  <span class="ball-art" aria-hidden="true"></span>
+  <span class="ball-bubble" id="ballBubble" aria-hidden="true"></span>
+</button>
+<div class="ball-fx" id="ballFx" aria-hidden="true"></div>
 
 <script>
 const ACCESS_PASSWORD="fifa2026";
@@ -2084,10 +2129,114 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-close]");i
 document.getElementById("list").addEventListener("click",e=>{const d=e.target.closest("[data-detail]");if(d){openMatchDetail(d.dataset.detail);return;}const b=e.target.closest("[data-bet]");if(b)openBet(b.dataset.bet);});
 document.getElementById("matchDetailBody").addEventListener("click",e=>{const b=e.target.closest("[data-bet]");if(b){closeModal("matchDetailMask");openBet(b.dataset.bet);}});
 document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-toggle-day]");if(!b)return;expandedOldDays.has(b.dataset.toggleDay)?expandedOldDays.delete(b.dataset.toggleDay):expandedOldDays.add(b.dataset.toggleDay);saveExpandedOldDays();render();});
+function initPrankBall(){
+  const ball=document.getElementById("prankBall"),bubble=document.getElementById("ballBubble"),fx=document.getElementById("ballFx");
+  if(!ball||ball.dataset.ready)return;
+  ball.dataset.ready="1";
+  const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  const lines=["VAR 正在看你","别点了，我还没热身","这球我来罚","被揪住了！","今晚押几比几？","Zoom!","我躲一下","草皮烫脚"];
+  let x=0,y=0,vx=.07,vy=.055,rot=0,last=0,grabbed=false,hovering=false,moved=false,downX=0,downY=0,offsetX=0,offsetY=0,bubbleTimer=0,hideTimer=0;
+  const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
+  const size=()=>ball.offsetWidth||54;
+  function bounds(){
+    const s=size();
+    return {minX:12,minY:76,maxX:Math.max(12,innerWidth-s-12),maxY:Math.max(84,innerHeight-s-82)};
+  }
+  function place(){
+    ball.style.transform=`translate3d(${Math.round(x)}px,${Math.round(y)}px,0) rotate(${Math.round(rot)}deg)`;
+  }
+  function say(text){
+    bubble.textContent=text;
+    bubble.classList.add("show");
+    clearTimeout(bubbleTimer);
+    bubbleTimer=setTimeout(()=>bubble.classList.remove("show"),1500);
+  }
+  function pop(){
+    const cx=x+size()/2,cy=y+size()/2,colors=["red","blue","gold",""];
+    for(let i=0;i<14;i++){
+      const p=document.createElement("span");
+      p.className=`ball-pop ${colors[i%colors.length]}`;
+      const a=Math.random()*Math.PI*2,d=28+Math.random()*52;
+      p.style.left=`${cx}px`;p.style.top=`${cy}px`;
+      p.style.setProperty("--dx",`${Math.cos(a)*d}px`);
+      p.style.setProperty("--dy",`${Math.sin(a)*d}px`);
+      fx.appendChild(p);
+      setTimeout(()=>p.remove(),650);
+    }
+  }
+  function play(cls){
+    ball.classList.remove("zoom","dizzy","flat");
+    void ball.offsetWidth;
+    ball.classList.add(cls);
+    setTimeout(()=>ball.classList.remove(cls),700);
+  }
+  function kick(power=1){
+    const b=bounds();
+    vx=(Math.random()>.5?1:-1)*(.09+Math.random()*.08)*power;
+    vy=(Math.random()>.5?1:-1)*(.07+Math.random()*.08)*power;
+    x=clamp(x,b.minX,b.maxX);y=clamp(y,b.minY,b.maxY);
+  }
+  function prank(){
+    const n=Math.floor(Math.random()*5);
+    say(lines[Math.floor(Math.random()*lines.length)]);
+    if(n===0){pop();play("dizzy");}
+    else if(n===1){play("zoom");}
+    else if(n===2){play("flat");}
+    else if(n===3){pop();kick(1.8);}
+    else{ball.style.opacity=".18";say("我隐身三秒");clearTimeout(hideTimer);hideTimer=setTimeout(()=>{ball.style.opacity="1";say("又回来了");},3000);}
+  }
+  function tick(ts){
+    if(!last)last=ts;
+    const dt=Math.min(32,ts-last);last=ts;
+    if(!grabbed&&!hovering&&!reduce){
+      const b=bounds();
+      x+=vx*dt;y+=vy*dt;rot+=vx*dt*3;
+      if(x<=b.minX||x>=b.maxX){vx*=-1;x=clamp(x,b.minX,b.maxX);}
+      if(y<=b.minY||y>=b.maxY){vy*=-1;y=clamp(y,b.minY,b.maxY);}
+    }
+    place();
+    requestAnimationFrame(tick);
+  }
+  const b=bounds();
+  x=clamp(innerWidth-size()-96,b.minX,b.maxX);
+  y=clamp(innerHeight-size()-154,b.minY,b.maxY);
+  if(reduce){place();say("点我试试");}
+  else requestAnimationFrame(tick);
+  window.addEventListener("resize",()=>{const b=bounds();x=clamp(x,b.minX,b.maxX);y=clamp(y,b.minY,b.maxY);place();});
+  ball.addEventListener("pointerdown",e=>{
+    if(e.button!=null&&e.button!==0)return;
+    grabbed=true;moved=false;downX=e.clientX;downY=e.clientY;
+    offsetX=e.clientX-x;offsetY=e.clientY-y;
+    ball.setPointerCapture?.(e.pointerId);
+    ball.classList.add("grabbed");
+    say("被揪住了！");
+  });
+  ball.addEventListener("pointerenter",()=>{hovering=true;});
+  ball.addEventListener("pointerleave",()=>{hovering=false;});
+  ball.addEventListener("pointermove",e=>{
+    if(!grabbed)return;
+    const b=bounds();
+    if(Math.hypot(e.clientX-downX,e.clientY-downY)>5)moved=true;
+    x=clamp(e.clientX-offsetX,b.minX,b.maxX);
+    y=clamp(e.clientY-offsetY,b.minY,b.maxY);
+    rot+=2;place();
+  });
+  function release(e){
+    if(!grabbed)return;
+    grabbed=false;ball.classList.remove("grabbed");
+    ball.releasePointerCapture?.(e.pointerId);
+    if(moved){say("松手！开大脚！");kick(2.2);pop();}
+  }
+  ball.addEventListener("pointerup",release);
+  ball.addEventListener("pointercancel",release);
+  ball.addEventListener("click",e=>{if(moved){moved=false;return;}prank();kick(1.25);});
+  ball.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();prank();kick(1.25);}});
+}
 
 /* ---- 启动 ---- */
 snapshotDaily();
 initRemoteSync();
+initPrankBall();
 refreshAll();
 </script>
 </body>
