@@ -1457,7 +1457,7 @@ function renderStandings(){
     ?`<details class="standings-fold"><summary>查看小组赛最终积分</summary><div class="standings">${grid}</div></details>`
     :`<div class="standings">${grid}</div>`;
 }
-const HOST_ADV=70, BASE_TOTAL=2.65, ELO_PER_GOAL=130, MARGIN=0.94, GRID=7;
+const HOST_ADV=70, BASE_TOTAL=2.65, ELO_PER_GOAL=130, MARGIN=0.94, GRID=7, SCORE_PICK_COUNT=24;
 function ratingOf(nameZh){return 2120-150*Math.log(FIFA_RANK[nameZh]||90);}
 const BOOK_ODDS_UPDATED="2026-06-12 20:20 Europe/Rome";
 const BOOK_ODDS_SOURCE="Pinnacle";
@@ -1785,7 +1785,7 @@ function buildPicks(){
     box.innerHTML=opts.map(([k,lab,od])=>`<button class="bet-pick" data-pick="${k}" data-odds="${od}"><div class="pk">${esc(lab)}</div><div class="od">${od.toFixed(2)}</div></button>`).join("");
   }else{
     box.className="bet-picks scores";
-    box.innerHTML=topScoreOdds(m,12).map(o=>`<button class="bet-pick" data-pick="${o.s}" data-odds="${o.odds}"><div class="pk">${o.s.replace("-","–")}</div><div class="od">${o.odds.toFixed(2)}</div></button>`).join("");
+    box.innerHTML=topScoreOdds(m,SCORE_PICK_COUNT).map(o=>`<button class="bet-pick" data-pick="${o.s}" data-odds="${o.odds}"><div class="pk">${o.s.replace("-","–")}</div><div class="od">${o.odds.toFixed(2)}</div></button>`).join("");
   }
   slip.pick=null;slip.odds=0;updatePayout();
 }
