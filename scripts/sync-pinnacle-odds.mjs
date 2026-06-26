@@ -12,6 +12,8 @@ const FORCE_ALL = process.env.FORCE_ALL === "1";
 const FORCE_SYNC = process.env.ODDS_FORCE_SYNC === "1" || process.env.ODDS_FORCE_SYNC === "true" || FORCE_ALL;
 const ALLOW_MATCHUPS_PARSE = process.env.PINNACLE_ALLOW_MATCHUPS_PARSE === "1";
 const ESPN_ODDS_BACKUP = process.env.ESPN_ODDS_BACKUP !== "0";
+const SCORE_ODDS_SYNC = process.env.SCORE_ODDS_SYNC !== "0";
+const SCORE_GRID = Number(process.env.SCORE_GRID || 7);
 
 const PINNACLE_MATCHUPS_URLS = [
   "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/",
@@ -224,6 +226,45 @@ function parseOddsFromText(text, m){
   }
   return null;
 }
+function normalizeScoreKey(value){
+  const m = String(value || "").trim().match(/^(\d+)\s*[-–:]\s*(\d+)$/);
+  if(!m)return "";
+  const h = Number(m[1]), a = Number(m[2]);
+  if(!Number.isInteger(h) || !Number.isInteger(a) || h < 0 || a < 0 || h > SCORE_GRID || a > SCORE_GRID)return "";
+  return `${h}-${a}`;
+}
+function setScorePrice(scores, key, price){
+  const score = normalizeScoreKey(key);
+  const odds = Number(price);
+  if(score && odds > 1.01 && odds <= 500)scores[score] = Math.round(odds * 1000) / 1000;
+}
+function parseCorrectScoreOddsFromText(text, m){
+  if(!SCORE_ODDS_SYNC)return null;
+  const clean = String(text || "").replace(/\s+/g," ");
+  const n = norm(clean);
+  const markers = ["correct score","exact score","score betting","correct-score","比分"];
+  const markerIndexes = markers.map(x => n.indexOf(x)).filter(i => i >= 0);
+  if(!markerIndexes.length)return null;
+  const home = rawName(m.h), away = rawName(m.a);
+  if(!candidateNames(home).some(name => n.includes(name)) || !candidateNames(away).some(name => n.includes(name)))return null;
+  const scores = {};
+  for(const marker of markerIndexes){
+    const start = Math.max(0, marker - 500);
+    const window = clean.slice(start, Math.min(clean.length, marker + 8000));
+    for(const rx of [
+      /\b([0-7])\s*[-–:]\s*([0-7])\b[^\d.]{0,80}\b(\d{1,3}\.\d{2,3})\b/g,
+      /\b(\d{1,3}\.\d{2,3})\b[^\d.]{0,80}\b([0-7])\s*[-–:]\s*([0-7])\b/g
+    ]){
+      let hit;
+      while((hit = rx.exec(window))){
+        if(hit[1].includes("."))setScorePrice(scores, `${hit[2]}-${hit[3]}`, hit[1]);
+        else setScorePrice(scores, `${hit[1]}-${hit[2]}`, hit[3]);
+      }
+    }
+  }
+  if(Object.keys(scores).length < 4)return null;
+  return {scores, market:"Correct Score"};
+}
 async function loadPageTexts(urls){
   const texts = [];
   for(const url of urls){
@@ -285,6 +326,8 @@ console.log(`Bookmaker odds candidate matches: ${candidates.length}`);
 const state = await loadState();
 state.odds ||= {};
 state.oddsSync ||= {};
+state.scoreOdds ||= {};
+state.scoreOddsSync ||= {};
 
 const plan = shouldFetchOdds(state, candidates);
 console.log(`Odds sync plan: ${plan.shouldFetch ? "fetch" : "skip"} (${plan.tier}, every ${plan.minutes}m, ${plan.reason})`);
@@ -324,6 +367,8 @@ if(PLAN_ONLY || !plan.shouldFetch){
   let pruned = 0;
   let espnUpdated = 0;
   let pinnacleUpdated = 0;
+  let scoreUpdated = 0;
+  let scoreChecked = 0;
   const warnings = [];
   const checkedAt = new Date().toISOString();
 
@@ -347,6 +392,23 @@ if(PLAN_ONLY || !plan.shouldFetch){
       if(odds){
         found = {...odds, source:"Pinnacle", url:page.url, updatedAt:checkedAt, market:"1X2"};
         break;
+      }
+    }
+    const directPage = direct ? pageTexts.find(p => p.url === direct) : null;
+    if(directPage && SCORE_ODDS_SYNC){
+      scoreChecked += 1;
+      const scoreOdds = parseCorrectScoreOddsFromText(directPage.text, m);
+      if(scoreOdds){
+        state.scoreOdds[matchId(m)] = {
+          ...scoreOdds,
+          source:"Pinnacle",
+          url:directPage.url,
+          updatedAt:checkedAt
+        };
+        scoreUpdated += 1;
+        console.log(`Pinnacle correct-score odds: ${oddsKey(m)} ${Object.keys(scoreOdds.scores).length} lines`);
+      }else{
+        warnings.push(`No Pinnacle correct-score odds parsed: ${oddsKey(m)}`);
       }
     }
     if(!found){
@@ -381,11 +443,27 @@ if(PLAN_ONLY || !plan.shouldFetch){
     matchupsParse:ALLOW_MATCHUPS_PARSE,
     espnBackup:ESPN_ODDS_BACKUP,
     lookaheadHours:LOOKAHEAD_HOURS,
+    scoreOddsSync:SCORE_ODDS_SYNC,
+    scoreChecked,
+    scoreUpdated,
     warnings:warnings.slice(0,20)
+  };
+  state.scoreOddsSync = {
+    source:"Pinnacle",
+    mode:"pre-match-correct-score",
+    lastAttemptAt:checkedAt,
+    lastCheckedAt:checkedAt,
+    checked:scoreChecked,
+    updated:scoreUpdated,
+    directPagesOnly:true,
+    scoreGrid:SCORE_GRID,
+    note:"Correct-score odds are stored only when a direct Pinnacle match page exposes the market.",
+    warnings:warnings.filter(w => w.includes("correct-score")).slice(0,20)
   };
 
   if(DRY_RUN){
     console.log(JSON.stringify(state.oddsSync,null,2));
+    console.log(JSON.stringify(state.scoreOddsSync,null,2));
     console.log("DRY_RUN=1, not writing Supabase");
   }else{
     await saveState(state);

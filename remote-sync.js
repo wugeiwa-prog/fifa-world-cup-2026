@@ -22,8 +22,8 @@
     return res.status===204?null:res.json();
   }
   function normalize(db){
-    db=Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},comments:[]},db||{});
-    db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};db.odds=db.odds||{};db.oddsSync=db.oddsSync||{};db.comments=Array.isArray(db.comments)?db.comments:[];
+    db=Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},scoreOdds:{},scoreOddsSync:{},comments:[]},db||{});
+    db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};db.odds=db.odds||{};db.oddsSync=db.oddsSync||{};db.scoreOdds=db.scoreOdds||{};db.scoreOddsSync=db.scoreOddsSync||{};db.comments=Array.isArray(db.comments)?db.comments:[];
     return db;
   }
   const INIT_BALANCE=1000;
@@ -78,8 +78,13 @@
         const old=db.odds[mid];
         db.odds[mid]=!old||rowTs(o)>=rowTs(old)?{...old,...o}:old;
       });
+      Object.entries(src.scoreOdds||{}).forEach(([mid,o])=>{
+        const old=db.scoreOdds[mid];
+        db.scoreOdds[mid]=!old||rowTs(o)>=rowTs(old)?{...old,...o}:old;
+      });
       db.resultSync={...db.resultSync,...(src.resultSync||{})};
       db.oddsSync={...db.oddsSync,...(src.oddsSync||{})};
+      db.scoreOddsSync={...db.scoreOddsSync,...(src.scoreOddsSync||{})};
       const commentMap=Object.fromEntries(db.comments.map(c=>[c.id,c]));
       (src.comments||[]).forEach(c=>{
         if(!c?.id)return;
@@ -117,7 +122,12 @@
     const repliesByComment={};
     (rows.replies||[]).forEach(r=>{(repliesByComment[r.comment_id] ||= []).push({id:r.id,user:r.user_name,text:r.text,createdAt:Number(r.created_at)||0});});
     db.comments=(rows.comments||[]).map(r=>({id:r.id,user:r.user_name,text:r.text,createdAt:Number(r.created_at)||0,updatedAt:Number(r.updated_at)||0,replies:(repliesByComment[r.id]||[]).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,200);
-    (rows.meta||[]).forEach(r=>{if(r.key==="resultSync")db.resultSync=r.data||{};if(r.key==="oddsSync")db.oddsSync=r.data||{};});
+    (rows.meta||[]).forEach(r=>{
+      if(r.key==="resultSync")db.resultSync=r.data||{};
+      if(r.key==="oddsSync")db.oddsSync=r.data||{};
+      if(r.key==="scoreOdds")db.scoreOdds=r.data||{};
+      if(r.key==="scoreOddsSync")db.scoreOddsSync=r.data||{};
+    });
     db.__remoteMode="tables";
     db.__remoteUpdatedAt=new Date(maxTs([
       ...(rows.users||[]).map(r=>r.updated_at),
@@ -162,7 +172,9 @@
       replies:db.comments.flatMap(c=>(c.replies||[]).map(r=>({id:r.id,comment_id:c.id,user_name:r.user,text:r.text,created_at:r.createdAt||Date.now()}))),
       meta:[
         ...(Object.keys(db.resultSync||{}).length?[{key:"resultSync",data:db.resultSync,updated_at:nowIso}]:[]),
-        ...(Object.keys(db.oddsSync||{}).length?[{key:"oddsSync",data:db.oddsSync,updated_at:nowIso}]:[])
+        ...(Object.keys(db.oddsSync||{}).length?[{key:"oddsSync",data:db.oddsSync,updated_at:nowIso}]:[]),
+        ...(Object.keys(db.scoreOdds||{}).length?[{key:"scoreOdds",data:db.scoreOdds,updated_at:nowIso}]:[]),
+        ...(Object.keys(db.scoreOddsSync||{}).length?[{key:"scoreOddsSync",data:db.scoreOddsSync,updated_at:nowIso}]:[])
       ]
     };
   }

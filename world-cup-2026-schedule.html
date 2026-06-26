@@ -86,6 +86,25 @@ body:not(.locked) .access-gate{display:none}
 .progress-track{height:10px;border-radius:999px;background:rgba(243,239,230,.18);overflow:hidden;border:1px solid rgba(243,239,230,.22)}
 .progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--grass),#FFD56A);border-radius:inherit;transition:width .35s ease}
 .progress-detail{margin-top:7px;font-size:12px;color:rgba(243,239,230,.68)}
+.update-strip{margin-top:16px;max-width:760px;border:1px solid rgba(243,239,230,.24);
+  background:rgba(243,239,230,.08);border-radius:13px;padding:12px 14px 11px;
+  box-shadow:0 10px 28px rgba(0,0,0,.08);backdrop-filter:blur(4px)}
+.update-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.update-head b{font-size:13px;color:#fff;letter-spacing:.04em}
+.update-head span{font-size:11px;color:rgba(243,239,230,.62)}
+.update-list{display:grid;gap:6px;list-style:none}
+.update-list li{display:grid;grid-template-columns:128px 1fr;gap:10px;align-items:start;
+  font-size:12.5px;color:rgba(243,239,230,.86)}
+.update-list time{font-family:var(--num);font-size:13px;font-weight:700;color:#FFD56A;white-space:nowrap}
+.update-list .txt{min-width:0}
+.update-list .taggy{display:inline-flex;margin-right:6px;border:1px solid rgba(255,213,106,.38);
+  border-radius:999px;padding:0 6px;color:#fff;background:rgba(255,213,106,.12);font-size:11px;font-weight:800}
+.update-more{margin-top:7px}
+.update-more summary{cursor:pointer;width:max-content;max-width:100%;font-size:12px;font-weight:800;
+  color:#fff;border:1px solid rgba(243,239,230,.28);border-radius:999px;padding:3px 10px;
+  background:rgba(11,59,42,.34)}
+.update-more summary:hover{border-color:rgba(255,213,106,.6)}
+.update-more[open] summary{margin-bottom:7px}
 
 /* 阶段时间轴 */
 .timeline{display:flex;gap:0;margin-top:30px;overflow-x:auto;padding-bottom:6px;
@@ -339,6 +358,10 @@ body:not(.locked) .access-gate{display:none}
   .hero-in{padding:34px 16px 24px}
   .stats{gap:18px}
   .stat .n{font-size:27px}
+  .update-strip{padding:11px 12px}
+  .update-head{align-items:flex-start}
+  .update-list li{grid-template-columns:1fr;gap:2px}
+  .update-list time{font-size:12px}
   .toolbar-in{padding:9px 12px;gap:8px}
   .nav-group{flex:1 1 100%;display:grid;grid-template-columns:34px 1fr;gap:6px}
   .nav-label{padding-top:6px;width:34px}
@@ -491,8 +514,12 @@ body:not(.locked) .access-gate{display:none}
   text-align:center;font-family:var(--cjk);transition:border-color .12s,background .12s}
 .bet-pick:hover{border-color:var(--grass)}
 .bet-pick.on{border-color:var(--grass);background:#F0F8F2;box-shadow:inset 0 0 0 1px var(--grass)}
+.bet-pick:disabled{cursor:not-allowed;opacity:.52;background:#F7F6F0;border-color:#DDD6C7}
 .bet-pick .pk{font-size:13px;font-weight:600;color:var(--ink)}
 .bet-pick .od{font-family:var(--num);font-size:13px;font-weight:700;color:var(--host-blue);margin-top:2px}
+.bet-pick .src{font-size:10px;line-height:1.1;margin-top:3px;color:var(--muted)}
+.bet-pick .src.book{color:var(--grass);font-weight:700}
+.bet-pick .src.lock{color:#8B6F45}
 .bet-summary{margin-top:14px;font-size:13px;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center}
 .bet-summary b{font-family:var(--num);font-size:17px;color:var(--grass)}
 .bet-msg{font-size:12.5px;color:var(--host-red);min-height:17px;margin-top:8px}
@@ -559,6 +586,22 @@ body:not(.locked) .access-gate{display:none}
       <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
       <div class="progress-detail" id="progressDetail">已完成 0 场 · 剩余 104 场</div>
     </div>
+    <section class="update-strip" aria-label="网站最新更新">
+      <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
+      <ol class="update-list">
+        <li><time datetime="2026-06-26T23:34+02:00">06/26 23:34</time><div class="txt"><span class="taggy">竞猜</span>正确比分优先采用真实赔率快照；缺少快照的比分暂不开放下注。</div></li>
+        <li><time datetime="2026-06-26T23:14+02:00">06/26 23:14</time><div class="txt"><span class="taggy">比分</span>可选比分数量扩展，覆盖更多常见赛果。</div></li>
+        <li><time datetime="2026-06-26T10:09+02:00">06/26 10:09</time><div class="txt"><span class="taggy">首页</span>焦点、竞猜、榜单与小组积分顺序重新整理，更快找到关心内容。</div></li>
+      </ol>
+      <details class="update-more">
+        <summary>查看更早更新</summary>
+        <ol class="update-list">
+          <li><time datetime="2026-06-26T09:45+02:00">06/26 09:45</time><div class="txt"><span class="taggy">信息</span>压缩观赛、规则和说明内容，页面更适合快速浏览。</div></li>
+          <li><time datetime="2026-06-25T18:33+02:00">06/25 18:33</time><div class="txt"><span class="taggy">专题</span>优化球星与 FIFA 动态视觉，补充可复用球星缩略图。</div></li>
+          <li><time datetime="2026-06-25T18:07+02:00">06/25 18:07</time><div class="txt"><span class="taggy">故事</span>新增球星专题、人文纪事和 FIFA 动态入口。</div></li>
+        </ol>
+      </details>
+    </section>
     <div class="timeline">
       <div class="tl"><div class="s">小组赛</div><div class="d">6/11 – 6/28</div></div>
       <div class="tl"><div class="s">1/16决赛</div><div class="d">6/28 – 7/4</div></div>
@@ -1499,12 +1542,42 @@ function odds1x2(m){
   const f=p=>Math.max(1.01,round2(MARGIN/(p/tot)));
   return {h:f(h),d:f(d),a:f(a)};
 }
-function topScoreOdds(m,n=12){
+function modelTopScoreOdds(m,n=12){
   const mat=scoreMatrix(m),arr=[];let tot=0;
   for(const row of mat)for(const p of row)tot+=p;
   for(let i=0;i<mat.length;i++)for(let j=0;j<mat.length;j++)arr.push({s:`${i}-${j}`,p:mat[i][j]/tot});
   arr.sort((x,y)=>y.p-x.p);
-  return arr.slice(0,n).map(o=>({s:o.s,odds:Math.max(1.5,round2(MARGIN/o.p))}));
+  return arr.slice(0,n).map(o=>({s:o.s,odds:Math.max(1.5,round2(MARGIN/o.p)),source:"model",disabled:false}));
+}
+function normalizeScoreKey(s){
+  const m=String(s||"").trim().match(/^(\d+)\s*[-–:]\s*(\d+)$/);
+  return m?`${Number(m[1])}-${Number(m[2])}`:"";
+}
+function cleanScoreOdds(entry){
+  if(!entry)return null;
+  const raw=entry.scores||entry.prices||entry.correctScores||{};
+  const scores={};
+  Object.entries(raw).forEach(([k,v])=>{
+    const key=normalizeScoreKey(k),od=Number(v);
+    if(key&&od>1&&od<=500)scores[key]=round2(od);
+  });
+  return Object.keys(scores).length?{...entry,scores}:null;
+}
+function bookScoreOdds(m){
+  return cleanScoreOdds(DB?.scoreOdds?.[matchId(m)]||DB?.scoreOdds?.[oddsKey(m)]);
+}
+function topScoreOdds(m,n=SCORE_PICK_COUNT){
+  const model=modelTopScoreOdds(m,n),snap=bookScoreOdds(m);
+  if(!snap)return model;
+  return model.map(o=>{
+    const real=Number(snap.scores[o.s]);
+    if(real>1)return {...o,odds:round2(real),source:"book",bookSource:snap.source||"赔率快照",disabled:false};
+    return {...o,source:"missing",disabled:true,lock:"暂无真实赔率"};
+  });
+}
+function scorePickOption(m,pick){
+  const key=normalizeScoreKey(pick);
+  return topScoreOdds(m,SCORE_PICK_COUNT).find(o=>o.s===key&&!o.disabled)||null;
 }
 
 function matchId(m){return `${m.d}#${m.t}#${rawName(m.h)}#${rawName(m.a)}`;}
@@ -1551,9 +1624,9 @@ const MID2M={};M.forEach(m=>MID2M[matchId(m)]=m);
 
 /* ---- 持久化 ---- */
 const DB_KEY="wc2026_betting_v1",USER_KEY="wc2026_user",MAX_USERS=50,INIT_BAL=1000,MIN_STAKE=10,MAX_PCT=0.5;
-let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},comments:[]},JSON.parse(localStorage.getItem(DB_KEY))||{});}
-  catch(e){return {users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},comments:[]};}})();
-DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};DB.results=DB.results||{};DB.resultSync=DB.resultSync||{};DB.odds=DB.odds||{};DB.oddsSync=DB.oddsSync||{};DB.comments=Array.isArray(DB.comments)?DB.comments:[];
+let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},scoreOdds:{},scoreOddsSync:{},comments:[]},JSON.parse(localStorage.getItem(DB_KEY))||{});}
+  catch(e){return {users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},scoreOdds:{},scoreOddsSync:{},comments:[]};}})();
+DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};DB.results=DB.results||{};DB.resultSync=DB.resultSync||{};DB.odds=DB.odds||{};DB.oddsSync=DB.oddsSync||{};DB.scoreOdds=DB.scoreOdds||{};DB.scoreOddsSync=DB.scoreOddsSync||{};DB.comments=Array.isArray(DB.comments)?DB.comments:[];
 const DB_CHANNEL=typeof BroadcastChannel!=="undefined"?new BroadcastChannel("wc2026_betting_sync"):null;
 const REMOTE_SYNC={
   enabled:true,
@@ -1566,8 +1639,8 @@ const REMOTE_SYNC={
 let remotePulling=false,remotePushTimer=null,remoteLastWrite=0;
 let remoteStatus="已配置，正在连接";
 function normalizeDB(db){
-  db=Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},comments:[]},db||{});
-  db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};db.odds=db.odds||{};db.oddsSync=db.oddsSync||{};db.comments=Array.isArray(db.comments)?db.comments:[];
+  db=Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},scoreOdds:{},scoreOddsSync:{},comments:[]},db||{});
+  db.users=db.users||{};db.bets=Array.isArray(db.bets)?db.bets:[];db.daily=db.daily||{};db.results=db.results||{};db.resultSync=db.resultSync||{};db.odds=db.odds||{};db.oddsSync=db.oddsSync||{};db.scoreOdds=db.scoreOdds||{};db.scoreOddsSync=db.scoreOddsSync||{};db.comments=Array.isArray(db.comments)?db.comments:[];
   return db;
 }
 function canonicalBalance(name,db=DB){
@@ -1621,6 +1694,13 @@ function mergeDB(local,remote){
     odds[id]=!lo||rt>=lt?ro:lo;
   });
   const oddsSync={...local.oddsSync,...remote.oddsSync};
+  const scoreOdds={...local.scoreOdds};
+  Object.entries(remote.scoreOdds).forEach(([id,ro])=>{
+    const lo=scoreOdds[id];
+    const rt=Date.parse(ro?.updatedAt||ro?.updated||"")||0,lt=Date.parse(lo?.updatedAt||lo?.updated||"")||0;
+    scoreOdds[id]=!lo||rt>=lt?ro:lo;
+  });
+  const scoreOddsSync={...local.scoreOddsSync,...remote.scoreOddsSync};
   const commentsById={};
   [...remote.comments,...local.comments].forEach(c=>{
     if(!c?.id)return;
@@ -1636,7 +1716,7 @@ function mergeDB(local,remote){
     };
   });
   const comments=Object.values(commentsById).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,200);
-  return normalizeBalances({users,bets:Object.values(betsById).sort((a,b)=>(a.placedAt||0)-(b.placedAt||0)),daily:{...remote.daily,...local.daily},results,resultSync,odds,oddsSync,comments});
+  return normalizeBalances({users,bets:Object.values(betsById).sort((a,b)=>(a.placedAt||0)-(b.placedAt||0)),daily:{...remote.daily,...local.daily},results,resultSync,odds,oddsSync,scoreOdds,scoreOddsSync,comments});
 }
 function remoteEnabled(){return REMOTE_SYNC.enabled&&REMOTE_SYNC.url&&REMOTE_SYNC.anonKey;}
 function remoteHeaders(extra={}){
@@ -1693,7 +1773,7 @@ function saveDB(){
 }
 function reloadDB(){
   try{DB=normalizeDB(JSON.parse(localStorage.getItem(DB_KEY))||{});}
-  catch(e){DB={users:{},bets:[],daily:{}};}
+  catch(e){DB={users:{},bets:[],daily:{},scoreOdds:{},scoreOddsSync:{}};}
   DB=normalizeBalances(DB);
 }
 function syncFromStorage(){
@@ -1785,7 +1865,7 @@ function buildPicks(){
     box.innerHTML=opts.map(([k,lab,od])=>`<button class="bet-pick" data-pick="${k}" data-odds="${od}"><div class="pk">${esc(lab)}</div><div class="od">${od.toFixed(2)}</div></button>`).join("");
   }else{
     box.className="bet-picks scores";
-    box.innerHTML=topScoreOdds(m,SCORE_PICK_COUNT).map(o=>`<button class="bet-pick" data-pick="${o.s}" data-odds="${o.odds}"><div class="pk">${o.s.replace("-","–")}</div><div class="od">${o.odds.toFixed(2)}</div></button>`).join("");
+    box.innerHTML=topScoreOdds(m,SCORE_PICK_COUNT).map(o=>`<button class="bet-pick" data-pick="${o.s}" data-odds="${o.odds}" ${o.disabled?"disabled":""} title="${o.disabled?"该比分暂无真实赔率快照，暂不开放":(o.source==="book"?"真实赔率快照":"模型赔率")}"><div class="pk">${o.s.replace("-","–")}</div><div class="od">${o.disabled?"—":o.odds.toFixed(2)}</div><div class="src ${o.source==="book"?"book":o.disabled?"lock":""}">${o.source==="book"?"快照":o.disabled?"未开放":"模型"}</div></button>`).join("");
   }
   slip.pick=null;slip.odds=0;updatePayout();
 }
@@ -1804,6 +1884,12 @@ function confirmBet(){
   if(!slip||!slip.pick){msg.textContent="请先选择一个竞猜选项";return;}
   const lock=betLockReason(slip.m);
   if(lock){msg.textContent=`${lock}，无法投注`;return;}
+  if(slip.type==="score"){
+    const current=scorePickOption(slip.m,slip.pick);
+    if(!current){msg.textContent="该比分暂无真实赔率快照，暂不开放投注";return;}
+    slip.pick=current.s;
+    slip.odds=current.odds;
+  }
   normalizeBalances();
   const stake=parseInt(document.getElementById("betStake").value,10),max=Math.floor(u.balance*MAX_PCT);
   if(!stake||stake<MIN_STAKE){msg.textContent=`最低下注 ${MIN_STAKE} 币`;return;}
@@ -1989,7 +2075,7 @@ document.getElementById("betConfirm").addEventListener("click",confirmBet);
 document.getElementById("betStake").addEventListener("input",updatePayout);
 document.getElementById("betSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!slip)return;
   slip.type=b.dataset.type;document.querySelectorAll("#betSeg button").forEach(x=>x.classList.toggle("on",x===b));buildPicks();});
-document.getElementById("betPicks").addEventListener("click",e=>{const b=e.target.closest(".bet-pick");if(!b)return;
+document.getElementById("betPicks").addEventListener("click",e=>{const b=e.target.closest(".bet-pick");if(!b||b.disabled)return;
   document.querySelectorAll("#betPicks .bet-pick").forEach(x=>x.classList.remove("on"));b.classList.add("on");
   slip.pick=b.dataset.pick;slip.odds=parseFloat(b.dataset.odds);updatePayout();});
 document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
