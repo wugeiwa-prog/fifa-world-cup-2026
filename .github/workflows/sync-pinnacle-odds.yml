@@ -45,6 +45,7 @@ jobs:
           ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
           PINNACLE_ALLOW_MATCHUPS_PARSE: "1"
           ESPN_ODDS_BACKUP: "1"
+          SPORTSGAMBLER_SCORE_BACKUP: "1"
         run: node scripts/sync-pinnacle-odds.mjs
 
       - name: Install Playwright
@@ -65,4 +66,5 @@ jobs:
           ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
           PINNACLE_ALLOW_MATCHUPS_PARSE: "1"
           ESPN_ODDS_BACKUP: "1"
+          SPORTSGAMBLER_SCORE_BACKUP: "1"
         run: node scripts/sync-pinnacle-odds.mjs

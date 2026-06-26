@@ -1621,7 +1621,7 @@ function bookScoreOdds(m){
 }
 function topScoreOdds(m,n=SCORE_PICK_COUNT){
   const model=modelTopScoreOdds(m,n),snap=bookScoreOdds(m);
-  if(!snap)return model;
+  if(!snap)return model.map(o=>({...o,source:"missing",disabled:true,lock:"等待真实赔率"}));
   return model.map(o=>{
     const real=Number(snap.scores[o.s]);
     if(real>1)return {...o,odds:round2(real),source:"book",bookSource:snap.source||"赔率快照",disabled:false};

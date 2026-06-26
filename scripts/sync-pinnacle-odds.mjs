@@ -13,6 +13,7 @@ const FORCE_SYNC = process.env.ODDS_FORCE_SYNC === "1" || process.env.ODDS_FORCE
 const ALLOW_MATCHUPS_PARSE = process.env.PINNACLE_ALLOW_MATCHUPS_PARSE === "1";
 const ESPN_ODDS_BACKUP = process.env.ESPN_ODDS_BACKUP !== "0";
 const SCORE_ODDS_SYNC = process.env.SCORE_ODDS_SYNC !== "0";
+const SPORTSGAMBLER_SCORE_BACKUP = process.env.SPORTSGAMBLER_SCORE_BACKUP !== "0";
 const SCORE_GRID = Number(process.env.SCORE_GRID || 7);
 
 const PINNACLE_MATCHUPS_URLS = [
@@ -59,6 +60,9 @@ function addDays(dateStr, days){
   const d = new Date(`${dateStr}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0,10);
+}
+function previousDay(dateStr){
+  return addDays(dateStr, -1);
 }
 function matchDateKey(m){
   return `2026-${m.d}`;
@@ -265,6 +269,72 @@ function parseCorrectScoreOddsFromText(text, m){
   if(Object.keys(scores).length < 4)return null;
   return {scores, market:"Correct Score"};
 }
+function teamSlug(zh){
+  const map = {
+    "美国":"usa",
+    "英国":"england",
+    "英格兰":"england",
+    "韩国":"south-korea",
+    "波黑":"bosnia",
+    "刚果（金）":"dr-congo",
+    "佛得角":"cape-verde",
+    "伊朗":"iran",
+    "科特迪瓦":"ivory-coast",
+    "新西兰":"new-zealand",
+    "沙特阿拉伯":"saudi-arabia"
+  };
+  const name = map[zh] || TEAM_EN[zh] || zh;
+  return norm(name).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+}
+function sportsgamblerUrls(m){
+  const home = teamSlug(rawName(m.h));
+  const away = teamSlug(rawName(m.a));
+  const date = matchDateKey(m);
+  return [
+    `https://www.sportsgambler.com/betting-tips/football/${home}-vs-${away}-prediction-lineups-odds-${date}/`,
+    `https://www.sportsgambler.com/betting-tips/football/${home}-vs-${away}-prediction-lineups-odds-${previousDay(date)}/`
+  ];
+}
+function parseSportsgamblerScoreOdds(text, m){
+  const clean = String(text || "").replace(/\s+/g," ");
+  const marker = clean.toLowerCase().indexOf("latest correct score odds");
+  if(marker < 0)return null;
+  const window = clean.slice(marker, marker + 4500);
+  const scores = {};
+  for(const rx of [
+    /\b([0-7])\s*[-–]\s*([0-7])\b[^\d.]{0,90}\b(\d{1,3}\.\d{2,3})\b/g,
+    /\b([0-7])\s*[-–]\s*([0-7])\b[^\d.]{0,90}\b(\d{1,3}\.\d)\b/g
+  ]){
+    let hit;
+    while((hit = rx.exec(window)))setScorePrice(scores, `${hit[1]}-${hit[2]}`, hit[3]);
+  }
+  if(Object.keys(scores).length < 4)return null;
+  return {scores, market:"Correct Score"};
+}
+async function loadSportsgamblerScoreOdds(matches){
+  if(!SPORTSGAMBLER_SCORE_BACKUP || !SCORE_ODDS_SYNC || !matches.length)return new Map();
+  const byMid = new Map();
+  for(const m of matches){
+    for(const url of sportsgamblerUrls(m)){
+      try{
+        const res = await fetch(url,{headers:{"user-agent":"Mozilla/5.0 odds-sync"}});
+        if(res.status === 404)continue;
+        if(!res.ok)throw new Error(`HTTP ${res.status}`);
+        const html = await res.text();
+        const text = html.replace(/<script[\s\S]*?<\/script>/gi," ").replace(/<style[\s\S]*?<\/style>/gi," ").replace(/<[^>]+>/g," ").replace(/\s+/g," ");
+        const found = parseSportsgamblerScoreOdds(text, m);
+        if(found){
+          byMid.set(matchId(m), {...found, source:"SportsGambler/BetMGM", url, updatedAt:new Date().toISOString()});
+          console.log(`SportsGambler correct-score odds: ${oddsKey(m)} ${Object.keys(found.scores).length} lines`);
+          break;
+        }
+      }catch(e){
+        console.warn(`SportsGambler score odds fetch failed: ${oddsKey(m)} ${url}: ${e.message}`);
+      }
+    }
+  }
+  return byMid;
+}
 async function loadPageTexts(urls){
   const texts = [];
   for(const url of urls){
@@ -363,6 +433,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
   ])];
   const pageTexts = await loadPageTexts(urls);
   const espnOdds = await loadEspnOdds(candidates);
+  const sportsgamblerScoreOdds = await loadSportsgamblerScoreOdds(candidates);
   let updated = 0;
   let pruned = 0;
   let espnUpdated = 0;
@@ -395,9 +466,9 @@ if(PLAN_ONLY || !plan.shouldFetch){
       }
     }
     const directPage = direct ? pageTexts.find(p => p.url === direct) : null;
-    if(directPage && SCORE_ODDS_SYNC){
+    if(SCORE_ODDS_SYNC){
       scoreChecked += 1;
-      const scoreOdds = parseCorrectScoreOddsFromText(directPage.text, m);
+      const scoreOdds = directPage ? parseCorrectScoreOddsFromText(directPage.text, m) : null;
       if(scoreOdds){
         state.scoreOdds[matchId(m)] = {
           ...scoreOdds,
@@ -407,8 +478,14 @@ if(PLAN_ONLY || !plan.shouldFetch){
         };
         scoreUpdated += 1;
         console.log(`Pinnacle correct-score odds: ${oddsKey(m)} ${Object.keys(scoreOdds.scores).length} lines`);
+      }else if(sportsgamblerScoreOdds.has(matchId(m))){
+        state.scoreOdds[matchId(m)] = {
+          ...sportsgamblerScoreOdds.get(matchId(m)),
+          updatedAt:checkedAt
+        };
+        scoreUpdated += 1;
       }else{
-        warnings.push(`No Pinnacle correct-score odds parsed: ${oddsKey(m)}`);
+        warnings.push(`No correct-score odds parsed: ${oddsKey(m)}`);
       }
     }
     if(!found){
@@ -444,20 +521,22 @@ if(PLAN_ONLY || !plan.shouldFetch){
     espnBackup:ESPN_ODDS_BACKUP,
     lookaheadHours:LOOKAHEAD_HOURS,
     scoreOddsSync:SCORE_ODDS_SYNC,
+    sportsgamblerScoreBackup:SPORTSGAMBLER_SCORE_BACKUP,
     scoreChecked,
     scoreUpdated,
     warnings:warnings.slice(0,20)
   };
   state.scoreOddsSync = {
-    source:"Pinnacle",
+    source:SPORTSGAMBLER_SCORE_BACKUP ? "Pinnacle + SportsGambler/BetMGM" : "Pinnacle",
     mode:"pre-match-correct-score",
     lastAttemptAt:checkedAt,
     lastCheckedAt:checkedAt,
     checked:scoreChecked,
     updated:scoreUpdated,
-    directPagesOnly:true,
+    directPagesOnly:false,
+    sportsgamblerBackup:SPORTSGAMBLER_SCORE_BACKUP,
     scoreGrid:SCORE_GRID,
-    note:"Correct-score odds are stored only when a direct Pinnacle match page exposes the market.",
+    note:"Correct-score odds prefer direct Pinnacle match pages and fall back to SportsGambler/BetMGM match pages.",
     warnings:warnings.filter(w => w.includes("correct-score")).slice(0,20)
   };
 
