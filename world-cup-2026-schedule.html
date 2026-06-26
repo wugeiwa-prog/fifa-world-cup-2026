@@ -34,7 +34,7 @@ html{scroll-behavior:smooth}
 body{font-family:var(--cjk);background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
 img.emoji{width:1.15em;height:1.15em;margin:0 .04em;vertical-align:-.18em}
 body.locked{overflow:hidden}
-body.locked header,body.locked nav,body.locked main,body.locked footer,body.locked .to-top,body.locked .prank-ball,body.locked .ball-fx,body.locked .bet-mask{display:none!important}
+body.locked header,body.locked nav,body.locked main,body.locked footer,body.locked .to-top,body.locked .prank-ball,body.locked .ball-dismiss,body.locked .ball-fx,body.locked .bet-mask{display:none!important}
 
 .access-gate{position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,var(--pitch),var(--pitch-2));
   color:var(--chalk);display:grid;place-items:center;padding:22px}
@@ -347,26 +347,27 @@ body:not(.locked) .access-gate{display:none}
 .to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
 .to-top:hover{background:var(--host-blue)}
 .to-top:focus-visible{outline:3px solid var(--grass);outline-offset:3px}
-.prank-ball{position:fixed;left:0;top:0;z-index:36;width:54px;height:54px;border:0;border-radius:50%;
-  background:transparent;padding:0;cursor:grab;touch-action:none;filter:drop-shadow(0 9px 16px rgba(11,59,42,.24));
+.prank-ball{position:fixed;left:0;top:0;z-index:36;width:36px;height:36px;border:0;border-radius:50%;
+  background:transparent;padding:0;cursor:grab;touch-action:none;filter:drop-shadow(0 7px 12px rgba(11,59,42,.22));
   transform:translate3d(calc(100vw - 96px),calc(100vh - 154px),0);will-change:transform}
 .prank-ball:active{cursor:grabbing}
 .prank-ball:focus-visible{outline:3px solid #FFD56A;outline-offset:5px}
 .ball-art{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:
-  radial-gradient(circle at 36% 28%,rgba(255,255,255,.95),rgba(255,255,255,.05) 18%,transparent 26%),
-  radial-gradient(circle at center,#fff 0 57%,#E9E4D6 76%,#CFC8B8 100%);
-  box-shadow:inset -8px -9px 14px rgba(11,59,42,.18),inset 5px 5px 9px rgba(255,255,255,.85)}
-.ball-art::before{content:"";position:absolute;left:18px;top:15px;width:18px;height:17px;background:#171915;
+  radial-gradient(circle at 34% 26%,rgba(255,255,255,.98),rgba(255,255,255,.18) 16%,transparent 28%),
+  radial-gradient(circle at 64% 72%,rgba(255,213,106,.4),transparent 18%),
+  radial-gradient(circle at center,#fff 0 57%,#ECE7DA 76%,#CFC8B8 100%);
+  box-shadow:inset -6px -7px 11px rgba(11,59,42,.18),inset 4px 4px 7px rgba(255,255,255,.88),0 0 0 1px rgba(11,59,42,.12)}
+.ball-art::before{content:"";position:absolute;left:12px;top:10px;width:12px;height:12px;background:#171915;
   clip-path:polygon(50% 0,100% 36%,82% 100%,18% 100%,0 36%);box-shadow:
-  -17px 3px 0 -5px #171915,17px 3px 0 -5px #171915,0 20px 0 -5px #171915}
-.ball-art::after{content:"";position:absolute;inset:7px;border-radius:50%;
-  background:conic-gradient(from 28deg,transparent 0 14%,#C8372D 14% 18%,transparent 18% 38%,#1F4FA0 38% 42%,transparent 42% 68%,#1AA15F 68% 72%,transparent 72% 100%);
-  opacity:.86;mix-blend-mode:multiply}
+  -12px 2px 0 -4px #171915,12px 2px 0 -4px #171915,0 14px 0 -4px #171915}
+.ball-art::after{content:"";position:absolute;inset:5px;border-radius:50%;
+  background:conic-gradient(from 28deg,transparent 0 13%,#C8372D 13% 18%,transparent 18% 36%,#1F4FA0 36% 42%,transparent 42% 66%,#1AA15F 66% 72%,transparent 72% 86%,#FFD56A 86% 90%,transparent 90% 100%);
+  opacity:.9;mix-blend-mode:multiply}
 .prank-ball.grabbed .ball-art{animation:ballSquirm .18s infinite alternate}
 .prank-ball.zoom .ball-art{animation:ballZoom .5s ease both}
 .prank-ball.dizzy .ball-art{animation:ballDizzy .62s ease both}
 .prank-ball.flat .ball-art{animation:ballFlat .48s ease both}
-.ball-bubble{position:absolute;right:48px;top:-14px;max-width:150px;min-width:max-content;border:1px solid var(--line);
+.ball-bubble{position:absolute;right:34px;top:-18px;max-width:150px;min-width:max-content;border:1px solid var(--line);
   border-radius:999px;background:#fff;color:var(--pitch);padding:5px 10px;font-size:12px;font-weight:800;
   box-shadow:0 10px 24px rgba(11,59,42,.14);opacity:0;transform:translateY(5px) scale(.95);
   pointer-events:none;transition:opacity .16s,transform .16s}
@@ -375,6 +376,11 @@ body:not(.locked) .access-gate{display:none}
 .ball-pop{position:fixed;width:8px;height:8px;border-radius:50%;background:var(--grass);
   animation:ballPop .58s ease-out forwards;will-change:transform,opacity}
 .ball-pop.red{background:var(--host-red)}.ball-pop.blue{background:var(--host-blue)}.ball-pop.gold{background:#FFD56A}
+.ball-dismiss{position:fixed;left:0;top:0;z-index:37;width:18px;height:18px;border-radius:50%;border:1px solid rgba(11,59,42,.14);
+  background:rgba(255,255,255,.94);color:var(--ink-soft);font-size:13px;line-height:16px;font-weight:800;
+  cursor:pointer;box-shadow:0 5px 12px rgba(11,59,42,.14);opacity:.46;transition:opacity .15s,transform .15s}
+.prank-ball:hover + .ball-dismiss,.ball-dismiss:hover,.ball-dismiss:focus-visible{opacity:1}
+.ball-dismiss:focus-visible{outline:2px solid #FFD56A;outline-offset:2px}
 @keyframes ballSquirm{from{transform:rotate(-8deg) scale(1.04,.94)}to{transform:rotate(9deg) scale(.94,1.04)}}
 @keyframes ballZoom{0%{transform:scale(1)}45%{transform:scale(1.48)}100%{transform:scale(1)}}
 @keyframes ballDizzy{0%{transform:rotate(0) scale(1)}55%{transform:rotate(540deg) scale(.92)}100%{transform:rotate(720deg) scale(1)}}
@@ -382,7 +388,7 @@ body:not(.locked) .access-gate{display:none}
 @keyframes ballPop{to{transform:translate(var(--dx),var(--dy)) scale(.25);opacity:0}}
 
 @media print{
-  .toolbar,.hero::before,.hero::after,.to-top,.prank-ball,.ball-fx{display:none}
+  .toolbar,.hero::before,.hero::after,.to-top,.prank-ball,.ball-dismiss,.ball-fx{display:none}
   .hero{background:var(--pitch)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .m{break-inside:avoid}
 }
@@ -391,9 +397,10 @@ body:not(.locked) .access-gate{display:none}
   .hero-in{padding:34px 16px 24px}
   .stats{gap:18px}
   .stat .n{font-size:27px}
-  .prank-ball{width:46px;height:46px}
-  .ball-bubble{right:42px;top:-12px;max-width:128px;font-size:11.5px}
-  .ball-art::before{left:15px;top:13px;width:16px;height:15px;box-shadow:-14px 3px 0 -5px #171915,14px 3px 0 -5px #171915,0 17px 0 -5px #171915}
+  .prank-ball{width:30px;height:30px}
+  .ball-bubble{right:28px;top:-18px;max-width:128px;font-size:11.5px}
+  .ball-art::before{left:10px;top:8px;width:10px;height:10px;box-shadow:-10px 2px 0 -4px #171915,10px 2px 0 -4px #171915,0 12px 0 -4px #171915}
+  .ball-dismiss{width:17px;height:17px;font-size:12px;line-height:15px}
   .update-strip{padding:11px 12px}
   .update-head{align-items:flex-start}
   .update-list li{grid-template-columns:1fr;gap:2px}
@@ -628,7 +635,7 @@ body:not(.locked) .access-gate{display:none}
     <section class="update-strip" aria-label="网站最新更新">
       <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
       <ol class="update-list">
-        <li><time datetime="2026-06-26T23:43+02:00">06/26 23:43</time><div class="txt"><span class="taggy">彩蛋</span>新增一只会乱跑的世界杯气氛足球，点击、拖拽都有小反应。</div></li>
+        <li><time datetime="2026-06-26T23:43+02:00">06/26 23:43</time><div class="txt"><span class="taggy">彩蛋</span>新增一只懒洋洋的世界杯气氛足球，点击、拖拽才会兴奋起来。</div></li>
         <li><time datetime="2026-06-26T23:34+02:00">06/26 23:34</time><div class="txt"><span class="taggy">竞猜</span>正确比分优先采用真实赔率快照；缺少快照的比分暂不开放下注。</div></li>
         <li><time datetime="2026-06-26T23:14+02:00">06/26 23:14</time><div class="txt"><span class="taggy">比分</span>可选比分数量扩展，覆盖更多常见赛果。</div></li>
       </ol>
@@ -854,6 +861,7 @@ body:not(.locked) .access-gate{display:none}
   <span class="ball-art" aria-hidden="true"></span>
   <span class="ball-bubble" id="ballBubble" aria-hidden="true"></span>
 </button>
+<button class="ball-dismiss" id="ballDismiss" type="button" aria-label="暂时隐藏捣蛋足球" title="暂时隐藏">×</button>
 <div class="ball-fx" id="ballFx" aria-hidden="true"></div>
 
 <script>
@@ -2130,20 +2138,34 @@ document.getElementById("list").addEventListener("click",e=>{const d=e.target.cl
 document.getElementById("matchDetailBody").addEventListener("click",e=>{const b=e.target.closest("[data-bet]");if(b){closeModal("matchDetailMask");openBet(b.dataset.bet);}});
 document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("[data-toggle-day]");if(!b)return;expandedOldDays.has(b.dataset.toggleDay)?expandedOldDays.delete(b.dataset.toggleDay):expandedOldDays.add(b.dataset.toggleDay);saveExpandedOldDays();render();});
 function initPrankBall(){
-  const ball=document.getElementById("prankBall"),bubble=document.getElementById("ballBubble"),fx=document.getElementById("ballFx");
+  const ball=document.getElementById("prankBall"),dismiss=document.getElementById("ballDismiss"),bubble=document.getElementById("ballBubble"),fx=document.getElementById("ballFx");
   if(!ball||ball.dataset.ready)return;
+  if(sessionStorage.getItem("wc2026_prank_ball_hidden")==="1"){ball.style.display="none";if(dismiss)dismiss.style.display="none";return;}
   ball.dataset.ready="1";
   const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-  const lines=["VAR 正在看你","别点了，我还没热身","这球我来罚","被揪住了！","今晚押几比几？","Zoom!","我躲一下","草皮烫脚"];
-  let x=0,y=0,vx=.07,vy=.055,rot=0,last=0,grabbed=false,hovering=false,moved=false,downX=0,downY=0,offsetX=0,offsetY=0,bubbleTimer=0,hideTimer=0;
+  const quietLines=["我先蹲会儿","不打扰，看球要紧","我在场边热身","需要我再上"];
+  const happyLines=["金币回来了，轻轻庆祝","手感不错，我也开心","今晚草皮挺顺","小赚一点，别飘"];
+  const sadLines=["金币丢了，我慢点走","先抱抱钱包","今天少说两句","我陪你安静看球"];
+  const firedLines=["被拍醒了！","这球我来罚","VAR 正在看你","Zoom!","草皮烫脚","今晚押几比几？"];
+  let x=0,y=0,vx=0,vy=0,rot=0,last=0,activeUntil=0,nextHopAt=0,grabbed=false,hovering=false,moved=false,downX=0,downY=0,offsetX=0,offsetY=0,bubbleTimer=0,hideTimer=0;
   const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
-  const size=()=>ball.offsetWidth||54;
+  const rand=(a,b)=>a+Math.random()*(b-a);
+  const size=()=>ball.offsetWidth||36;
+  function mood(){
+    const u=curUser(),bal=u&&DB.users[u]?canonicalBalance(u):INIT_BAL,delta=bal-INIT_BAL;
+    if(!u)return {pace:[30000,52000],energy:.45,lines:quietLines};
+    if(delta>=120)return {pace:[12000,22000],energy:.85,lines:happyLines};
+    if(delta<=-120)return {pace:[36000,62000],energy:.28,lines:sadLines};
+    return {pace:[22000,38000],energy:.55,lines:quietLines};
+  }
+  function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
   function bounds(){
     const s=size();
     return {minX:12,minY:76,maxX:Math.max(12,innerWidth-s-12),maxY:Math.max(84,innerHeight-s-82)};
   }
   function place(){
     ball.style.transform=`translate3d(${Math.round(x)}px,${Math.round(y)}px,0) rotate(${Math.round(rot)}deg)`;
+    if(dismiss)dismiss.style.transform=`translate3d(${Math.round(x+size()-6)}px,${Math.round(y-7)}px,0)`;
   }
   function say(text){
     bubble.textContent=text;
@@ -2172,27 +2194,47 @@ function initPrankBall(){
   }
   function kick(power=1){
     const b=bounds();
-    vx=(Math.random()>.5?1:-1)*(.09+Math.random()*.08)*power;
-    vy=(Math.random()>.5?1:-1)*(.07+Math.random()*.08)*power;
+    vx=(Math.random()>.5?1:-1)*(.055+Math.random()*.05)*power;
+    vy=(Math.random()>.5?1:-1)*(.045+Math.random()*.045)*power;
     x=clamp(x,b.minX,b.maxX);y=clamp(y,b.minY,b.maxY);
+  }
+  function wake(power=1,duration=1100,line=""){
+    activeUntil=performance.now()+duration;
+    kick(power);
+    if(line)say(line);
+  }
+  function scheduleHop(ts){
+    const m=mood();
+    nextHopAt=ts+rand(m.pace[0],m.pace[1]);
+  }
+  function lazyHop(ts){
+    const m=mood();
+    activeUntil=ts+rand(650,1150);
+    kick(m.energy);
+    if(Math.random()<.28)say(pick(m.lines));
+    scheduleHop(ts);
   }
   function prank(){
     const n=Math.floor(Math.random()*5);
-    say(lines[Math.floor(Math.random()*lines.length)]);
+    say(pick(firedLines));
     if(n===0){pop();play("dizzy");}
     else if(n===1){play("zoom");}
     else if(n===2){play("flat");}
-    else if(n===3){pop();kick(1.8);}
+    else if(n===3){pop();}
     else{ball.style.opacity=".18";say("我隐身三秒");clearTimeout(hideTimer);hideTimer=setTimeout(()=>{ball.style.opacity="1";say("又回来了");},3000);}
+    wake(2.3,3200);
   }
   function tick(ts){
     if(!last)last=ts;
     const dt=Math.min(32,ts-last);last=ts;
-    if(!grabbed&&!hovering&&!reduce){
+    if(!nextHopAt)scheduleHop(ts);
+    if(!grabbed&&!hovering&&!reduce&&ts>=nextHopAt)lazyHop(ts);
+    if(!grabbed&&!hovering&&!reduce&&ts<activeUntil){
       const b=bounds();
       x+=vx*dt;y+=vy*dt;rot+=vx*dt*3;
       if(x<=b.minX||x>=b.maxX){vx*=-1;x=clamp(x,b.minX,b.maxX);}
       if(y<=b.minY||y>=b.maxY){vy*=-1;y=clamp(y,b.minY,b.maxY);}
+      vx*=.992;vy*=.992;
     }
     place();
     requestAnimationFrame(tick);
@@ -2203,6 +2245,12 @@ function initPrankBall(){
   if(reduce){place();say("点我试试");}
   else requestAnimationFrame(tick);
   window.addEventListener("resize",()=>{const b=bounds();x=clamp(x,b.minX,b.maxX);y=clamp(y,b.minY,b.maxY);place();});
+  dismiss?.addEventListener("click",e=>{
+    e.stopPropagation();
+    sessionStorage.setItem("wc2026_prank_ball_hidden","1");
+    say("我先下场休息");
+    setTimeout(()=>{ball.style.display="none";dismiss.style.display="none";},120);
+  });
   ball.addEventListener("pointerdown",e=>{
     if(e.button!=null&&e.button!==0)return;
     grabbed=true;moved=false;downX=e.clientX;downY=e.clientY;
@@ -2225,12 +2273,12 @@ function initPrankBall(){
     if(!grabbed)return;
     grabbed=false;ball.classList.remove("grabbed");
     ball.releasePointerCapture?.(e.pointerId);
-    if(moved){say("松手！开大脚！");kick(2.2);pop();}
+    if(moved){say("松手！开大脚！");pop();wake(2.6,3600);}
   }
   ball.addEventListener("pointerup",release);
   ball.addEventListener("pointercancel",release);
-  ball.addEventListener("click",e=>{if(moved){moved=false;return;}prank();kick(1.25);});
-  ball.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();prank();kick(1.25);}});
+  ball.addEventListener("click",e=>{if(moved){moved=false;return;}prank();});
+  ball.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();prank();}});
 }
 
 /* ---- 启动 ---- */
