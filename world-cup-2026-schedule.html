@@ -113,6 +113,8 @@ body:not(.locked) .access-gate{display:none}
 .tab.hot.on{background:var(--host-red);border-color:var(--host-red)}
 .tab.link{position:relative;border-radius:7px;padding:6px 10px}
 .tab.link.primary{background:#E5F4EB;border-color:#BFE0C9;color:#10663C;font-weight:800}
+.tab.link.standings-tab{background:#E5F4EB;border-color:#BFE0C9;color:#10663C;font-weight:800}
+.tab.link.standings-tab.on{background:var(--pitch);border-color:var(--pitch);color:var(--chalk)}
 .tab.link.on{background:#E8EEF9;border-color:#CAD7EF;color:var(--host-blue)}
 .notify-badge{display:none;min-width:18px;height:18px;border-radius:999px;background:var(--host-red);color:#fff;font-family:var(--num);font-size:12px;font-weight:800;line-height:18px;text-align:center;padding:0 5px;margin-left:4px}
 .notify-badge.show{display:inline-flex;align-items:center;justify-content:center}
@@ -205,6 +207,9 @@ body:not(.locked) .access-gate{display:none}
 .focus-meta{font-size:12px;color:var(--ink-soft)}
 .focus-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .focus-card{border:1px solid var(--line);border-radius:10px;background:#fff;padding:11px 12px;min-width:0}
+.focus-card[data-target],.focus-card[data-action],.focus-card[data-stage],.focus-match[data-detail]{cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
+.focus-card[data-target]:hover,.focus-card[data-action]:hover,.focus-card[data-stage]:hover,.focus-match[data-detail]:hover{border-color:var(--grass);box-shadow:0 8px 18px rgba(11,59,42,.08);transform:translateY(-1px)}
+.focus-card[data-target]:focus-visible,.focus-card[data-action]:focus-visible,.focus-card[data-stage]:focus-visible,.focus-match[data-detail]:focus-visible{outline:2px solid var(--host-blue);outline-offset:2px}
 .focus-card.hot{border-color:#F0C0B8;background:#FFF8F6}
 .focus-card.mine{border-color:#BFE0C9;background:#F8FBF6}
 .focus-card .k{font-size:11px;color:var(--ink-soft);font-weight:800;letter-spacing:.08em;margin-bottom:4px}
@@ -226,6 +231,12 @@ body:not(.locked) .access-gate{display:none}
 .focus-match .pair .vs{font-family:var(--num);font-size:14px;color:var(--ink-soft)}
 .focus-match .meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
 .quick-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.quick-strip button{border:1px solid var(--line);background:#fff;color:var(--pitch);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;font-family:var(--cjk);cursor:pointer}.quick-strip button:hover{border-color:var(--grass)}
+.standings-panel{border-color:#BFE0C9;background:linear-gradient(180deg,#F4FBF6,#fff)}
+.standings-panel h2::before{background:#10663C}
+.standings-panel.archived{border-color:var(--line);background:#fff}
+.standings-fold{border:1px solid var(--line);border-radius:11px;background:#FCFBF7;padding:10px 12px}
+.standings-fold summary{cursor:pointer;font-weight:800;color:var(--pitch);font-size:13.5px}
+.standings-fold .standings{margin-top:10px}
 .standings{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
 .stand-card{border:1px solid var(--line);border-radius:11px;background:#FCFBF7;padding:12px;min-width:0}
 .stand-card h3{font-family:var(--num);font-size:17px;color:var(--pitch);margin-bottom:8px;letter-spacing:.04em}
@@ -569,12 +580,11 @@ body:not(.locked) .access-gate{display:none}
         <button class="tab link" data-action="open-bettable">下注</button>
         <button class="tab link" data-target="betHall">我的 <span class="notify-badge" id="betNotifyBadge">0</span></button>
         <button class="tab link" data-target="betBoard">榜单</button>
-        <button class="tab link" data-target="standingsPanel">小组积分</button>
+        <button class="tab link standings-tab" data-target="standingsPanel">小组积分</button>
         <a class="tab link" href="stories.html">专题</a>
         <a class="tab link" href="comments.html?focus=replies">留言 <span class="notify-badge" id="commentNotifyBadge">0</span></a>
         <button class="tab link" data-target="schedulePanel">赛程</button>
         <button class="tab link" data-target="rankings">排名</button>
-        <button class="tab link" data-target="groupsPanel">小组</button>
         <button class="tab link" data-target="squadsPanel">阵容</button>
         <button class="tab link" data-target="infoPanel">信息</button>
       </div>
@@ -621,10 +631,10 @@ body:not(.locked) .access-gate{display:none}
     <div id="leaderboard"></div>
   </section>
 
-  <section class="panel" id="standingsPanel">
+  <section class="panel standings-panel" id="standingsPanel">
     <h2>小组积分</h2>
-    <div class="rank-meta">按当前已录入完赛比分自动计算；未完赛比赛不计入积分。</div>
-    <div class="standings" id="standingsList"></div>
+    <div class="rank-meta" id="standingsMeta">按当前已录入完赛比分自动计算；未完赛比赛不计入积分。</div>
+    <div id="standingsList"></div>
   </section>
 
   <section class="panel" id="storiesTeaser">
@@ -1154,6 +1164,10 @@ function updateTournamentProgress(){
 function renderFocusPanel(){
   const box=document.getElementById("attentionFocus");
   if(!box)return;
+  const meta=document.getElementById("focusMeta");
+  if(meta)meta.textContent=groupStageComplete()
+    ?"淘汰赛阶段优先整理晋级赛程、竞猜窗口和关键赛果"
+    :"根据比赛状态、竞猜窗口和我的注单自动整理";
   const tomorrow=addDays(todayRome,1);
   const todayTomorrow=M.filter(m=>[todayRome,tomorrow].includes(matchDateKey(m)));
   const todayMatches=M.filter(m=>matchDateKey(m)===todayRome);
@@ -1165,13 +1179,13 @@ function renderFocusPanel(){
   const myOpen=(curUser()?DB.bets.filter(b=>b.user===curUser()&&b.status==="open"):[])
     .map(b=>MID2M[b.mid]).filter(Boolean);
   const nextBet=bettableRows[0],nextHot=hot[0],nextMine=myOpen[0],lastDone=recentFinal[recentFinal.length-1];
-  const card=(k,v,s,cls="")=>`<article class="focus-card ${cls}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></article>`;
+  const card=(k,v,s,cls="",attrs="")=>`<article class="focus-card ${cls}" ${attrs} tabindex="0" role="button"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></article>`;
   const cards=[
-    card("今天赛程",`${todayMatches.length} 场`,todayMatches[0]?`${shortMatchName(todayMatches[0])} · ${todayMatches[0].t} CEST`:"今天暂无比赛"),
-    card("可竞猜",`${bettableRows.length} 场`,nextBet?`${shortMatchName(nextBet)} · ${nextBet.t} CEST`:"今天/明天暂无开放场次","mine"),
-    card("进行中",`${live.length} 场`,live[0]?`${shortMatchName(live[0])} · ${live[0].score||"实时比分"}`:"当前没有进行中的比赛",live.length?"hot":""),
-    card("我的未结",`${myOpen.length} 注`,nextMine?`${shortMatchName(nextMine)} · 等待赛果`:(curUser()?"暂无未结注单":"登录后显示个人焦点"),"mine"),
-    card("重点关注",`${hot.length} 场`,nextHot?`${importanceLabel(nextHot)} · ${shortMatchName(nextHot)}`:"今天/明天暂无重点赛事","hot")
+    card("今天赛程",`${todayMatches.length} 场`,todayMatches[0]?`${shortMatchName(todayMatches[0])} · ${todayMatches[0].t} CEST`:"今天暂无比赛","","data-action=\"jump-today\""),
+    card("可竞猜",`${bettableRows.length} 场`,nextBet?`${shortMatchName(nextBet)} · ${nextBet.t} CEST`:"今天/明天暂无开放场次","mine","data-action=\"open-bettable\""),
+    card("进行中",`${live.length} 场`,live[0]?`${shortMatchName(live[0])} · ${live[0].score||"实时比分"}`:"当前没有进行中的比赛",live.length?"hot":"","data-action=\"jump-today\""),
+    card("我的未结",`${myOpen.length} 注`,nextMine?`${shortMatchName(nextMine)} · 等待赛果`:(curUser()?"暂无未结注单":"登录后显示个人焦点"),"mine","data-target=\"betHall\""),
+    card("重点关注",`${hot.length} 场`,nextHot?`${importanceLabel(nextHot)} · ${shortMatchName(nextHot)}`:"今天/明天暂无重点赛事","hot","data-stage=\"hot\"")
   ].join("");
   const extra=awaiting.length
     ?`<div class="focus-empty">有 ${awaiting.length} 场比赛已开赛且赛果待确认，比分确认后会结算相关竞猜。</div>`
@@ -1195,7 +1209,7 @@ function renderFocusPanel(){
     const score=m.score||m.s||"VS";
     const hotCls=m.importance>=2?" hot":"";
     const bet=bettable(m)?`<span class="tag mine">可竞猜</span>`:`<span class="tag">${importanceLabel(m)}</span>`;
-    return `<article class="focus-match${hotCls}">
+    return `<article class="focus-match${hotCls}" data-detail="${attr(matchId(m))}" tabindex="0" role="button" aria-label="${attr(`${shortMatchName(m)} 比赛详情`)}">
       <div class="top"><div class="when">${m.t}<small>${chinaTime(m.d,m.t)}</small></div>${statusChip(m)}</div>
       <div class="pair">${teamHtml(m.home,m.h)}<span class="vs">${esc(score)}</span>${teamHtml(m.away,m.a)}</div>
       <div class="meta">${bet}<span class="tag">${esc(m.g)}${m.st==="group"?" 组":""}</span></div>
@@ -1301,13 +1315,41 @@ function jumpToToday(){
   const next=list.querySelector(".day:not(.old)");
   (today||next||document.getElementById("schedulePanel"))?.scrollIntoView({behavior:"smooth",block:"start"});
 }
+function jumpToStage(stage){
+  curStage=stage;curQ="";document.getElementById("q").value="";
+  document.querySelectorAll("#tabs .tab").forEach(t=>t.classList.toggle("on",t.dataset.st===stage));
+  render();
+  document.getElementById("schedulePanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function activateFocusLink(el){
+  if(!el)return false;
+  if(el.dataset.action==="open-bettable"){jumpToBettable();return true;}
+  if(el.dataset.action==="jump-today"){jumpToToday();return true;}
+  if(el.dataset.stage){jumpToStage(el.dataset.stage);return true;}
+  if(el.dataset.detail){openMatchDetail(el.dataset.detail);return true;}
+  if(el.dataset.target){
+    markTargetSeen(el.dataset.target);
+    if(el.dataset.target==="betHall")renderWallet();
+    renderNotifyBadges();
+    document.getElementById(el.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});
+    return true;
+  }
+  return false;
+}
 document.addEventListener("click",e=>{
   const act=e.target.closest("[data-action='open-bettable']");
   if(act){e.preventDefault();jumpToBettable();return;}
   const today=e.target.closest("[data-action='jump-today']");
   if(today){e.preventDefault();jumpToToday();return;}
+  const focusLink=e.target.closest(".focus-card,.focus-match");
+  if(focusLink&&activateFocusLink(focusLink)){e.preventDefault();return;}
   const target=e.target.closest(".focus-actions [data-target]");
   if(target){markTargetSeen(target.dataset.target);if(target.dataset.target==="betHall")renderWallet();renderNotifyBadges();document.getElementById(target.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});}
+});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  const focusLink=e.target.closest?.(".focus-card,.focus-match");
+  if(focusLink&&activateFocusLink(focusLink)){e.preventDefault();}
 });
 document.getElementById("infoPanel")?.addEventListener("click",e=>{
   const b=e.target.closest("[data-target]");if(!b)return;
@@ -1394,15 +1436,26 @@ function groupStats(){
   Object.values(stats).forEach(s=>s.gd=s.gf-s.ga);
   return stats;
 }
+function groupStageComplete(){
+  const groupMatches=M.filter(m=>m.st==="group");
+  return todayRome>"2026-06-28"||groupMatches.every(m=>matchLiveState(m)==="done");
+}
 function renderStandings(){
   const box=document.getElementById("standingsList");if(!box)return;
+  const panel=document.getElementById("standingsPanel"),meta=document.getElementById("standingsMeta"),archived=groupStageComplete();
+  panel?.classList.toggle("archived",archived);
+  if(panel?.querySelector("h2"))panel.querySelector("h2").textContent=archived?"小组积分（已归档）":"小组积分";
+  if(meta)meta.textContent=archived?"小组赛结束后自动归档；淘汰赛阶段首页会优先呈现晋级赛程、竞猜和赛果。":"按当前已录入完赛比分自动计算；未完赛比赛不计入积分。";
   const stats=groupStats();
-  box.innerHTML="ABCDEFGHIJKL".split("").map(g=>{
+  const grid="ABCDEFGHIJKL".split("").map(g=>{
     const rows=Object.values(stats).filter(s=>s.team.group===g).sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||(FIFA_RANK[a.team.nameZh]||99)-(FIFA_RANK[b.team.nameZh]||99));
     return `<article class="stand-card"><h3>GROUP ${g}</h3><table class="stand-table"><thead><tr><th>球队</th><th>赛</th><th>胜</th><th>平</th><th>负</th><th>净</th><th>分</th></tr></thead><tbody>${
       rows.map(s=>`<tr><td><div class="team-cell"><span>${s.team.flag}</span><span>${esc(s.team.nameZh)}</span></div></td><td>${s.p}</td><td>${s.w}</td><td>${s.d}</td><td>${s.l}</td><td>${s.gd>0?`+${s.gd}`:s.gd}</td><td class="pts">${s.pts}</td></tr>`).join("")
     }</tbody></table><div class="stand-note">同分暂按净胜球、进球数、FIFA 排名辅助排序。</div></article>`;
   }).join("");
+  box.innerHTML=archived
+    ?`<details class="standings-fold"><summary>查看小组赛最终积分</summary><div class="standings">${grid}</div></details>`
+    :`<div class="standings">${grid}</div>`;
 }
 const HOST_ADV=70, BASE_TOTAL=2.65, ELO_PER_GOAL=130, MARGIN=0.94, GRID=7;
 function ratingOf(nameZh){return 2120-150*Math.log(FIFA_RANK[nameZh]||90);}

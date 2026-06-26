@@ -119,8 +119,10 @@ const FALLBACK_NEWS=[
 ];
 function qs(s){return document.querySelector(s);}function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 function emojify(root=document.body){if(window.twemoji)twemoji.parse(root,{folder:"svg",ext:".svg"});}
-function unlock(){document.body.classList.remove("locked");sessionStorage.setItem(ACCESS_KEY,"1");renderAll();}
-function checkAccess(){if(sessionStorage.getItem(ACCESS_KEY)==="1")unlock();}
+function markAccess(){localStorage.setItem(ACCESS_KEY,"1");sessionStorage.setItem(ACCESS_KEY,"1");}
+function hasAccess(){return localStorage.getItem(ACCESS_KEY)==="1"||sessionStorage.getItem(ACCESS_KEY)==="1";}
+function unlock(){document.body.classList.remove("locked");markAccess();renderAll();}
+function checkAccess(){if(hasAccess())unlock();}
 function tryAccess(){const input=qs("#accessInput"),err=qs("#accessError");if(input.value===ACCESS_PASSWORD){unlock();input.value="";err.textContent="";}else{err.textContent="密码不对，请再试一次";input.select();}}
 function switchTab(tab){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));document.querySelectorAll(".tab-panel").forEach(p=>p.hidden=true);qs(`#${tab}Panel`).hidden=false;if(location.hash!==`#${tab}`)history.replaceState(null,"",`#${tab}`);}
 function photoUrl(file){return file?`https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=640`:"";}
