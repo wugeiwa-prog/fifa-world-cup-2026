@@ -635,13 +635,14 @@ body:not(.locked) .access-gate{display:none}
     <section class="update-strip" aria-label="网站最新更新">
       <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
       <ol class="update-list">
+        <li><time datetime="2026-06-28T08:30+02:00">06/28 08:30</time><div class="txt"><span class="taggy">赛程</span>小组赛结束，32强赛对阵已按可靠赛事接口核对更新。</div></li>
         <li><time datetime="2026-06-26T23:43+02:00">06/26 23:43</time><div class="txt"><span class="taggy">彩蛋</span>新增一只懒洋洋的世界杯气氛足球，点击、拖拽才会兴奋起来。</div></li>
         <li><time datetime="2026-06-26T23:34+02:00">06/26 23:34</time><div class="txt"><span class="taggy">竞猜</span>正确比分优先采用真实赔率快照；缺少快照的比分暂不开放下注。</div></li>
-        <li><time datetime="2026-06-26T23:14+02:00">06/26 23:14</time><div class="txt"><span class="taggy">比分</span>可选比分数量扩展，覆盖更多常见赛果。</div></li>
       </ol>
       <details class="update-more">
         <summary>查看更早更新</summary>
         <ol class="update-list">
+          <li><time datetime="2026-06-26T23:14+02:00">06/26 23:14</time><div class="txt"><span class="taggy">比分</span>可选比分数量扩展，覆盖更多常见赛果。</div></li>
           <li><time datetime="2026-06-26T10:09+02:00">06/26 10:09</time><div class="txt"><span class="taggy">首页</span>焦点、竞猜、榜单与小组积分顺序重新整理，更快找到关心内容。</div></li>
           <li><time datetime="2026-06-26T09:45+02:00">06/26 09:45</time><div class="txt"><span class="taggy">信息</span>压缩观赛、规则和说明内容，页面更适合快速浏览。</div></li>
           <li><time datetime="2026-06-25T18:33+02:00">06/25 18:33</time><div class="txt"><span class="taggy">专题</span>优化球星与 FIFA 动态视觉，补充可复用球星缩略图。</div></li>
@@ -651,11 +652,11 @@ body:not(.locked) .access-gate{display:none}
     </section>
     <div class="timeline">
       <div class="tl"><div class="s">小组赛</div><div class="d">6/11 – 6/28</div></div>
-      <div class="tl"><div class="s">1/16决赛</div><div class="d">6/28 – 7/4</div></div>
-      <div class="tl"><div class="s">1/8决赛</div><div class="d">7/4 – 7/7</div></div>
-      <div class="tl"><div class="s">1/4决赛</div><div class="d">7/9 – 7/12</div></div>
-      <div class="tl"><div class="s">半决赛</div><div class="d">7/14 – 7/15</div></div>
-      <div class="tl final"><div class="s">🏆 决赛</div><div class="d">7/19 · 21:00</div></div>
+      <div class="tl"><div class="s">32强赛</div><div class="d">Round of 32 · 6/28 – 7/4</div></div>
+      <div class="tl"><div class="s">16强赛</div><div class="d">Round of 16 · 7/4 – 7/7</div></div>
+      <div class="tl"><div class="s">1/4决赛</div><div class="d">Quarter-final · 7/9 – 7/12</div></div>
+      <div class="tl"><div class="s">半决赛</div><div class="d">Semi-final · 7/14 – 7/15</div></div>
+      <div class="tl final"><div class="s">🏆 决赛</div><div class="d">Final · 7/19 · 21:00</div></div>
     </div>
   </div>
 </header>
@@ -684,10 +685,10 @@ body:not(.locked) .access-gate{display:none}
       <div class="tabs" id="tabs">
         <button class="tab on" data-st="all">全部</button>
         <button class="tab" data-st="group">小组赛</button>
-        <button class="tab" data-st="r32">32强</button>
-        <button class="tab" data-st="r16">16强</button>
+        <button class="tab" data-st="r32">32强赛</button>
+        <button class="tab" data-st="r16">16强赛</button>
         <button class="tab" data-st="qf">1/4决赛</button>
-        <button class="tab" data-st="fin">半决赛·决赛</button>
+        <button class="tab" data-st="fin">半决赛/决赛</button>
         <button class="tab hot" data-st="hot">重要赛事</button>
       </div>
     </div>
@@ -772,7 +773,7 @@ body:not(.locked) .access-gate{display:none}
   </section>
 
   <section class="panel" id="squadsPanel">
-    <h2>16 强队阵容</h2>
+    <h2>重点球队阵容</h2>
     <div class="squads" id="squads"></div>
   </section>
 
@@ -799,11 +800,11 @@ body:not(.locked) .access-gate{display:none}
     </div>
     <div class="notes">
       ① 主时间为意大利时间 CEST，中国时间会在每场比赛旁自动标注。<br>
-      ② 小组赛每组前 2 名 + 8 个成绩最好的小组第 3 名晋级 32 强；淘汰赛平局进入加时和点球。<br>
+      ② 小组赛每组前 2 名 + 8 个成绩最好的小组第 3 名晋级 32强赛（Round of 32）；之后依次为 16强赛（Round of 16）、1/4决赛、半决赛和决赛。<br>
       ③ 竞猜只供朋友间娱乐，无真实货币；开赛后停止竞猜，完赛确认比分后结算。<br>
       ④ 留言板支持自由输入，并可追加 @球队 与 #球星 标签，请友善互动。<br>
       ⑤ 球星专题为精选摘要，FIFA 动态仅展示标题链接快照，不转载全文或图片。<br>
-      ⑥ 赛程、排名、阵容和收看信息以官方及公开来源为准，页面会尽量保持比分和榜单为最新状态。
+      ⑥ 赛程、排名、阵容和收看信息以 FIFA 官方及可靠公开赛事接口为准；当 FIFA 动态页无法结构化读取时，对阵信息会用 ESPN 等赛事接口核对。
     </div>
   </section>
 </main>
@@ -962,24 +963,24 @@ const RAW_MATCHES=[
 {d:"06-28",t:"01:30",st:"group",g:"K",h:"🇨🇩 刚果（金）",a:"🇺🇿 乌兹别克斯坦",v:"亚特兰大体育场",c:"🇺🇸"},
 {d:"06-28",t:"04:00",st:"group",g:"J",h:"🇩🇿 阿尔及利亚",a:"🇦🇹 奥地利",v:"堪萨斯城体育场",c:"🇺🇸"},
 {d:"06-28",t:"04:00",st:"group",g:"J",h:"🇯🇴 约旦",a:"🇦🇷 阿根廷",v:"达拉斯体育场",c:"🇺🇸"},
-// —— 1/16 决赛（32强）——
-{d:"06-28",t:"21:00",st:"r32",g:"第73场",h:"A组第2",a:"B组第2",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
-{d:"06-29",t:"19:00",st:"r32",g:"第76场",h:"C组第1",a:"F组第2",v:"休斯敦体育场",c:"🇺🇸"},
-{d:"06-29",t:"22:30",st:"r32",g:"第74场",h:"E组第1",a:"最佳第3",v:"波士顿体育场",c:"🇺🇸",n:"第3名来自 A/B/C/D/F 组"},
-{d:"06-30",t:"03:00",st:"r32",g:"第75场",h:"F组第1",a:"C组第2",v:"蒙特雷体育场",c:"🇲🇽"},
-{d:"06-30",t:"19:00",st:"r32",g:"第78场",h:"E组第2",a:"I组第2",v:"达拉斯体育场",c:"🇺🇸"},
-{d:"06-30",t:"23:00",st:"r32",g:"第77场",h:"I组第1",a:"最佳第3",v:"纽约/新泽西体育场",c:"🇺🇸",n:"第3名来自 C/D/F/G/H 组"},
-{d:"07-01",t:"03:00",st:"r32",g:"第79场",h:"A组第1",a:"最佳第3",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽",n:"第3名来自 C/E/F/H/I 组"},
-{d:"07-01",t:"18:00",st:"r32",g:"第80场",h:"L组第1",a:"最佳第3",v:"亚特兰大体育场",c:"🇺🇸",n:"第3名来自 E/H/I/J/K 组"},
-{d:"07-01",t:"22:00",st:"r32",g:"第82场",h:"G组第1",a:"最佳第3",v:"西雅图体育场",c:"🇺🇸",n:"第3名来自 A/E/H/I/J 组"},
-{d:"07-02",t:"02:00",st:"r32",g:"第81场",h:"D组第1",a:"最佳第3",v:"旧金山湾区体育场",c:"🇺🇸",n:"第3名来自 B/E/F/I/J 组"},
-{d:"07-02",t:"21:00",st:"r32",g:"第84场",h:"H组第1",a:"J组第2",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
-{d:"07-03",t:"01:00",st:"r32",g:"第83场",h:"K组第2",a:"L组第2",v:"多伦多体育场",c:"🇨🇦"},
-{d:"07-03",t:"05:00",st:"r32",g:"第85场",h:"B组第1",a:"最佳第3",v:"温哥华 BC Place",c:"🇨🇦",n:"第3名来自 E/F/G/I/J 组"},
-{d:"07-03",t:"20:00",st:"r32",g:"第88场",h:"D组第2",a:"G组第2",v:"达拉斯体育场",c:"🇺🇸"},
-{d:"07-04",t:"00:00",st:"r32",g:"第86场",h:"J组第1",a:"H组第2",v:"迈阿密体育场",c:"🇺🇸"},
-{d:"07-04",t:"03:30",st:"r32",g:"第87场",h:"K组第1",a:"最佳第3",v:"堪萨斯城体育场",c:"🇺🇸",n:"第3名来自 D/E/I/J/L 组"},
-// —— 1/8 决赛（16强）——
+// —— 32强赛（Round of 32）——
+{d:"06-28",t:"21:00",st:"r32",g:"第73场",h:"🇿🇦 南非",a:"🇨🇦 加拿大",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"06-29",t:"19:00",st:"r32",g:"第76场",h:"🇧🇷 巴西",a:"🇯🇵 日本",v:"休斯敦体育场",c:"🇺🇸"},
+{d:"06-29",t:"22:30",st:"r32",g:"第74场",h:"🇩🇪 德国",a:"🇵🇾 巴拉圭",v:"波士顿体育场",c:"🇺🇸"},
+{d:"06-30",t:"03:00",st:"r32",g:"第75场",h:"🇳🇱 荷兰",a:"🇲🇦 摩洛哥",v:"蒙特雷体育场",c:"🇲🇽"},
+{d:"06-30",t:"19:00",st:"r32",g:"第78场",h:"🇨🇮 科特迪瓦",a:"🇳🇴 挪威",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"06-30",t:"23:00",st:"r32",g:"第77场",h:"🇫🇷 法国",a:"🇸🇪 瑞典",v:"纽约/新泽西体育场",c:"🇺🇸"},
+{d:"07-01",t:"03:00",st:"r32",g:"第79场",h:"🇲🇽 墨西哥",a:"🇪🇨 厄瓜多尔",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽"},
+{d:"07-01",t:"18:00",st:"r32",g:"第80场",h:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰",a:"🇨🇩 刚果（金）",v:"亚特兰大体育场",c:"🇺🇸"},
+{d:"07-01",t:"22:00",st:"r32",g:"第82场",h:"🇧🇪 比利时",a:"🇸🇳 塞内加尔",v:"西雅图体育场",c:"🇺🇸"},
+{d:"07-02",t:"02:00",st:"r32",g:"第81场",h:"🇺🇸 美国",a:"🇧🇦 波黑",v:"旧金山湾区体育场",c:"🇺🇸"},
+{d:"07-02",t:"21:00",st:"r32",g:"第84场",h:"🇪🇸 西班牙",a:"🇦🇹 奥地利",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"07-03",t:"01:00",st:"r32",g:"第83场",h:"🇵🇹 葡萄牙",a:"🇭🇷 克罗地亚",v:"多伦多体育场",c:"🇨🇦"},
+{d:"07-03",t:"05:00",st:"r32",g:"第85场",h:"🇨🇭 瑞士",a:"🇩🇿 阿尔及利亚",v:"温哥华 BC Place",c:"🇨🇦"},
+{d:"07-03",t:"20:00",st:"r32",g:"第88场",h:"🇦🇺 澳大利亚",a:"🇪🇬 埃及",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"07-04",t:"00:00",st:"r32",g:"第86场",h:"🇦🇷 阿根廷",a:"🇨🇻 佛得角",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"07-04",t:"03:30",st:"r32",g:"第87场",h:"🇨🇴 哥伦比亚",a:"🇬🇭 加纳",v:"堪萨斯城体育场",c:"🇺🇸"},
+// —— 16强赛（Round of 16）——
 {d:"07-04",t:"19:00",st:"r16",g:"第90场",h:"第73场胜者",a:"第75场胜者",v:"休斯敦体育场",c:"🇺🇸"},
 {d:"07-04",t:"23:00",st:"r16",g:"第89场",h:"第74场胜者",a:"第77场胜者",v:"费城体育场",c:"🇺🇸"},
 {d:"07-05",t:"22:00",st:"r16",g:"第91场",h:"第76场胜者",a:"第78场胜者",v:"纽约/新泽西体育场",c:"🇺🇸"},
@@ -993,10 +994,10 @@ const RAW_MATCHES=[
 {d:"07-10",t:"21:00",st:"qf",g:"第98场",h:"第93场胜者",a:"第94场胜者",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
 {d:"07-11",t:"23:00",st:"qf",g:"第99场",h:"第91场胜者",a:"第92场胜者",v:"迈阿密体育场",c:"🇺🇸"},
 {d:"07-12",t:"03:00",st:"qf",g:"第100场",h:"第95场胜者",a:"第96场胜者",v:"堪萨斯城体育场",c:"🇺🇸"},
-// —— 半决赛 / 季军赛 / 决赛 ——
+// —— 半决赛（Semi-final）/ 三四名决赛（Third-place match）/ 决赛（Final）——
 {d:"07-14",t:"21:00",st:"fin",g:"半决赛 1",h:"第97场胜者",a:"第98场胜者",v:"达拉斯体育场",c:"🇺🇸"},
 {d:"07-15",t:"21:00",st:"fin",g:"半决赛 2",h:"第99场胜者",a:"第100场胜者",v:"亚特兰大体育场",c:"🇺🇸"},
-{d:"07-18",t:"23:00",st:"fin",g:"季军赛",h:"半决赛负者",a:"半决赛负者",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"07-18",t:"23:00",st:"fin",g:"三四名决赛",h:"半决赛负者",a:"半决赛负者",v:"迈阿密体育场",c:"🇺🇸"},
 {d:"07-19",t:"21:00",st:"fin",g:"🏆 决赛",h:"半决赛胜者",a:"半决赛胜者",v:"纽约/新泽西体育场（MetLife）",c:"🇺🇸",n:"Coldplay 领衔决赛中场表演（世界杯首次）"}
 ];
 
@@ -1145,7 +1146,7 @@ function applyResults(){
 }
 
 const WK=["周日","周一","周二","周三","周四","周五","周六"];
-const STAGE_NAME={group:"小组赛",r32:"32强",r16:"16强",qf:"1/4决赛",fin:"决赛阶段"};
+const STAGE_NAME={group:"小组赛",r32:"32强赛",r16:"16强赛",qf:"1/4决赛",fin:"半决赛/决赛"};
 const todayRome=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome"}).format(new Date()); // YYYY-MM-DD
 
 let curStage="all",curQ="";
@@ -1534,7 +1535,8 @@ function groupStats(){
 }
 function groupStageComplete(){
   const groupMatches=M.filter(m=>m.st==="group");
-  return todayRome>"2026-06-28"||groupMatches.every(m=>matchLiveState(m)==="done");
+  const roundOf32Ready=M.some(m=>m.st==="r32"&&teamOf(m.h)&&teamOf(m.a));
+  return (todayRome>="2026-06-28"&&roundOf32Ready)||groupMatches.every(m=>matchLiveState(m)==="done");
 }
 function renderStandings(){
   const box=document.getElementById("standingsList");if(!box)return;
