@@ -88,10 +88,24 @@ function syncCadenceMinutes(candidates, now = new Date()){
   if(nextHours <= 24)return {minutes:120, tier:"matchday-minus-1"};
   return {minutes:360, tier:"normal"};
 }
+function hasUsableBookOdds(state, m){
+  const o = state?.odds?.[matchId(m)] || state?.odds?.[oddsKey(m)];
+  return Number(o?.h) > 1 && Number(o?.d) > 1 && Number(o?.a) > 1;
+}
+function hasUsableScoreOdds(state, m){
+  if(!SCORE_ODDS_SYNC)return true;
+  const o = state?.scoreOdds?.[matchId(m)] || state?.scoreOdds?.[oddsKey(m)];
+  return Object.values(o?.scores || o?.prices || o?.correctScores || {}).filter(v => Number(v) > 1).length >= 4;
+}
+function missingSnapshotMatches(state, candidates){
+  return candidates.filter(m => !hasUsableBookOdds(state, m) || !hasUsableScoreOdds(state, m));
+}
 function shouldFetchOdds(state, candidates, now = new Date()){
   const cadence = syncCadenceMinutes(candidates, now);
   if(FORCE_SYNC)return {...cadence, shouldFetch:true, reason:"forced"};
   if(!candidates.length)return {...cadence, shouldFetch:false, reason:"no odds candidate in lookahead window"};
+  const missing = missingSnapshotMatches(state, candidates);
+  if(missing.length)return {...cadence, shouldFetch:true, reason:`missing odds snapshot for ${missing.length} match(es)`, missingSnapshots:missing.length};
   const last = Date.parse(state?.oddsSync?.lastCheckedAt || state?.oddsSync?.lastAttemptAt || "") || 0;
   if(!last)return {...cadence, shouldFetch:true, reason:"no previous odds sync"};
   const elapsedMinutes = (now.getTime() - last) / 60_000;
@@ -405,7 +419,8 @@ setGithubOutput({
   should_fetch: plan.shouldFetch ? "true" : "false",
   tier: plan.tier,
   cadence_minutes: plan.minutes,
-  reason: plan.reason
+  reason: plan.reason,
+  missing_snapshots: plan.missingSnapshots || 0
 });
 if(PLAN_ONLY || !plan.shouldFetch){
   if(DRY_RUN || PLAN_ONLY){
@@ -417,6 +432,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
       mode:"pre-match-periodic",
       lastSkippedAt:new Date().toISOString(),
       checked:candidates.length,
+      missingSnapshots:plan.missingSnapshots || 0,
       cadenceMinutes:plan.minutes,
       cadenceTier:plan.tier,
       skipReason:plan.reason,
@@ -510,6 +526,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
     lastAttemptAt:checkedAt,
     lastCheckedAt:checkedAt,
     checked:candidates.length,
+    missingSnapshots:plan.missingSnapshots || 0,
     updated,
     pinnacleUpdated,
     espnUpdated,

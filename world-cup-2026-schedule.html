@@ -635,13 +635,14 @@ body:not(.locked) .access-gate{display:none}
     <section class="update-strip" aria-label="网站最新更新">
       <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
       <ol class="update-list">
+        <li><time datetime="2026-06-28T09:15+02:00">06/28 09:15</time><div class="txt"><span class="taggy">竞猜</span>赔率规则收紧：胜平负与正确比分均需真实快照，缺少快照暂不开放下注。</div></li>
         <li><time datetime="2026-06-28T08:30+02:00">06/28 08:30</time><div class="txt"><span class="taggy">赛程</span>小组赛结束，32强赛对阵已按可靠赛事接口核对更新。</div></li>
         <li><time datetime="2026-06-26T23:43+02:00">06/26 23:43</time><div class="txt"><span class="taggy">彩蛋</span>新增一只懒洋洋的世界杯气氛足球，点击、拖拽才会兴奋起来。</div></li>
-        <li><time datetime="2026-06-26T23:34+02:00">06/26 23:34</time><div class="txt"><span class="taggy">竞猜</span>正确比分优先采用真实赔率快照；缺少快照的比分暂不开放下注。</div></li>
       </ol>
       <details class="update-more">
         <summary>查看更早更新</summary>
         <ol class="update-list">
+          <li><time datetime="2026-06-26T23:34+02:00">06/26 23:34</time><div class="txt"><span class="taggy">竞猜</span>正确比分优先采用真实赔率快照；缺少快照的比分暂不开放下注。</div></li>
           <li><time datetime="2026-06-26T23:14+02:00">06/26 23:14</time><div class="txt"><span class="taggy">比分</span>可选比分数量扩展，覆盖更多常见赛果。</div></li>
           <li><time datetime="2026-06-26T10:09+02:00">06/26 10:09</time><div class="txt"><span class="taggy">首页</span>焦点、竞猜、榜单与小组积分顺序重新整理，更快找到关心内容。</div></li>
           <li><time datetime="2026-06-26T09:45+02:00">06/26 09:45</time><div class="txt"><span class="taggy">信息</span>压缩观赛、规则和说明内容，页面更适合快速浏览。</div></li>
@@ -1231,7 +1232,7 @@ function openMatchDetail(mid){
   </section>
   <div class="detail-grid">${teamBriefHtml(home,m.h,m)}${teamBriefHtml(away,m.a,m)}</div>
   <div class="detail-actions">
-    ${bettable(m)?`<button class="bet-btn sm" data-bet="${attr(mid)}">竞猜这场</button>`:""}
+    ${canPlaceBet(m)?`<button class="bet-btn sm" data-bet="${attr(mid)}">竞猜这场</button>`:""}
     <button class="bet-btn ghost sm" data-close="matchDetailMask">关闭</button>
   </div>`;
   emojify(document.getElementById("matchDetailBody"));
@@ -1299,13 +1300,13 @@ function renderFocusPanel(){
     seenNear.add(id);
     return true;
   }).sort((a,b)=>{
-    const weight=m=>matchLiveState(m)==="live"?0:(bettable(m)?1:(matchDateKey(m)===todayRome?2:(m.importance>=2?3:4)));
+    const weight=m=>matchLiveState(m)==="live"?0:(canPlaceBet(m)?1:(matchDateKey(m)===todayRome?2:(m.importance>=2?3:4)));
     return weight(a)-weight(b)||matchDateKey(a).localeCompare(matchDateKey(b))||a.t.localeCompare(b.t);
   }).slice(0,4);
   const near=nearRows.length?`<div class="focus-matches">${nearRows.map(m=>{
     const score=m.score||m.s||"VS";
     const hotCls=m.importance>=2?" hot":"";
-    const bet=bettable(m)?`<span class="tag mine">可竞猜</span>`:`<span class="tag">${importanceLabel(m)}</span>`;
+    const bet=canPlaceBet(m)?`<span class="tag mine">可竞猜</span>`:`<span class="tag">${importanceLabel(m)}</span>`;
     return `<article class="focus-match${hotCls}" data-detail="${attr(matchId(m))}" tabindex="0" role="button" aria-label="${attr(`${shortMatchName(m)} 比赛详情`)}">
       <div class="top"><div class="when">${m.t}<small>${chinaTime(m.d,m.t)}</small></div>${statusChip(m)}</div>
       <div class="pair">${teamHtml(m.home,m.h)}<span class="vs">${esc(score)}</span>${teamHtml(m.away,m.a)}</div>
@@ -1574,6 +1575,7 @@ function cleanBookOdds(o){
 function bookOdds(m){
   return cleanBookOdds(DB?.odds?.[matchId(m)]||DB?.odds?.[oddsKey(m)]||BOOK_ODDS[oddsKey(m)]);
 }
+function hasRealOdds1x2(m){return !!bookOdds(m);}
 function lambdas(m){
   const hN=teamOf(m.h)?.nameZh, aN=teamOf(m.a)?.nameZh;
   let d=ratingOf(hN)-ratingOf(aN);
@@ -1621,6 +1623,7 @@ function cleanScoreOdds(entry){
 function bookScoreOdds(m){
   return cleanScoreOdds(DB?.scoreOdds?.[matchId(m)]||DB?.scoreOdds?.[oddsKey(m)]);
 }
+function hasRealScoreOdds(m){return !!bookScoreOdds(m);}
 function topScoreOdds(m,n=SCORE_PICK_COUNT){
   const model=modelTopScoreOdds(m,n),snap=bookScoreOdds(m);
   if(!snap)return model.map(o=>({...o,source:"missing",disabled:true,lock:"等待真实赔率"}));
@@ -1675,6 +1678,13 @@ function betLockReason(m){
   return "";
 }
 function bettable(m){return !betLockReason(m);}
+function oddsBetLockReason(m){
+  const base=betLockReason(m);
+  if(base)return base;
+  if(!hasRealOdds1x2(m)&&!hasRealScoreOdds(m))return "等待真实赔率快照";
+  return "";
+}
+function canPlaceBet(m){return !oddsBetLockReason(m);}
 const MID2M={};M.forEach(m=>MID2M[matchId(m)]=m);
 
 /* ---- 持久化 ---- */
@@ -1903,10 +1913,13 @@ async function doLogin(){
 let slip=null;
 function openBet(mid){
   if(!curUser()){openModal("loginMask");return;}
-  const m=MID2M[mid];if(!m||!bettable(m))return;
-  slip={m,type:"1x2",pick:null,odds:0};
+  const m=MID2M[mid];if(!m||oddsBetLockReason(m))return;
+  slip={m,type:hasRealOdds1x2(m)?"1x2":"score",pick:null,odds:0};
   document.getElementById("betTitle").textContent=`${teamOf(m.h).nameZh} vs ${teamOf(m.a).nameZh}`;
-  document.querySelectorAll("#betSeg button").forEach(b=>b.classList.toggle("on",b.dataset.type==="1x2"));
+  document.querySelectorAll("#betSeg button").forEach(b=>{
+    b.disabled=b.dataset.type==="1x2"&&!hasRealOdds1x2(m);
+    b.classList.toggle("on",b.dataset.type===slip.type);
+  });
   document.getElementById("betStake").value="";
   document.getElementById("betMsg").textContent="";
   buildPicks();openModal("betMask");
@@ -1914,13 +1927,18 @@ function openBet(mid){
 function buildPicks(){
   const m=slip.m,box=document.getElementById("betPicks");
   if(slip.type==="1x2"){
-    const o=odds1x2(m);
+    const o=bookOdds(m);
+    if(!o){
+      box.className="bet-picks x3";
+      box.innerHTML=`<div class="bet-empty">胜平负暂无真实赔率快照，暂不开放投注。</div>`;
+      return;
+    }
     const opts=[["h",teamOf(m.h).nameZh+" 胜",o.h],["d","平局",o.d],["a",teamOf(m.a).nameZh+" 胜",o.a]];
     box.className="bet-picks x3";
     box.innerHTML=opts.map(([k,lab,od])=>`<button class="bet-pick" data-pick="${k}" data-odds="${od}"><div class="pk">${esc(lab)}</div><div class="od">${od.toFixed(2)}</div></button>`).join("");
   }else{
     box.className="bet-picks scores";
-    box.innerHTML=topScoreOdds(m,SCORE_PICK_COUNT).map(o=>`<button class="bet-pick" data-pick="${o.s}" data-odds="${o.odds}" ${o.disabled?"disabled":""} title="${o.disabled?"该比分暂无真实赔率快照，暂不开放":(o.source==="book"?"真实赔率快照":"模型赔率")}"><div class="pk">${o.s.replace("-","–")}</div><div class="od">${o.disabled?"—":o.odds.toFixed(2)}</div><div class="src ${o.source==="book"?"book":o.disabled?"lock":""}">${o.source==="book"?"快照":o.disabled?"未开放":"模型"}</div></button>`).join("");
+    box.innerHTML=topScoreOdds(m,SCORE_PICK_COUNT).map(o=>`<button class="bet-pick" data-pick="${o.s}" data-odds="${o.odds}" ${o.disabled?"disabled":""} title="${o.disabled?"该比分暂无真实赔率快照，暂不开放":"真实赔率快照"}"><div class="pk">${o.s.replace("-","–")}</div><div class="od">${o.disabled?"—":o.odds.toFixed(2)}</div><div class="src ${o.source==="book"?"book":o.disabled?"lock":""}">${o.source==="book"?"快照":"未开放"}</div></button>`).join("");
   }
   slip.pick=null;slip.odds=0;updatePayout();
 }
@@ -1937,13 +1955,19 @@ function confirmBet(){
   const u=DB.users[curUser()];
   if(!u){msg.textContent="请先登录";return;}
   if(!slip||!slip.pick){msg.textContent="请先选择一个竞猜选项";return;}
-  const lock=betLockReason(slip.m);
+  const lock=oddsBetLockReason(slip.m);
   if(lock){msg.textContent=`${lock}，无法投注`;return;}
   if(slip.type==="score"){
     const current=scorePickOption(slip.m,slip.pick);
     if(!current){msg.textContent="该比分暂无真实赔率快照，暂不开放投注";return;}
     slip.pick=current.s;
     slip.odds=current.odds;
+  }else if(slip.type==="1x2"){
+    const current=bookOdds(slip.m);
+    if(!current){msg.textContent="胜平负暂无真实赔率快照，暂不开放投注";return;}
+    const currentOdds={h:current.h,d:current.d,a:current.a}[slip.pick];
+    if(!(currentOdds>1)){msg.textContent="该选项暂无真实赔率快照，暂不开放投注";return;}
+    slip.odds=currentOdds;
   }
   normalizeBalances();
   const stake=parseInt(document.getElementById("betStake").value,10),max=Math.floor(u.balance*MAX_PCT);
@@ -1992,7 +2016,7 @@ function renderLoginBar(){
 }
 function renderWallet(){
   const w=document.getElementById("betWallet"),sl=document.getElementById("betMySlips");
-  document.getElementById("betRuleNote").textContent="今天/明天 · 开赛停止 · 完赛结算 · 赛前赔率参考";
+  document.getElementById("betRuleNote").textContent="今天/明天 · 开赛停止 · 完赛结算 · 仅真实赔率快照可下注";
   const u=DB.users[curUser()];
   if(!u){
     w.innerHTML=`<div class="bet-empty">未登录。<button class="bet-btn sm" id="walletLogin">竞猜登录 / 注册</button> 后即可下注（最多 ${MAX_USERS} 人，每人初始 1000 虚拟币）。</div>`;
@@ -2111,14 +2135,17 @@ function renderLeaderboard(){
   box.innerHTML=`<table class="lb"><thead><tr><th>名次</th><th>玩家</th><th style="text-align:right">余额</th><th style="text-align:right">余额变化</th><th style="text-align:right">可追溯注单</th><th style="text-align:right">已结/未结</th><th style="text-align:right">已结净额</th><th style="text-align:right">结算返还</th><th style="text-align:right">未结占用</th></tr></thead><tbody>${rows}</tbody></table><div class="lb-cards">${cards}</div>`;
 }
 function betButtonHtml(m){
-  const lock=betLockReason(m);
+  const lock=oddsBetLockReason(m);
   const mine=myBetSummary(m);
   const note=mine?`<span class="bet-note">我的 ${mine.count} 注 · ${mine.stake} 币${mine.open?` · ${mine.open} 未结`:""}</span>`:"";
   const detail=`<button class="bet-btn ghost sm detail-btn" data-detail="${attr(matchId(m))}" type="button">详情</button>`;
   if(lock)return `<div class="betline ${mine?"mine":""}"><span class="bet-locked ${matchLiveState(m)==="live"?"live":""}">🔒 ${esc(lock)}</span>${note}${detail}</div>`;
-  const o=odds1x2(m);
-  const src=o.source?`<span class="src">赔率快照</span>`:`<span class="src">参考赔率</span>`;
-  return `<div class="betline ${mine?"mine":""}"><span class="odds"><span>主 <b>${o.h.toFixed(2)}</b></span><span>平 <b>${o.d.toFixed(2)}</b></span><span>客 <b>${o.a.toFixed(2)}</b></span>${src}</span>${note}${detail}<button class="bet-btn sm" data-bet="${attr(matchId(m))}">竞猜</button></div>`;
+  const o=bookOdds(m);
+  const scoreOnly=!o&&hasRealScoreOdds(m);
+  const oddsHtml=o
+    ?`<span class="odds"><span>主 <b>${o.h.toFixed(2)}</b></span><span>平 <b>${o.d.toFixed(2)}</b></span><span>客 <b>${o.a.toFixed(2)}</b></span><span class="src">赔率快照</span></span>`
+    :`<span class="odds"><span>正确比分</span><span class="src">赔率快照</span></span>`;
+  return `<div class="betline ${mine?"mine":""}">${oddsHtml}${scoreOnly?`<span class="bet-note">仅开放比分玩法</span>`:""}${note}${detail}<button class="bet-btn sm" data-bet="${attr(matchId(m))}">竞猜</button></div>`;
 }
 
 function refreshAll(){applyResults();settleBets();renderLoginBar();renderWallet();renderFocusPanel();renderLeaderboard();renderStandings();updateTournamentProgress();updateResultSummary();render();renderNotifyBadges();emojify(document.body);}
