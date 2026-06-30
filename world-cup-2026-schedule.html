@@ -86,24 +86,24 @@ body:not(.locked) .access-gate{display:none}
 .progress-track{height:10px;border-radius:999px;background:rgba(243,239,230,.18);overflow:hidden;border:1px solid rgba(243,239,230,.22)}
 .progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--grass),#FFD56A);border-radius:inherit;transition:width .35s ease}
 .progress-detail{margin-top:7px;font-size:12px;color:rgba(243,239,230,.68)}
-.update-strip{margin-top:16px;max-width:760px;border:1px solid rgba(243,239,230,.24);
-  background:rgba(243,239,230,.08);border-radius:13px;padding:12px 14px 11px;
-  box-shadow:0 10px 28px rgba(0,0,0,.08);backdrop-filter:blur(4px)}
+.update-strip{border:1px solid var(--line);
+  background:linear-gradient(135deg,#FCFBF7 0%,#F3F8F4 100%);border-radius:13px;padding:12px 14px 11px;
+  box-shadow:0 8px 18px rgba(11,59,42,.06)}
 .update-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
-.update-head b{font-size:13px;color:#fff;letter-spacing:.04em}
-.update-head span{font-size:11px;color:rgba(243,239,230,.62)}
+.update-head b{font-size:13px;color:var(--pitch);letter-spacing:.04em}
+.update-head span{font-size:11px;color:var(--ink-soft)}
 .update-list{display:grid;gap:6px;list-style:none}
 .update-list li{display:grid;grid-template-columns:128px 1fr;gap:10px;align-items:start;
-  font-size:12.5px;color:rgba(243,239,230,.86)}
-.update-list time{font-family:var(--num);font-size:13px;font-weight:700;color:#FFD56A;white-space:nowrap}
+  font-size:12.5px;color:var(--ink)}
+.update-list time{font-family:var(--num);font-size:13px;font-weight:700;color:var(--host-red);white-space:nowrap}
 .update-list .txt{min-width:0}
-.update-list .taggy{display:inline-flex;margin-right:6px;border:1px solid rgba(255,213,106,.38);
-  border-radius:999px;padding:0 6px;color:#fff;background:rgba(255,213,106,.12);font-size:11px;font-weight:800}
+.update-list .taggy{display:inline-flex;margin-right:6px;border:1px solid #D8E9D1;
+  border-radius:999px;padding:0 6px;color:var(--pitch);background:#EAF5E7;font-size:11px;font-weight:800}
 .update-more{margin-top:7px}
 .update-more summary{cursor:pointer;width:max-content;max-width:100%;font-size:12px;font-weight:800;
-  color:#fff;border:1px solid rgba(243,239,230,.28);border-radius:999px;padding:3px 10px;
-  background:rgba(11,59,42,.34)}
-.update-more summary:hover{border-color:rgba(255,213,106,.6)}
+  color:var(--pitch);border:1px solid #D8E9D1;border-radius:999px;padding:3px 10px;
+  background:#fff}
+.update-more summary:hover{border-color:var(--grass)}
 .update-more[open] summary{margin-bottom:7px}
 
 /* 阶段时间轴 */
@@ -632,25 +632,6 @@ body:not(.locked) .access-gate{display:none}
       <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
       <div class="progress-detail" id="progressDetail">已完成 0 场 · 剩余 104 场</div>
     </div>
-    <section class="update-strip" aria-label="网站最新更新">
-      <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
-      <ol class="update-list">
-        <li><time datetime="2026-06-28T09:15+02:00">06/28 09:15</time><div class="txt"><span class="taggy">竞猜</span>赔率规则收紧：胜平负与正确比分均需真实快照，缺少快照暂不开放下注。</div></li>
-        <li><time datetime="2026-06-28T08:30+02:00">06/28 08:30</time><div class="txt"><span class="taggy">赛程</span>小组赛结束，32强赛对阵已按可靠赛事接口核对更新。</div></li>
-        <li><time datetime="2026-06-26T23:43+02:00">06/26 23:43</time><div class="txt"><span class="taggy">彩蛋</span>新增一只懒洋洋的世界杯气氛足球，点击、拖拽才会兴奋起来。</div></li>
-      </ol>
-      <details class="update-more">
-        <summary>查看更早更新</summary>
-        <ol class="update-list">
-          <li><time datetime="2026-06-26T23:34+02:00">06/26 23:34</time><div class="txt"><span class="taggy">竞猜</span>正确比分优先采用真实赔率快照；缺少快照的比分暂不开放下注。</div></li>
-          <li><time datetime="2026-06-26T23:14+02:00">06/26 23:14</time><div class="txt"><span class="taggy">比分</span>可选比分数量扩展，覆盖更多常见赛果。</div></li>
-          <li><time datetime="2026-06-26T10:09+02:00">06/26 10:09</time><div class="txt"><span class="taggy">首页</span>焦点、竞猜、榜单与小组积分顺序重新整理，更快找到关心内容。</div></li>
-          <li><time datetime="2026-06-26T09:45+02:00">06/26 09:45</time><div class="txt"><span class="taggy">信息</span>压缩观赛、规则和说明内容，页面更适合快速浏览。</div></li>
-          <li><time datetime="2026-06-25T18:33+02:00">06/25 18:33</time><div class="txt"><span class="taggy">专题</span>优化球星与 FIFA 动态视觉，补充可复用球星缩略图。</div></li>
-          <li><time datetime="2026-06-25T18:07+02:00">06/25 18:07</time><div class="txt"><span class="taggy">故事</span>新增球星专题、人文纪事和 FIFA 动态入口。</div></li>
-        </ol>
-      </details>
-    </section>
     <div class="timeline">
       <div class="tl"><div class="s">小组赛</div><div class="d">6/11 – 6/28</div></div>
       <div class="tl"><div class="s">32强赛</div><div class="d">Round of 32 · 6/28 – 7/4</div></div>
@@ -679,6 +660,7 @@ body:not(.locked) .access-gate{display:none}
         <button class="tab link" data-target="rankings">排名</button>
         <button class="tab link" data-target="squadsPanel">阵容</button>
         <button class="tab link" data-target="infoPanel">信息</button>
+        <button class="tab link" data-target="updatesPanel">更新</button>
       </div>
     </div>
     <div class="nav-group">
@@ -727,6 +709,29 @@ body:not(.locked) .access-gate{display:none}
     <h2>小组积分</h2>
     <div class="rank-meta" id="standingsMeta">按当前已录入完赛比分自动计算；未完赛比赛不计入积分。</div>
     <div id="standingsList"></div>
+  </section>
+
+  <section class="panel" id="updatesPanel">
+    <div class="update-strip" aria-label="网站最新更新">
+      <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
+      <ol class="update-list">
+        <li><time datetime="2026-06-30T10:41+02:00">06/30 10:41</time><div class="txt"><span class="taggy">规则</span>补充淘汰赛结算说明，并把本站更新移到核心内容之后。</div></li>
+        <li><time datetime="2026-06-28T09:15+02:00">06/28 09:15</time><div class="txt"><span class="taggy">竞猜</span>赔率规则收紧：胜平负与正确比分均需真实快照，缺少快照暂不开放下注。</div></li>
+        <li><time datetime="2026-06-28T08:30+02:00">06/28 08:30</time><div class="txt"><span class="taggy">赛程</span>小组赛结束，32强赛对阵已按可靠赛事接口核对更新。</div></li>
+      </ol>
+      <details class="update-more">
+        <summary>查看更早更新</summary>
+        <ol class="update-list">
+          <li><time datetime="2026-06-26T23:43+02:00">06/26 23:43</time><div class="txt"><span class="taggy">彩蛋</span>新增一只懒洋洋的世界杯气氛足球，点击、拖拽才会兴奋起来。</div></li>
+          <li><time datetime="2026-06-26T23:34+02:00">06/26 23:34</time><div class="txt"><span class="taggy">竞猜</span>正确比分优先采用真实赔率快照；缺少快照的比分暂不开放下注。</div></li>
+          <li><time datetime="2026-06-26T23:14+02:00">06/26 23:14</time><div class="txt"><span class="taggy">比分</span>可选比分数量扩展，覆盖更多常见赛果。</div></li>
+          <li><time datetime="2026-06-26T10:09+02:00">06/26 10:09</time><div class="txt"><span class="taggy">首页</span>焦点、竞猜、榜单与小组积分顺序重新整理，更快找到关心内容。</div></li>
+          <li><time datetime="2026-06-26T09:45+02:00">06/26 09:45</time><div class="txt"><span class="taggy">信息</span>压缩观赛、规则和说明内容，页面更适合快速浏览。</div></li>
+          <li><time datetime="2026-06-25T18:33+02:00">06/25 18:33</time><div class="txt"><span class="taggy">专题</span>优化球星与 FIFA 动态视觉，补充可复用球星缩略图。</div></li>
+          <li><time datetime="2026-06-25T18:07+02:00">06/25 18:07</time><div class="txt"><span class="taggy">故事</span>新增球星专题、人文纪事和 FIFA 动态入口。</div></li>
+        </ol>
+      </details>
+    </div>
   </section>
 
   <section class="panel" id="storiesTeaser">
@@ -788,7 +793,8 @@ body:not(.locked) .access-gate{display:none}
 
     <div class="status-grid">
       <div class="status-card"><b>赛果进度</b><span id="resultSummary">页面打开后自动读取最新比分和进度。</span></div>
-      <div class="status-card"><b>竞猜开放</b><span>仅开放今天和明天、且尚未开赛的比赛；开赛即停止，完赛后结算。</span></div>
+      <div class="status-card"><b>竞猜开放</b><span>仅开放今天和明天、且尚未开赛的比赛；开赛即停止，按官方完场比分结算。</span></div>
+      <div class="status-card"><b>淘汰赛结算</b><span>加时赛进球计入比分；点球大战只决定晋级，不计入胜平负或正确比分竞猜。</span></div>
       <div class="status-card"><b>留言互动</b><span>未登录可浏览留言；登录后可自由发布或回复，支持 @球队 与 #球星。</span></div>
       <div class="status-card"><b>专题动态</b><span>球星专题与人文纪事为人工精选；FIFA 动态只同步官方标题、时间、来源和链接。</span></div>
       <div class="status-card"><b>排名来源</b><span>FIFA 男足世界排名官方更新时间：2026年6月11日；下一次：2026年7月20日。</span></div>
@@ -2019,7 +2025,7 @@ function renderLoginBar(){
 }
 function renderWallet(){
   const w=document.getElementById("betWallet"),sl=document.getElementById("betMySlips");
-  document.getElementById("betRuleNote").textContent="今天/明天 · 开赛停止 · 完赛结算 · 仅真实赔率快照可下注";
+  document.getElementById("betRuleNote").textContent="今天/明天 · 开赛停止 · 完场比分结算 · 仅真实赔率快照可下注";
   const u=DB.users[curUser()];
   if(!u){
     w.innerHTML=`<div class="bet-empty">未登录。<button class="bet-btn sm" id="walletLogin">竞猜登录 / 注册</button> 后即可下注（最多 ${MAX_USERS} 人，每人初始 1000 虚拟币）。</div>`;
