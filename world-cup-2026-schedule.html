@@ -1689,6 +1689,8 @@ const MID2M={};M.forEach(m=>MID2M[matchId(m)]=m);
 
 /* ---- 持久化 ---- */
 const DB_KEY="wc2026_betting_v1",USER_KEY="wc2026_user",MAX_USERS=50,INIT_BAL=1000,MIN_STAKE=10,MAX_PCT=0.5;
+function minStakeFor(balance){const max=maxStakeFor(balance);return max<1?0:Math.min(MIN_STAKE,max);}
+function maxStakeFor(balance){return Math.floor((Number(balance)||0)*MAX_PCT);}
 let DB=(()=>{try{return Object.assign({users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},scoreOdds:{},scoreOddsSync:{},comments:[]},JSON.parse(localStorage.getItem(DB_KEY))||{});}
   catch(e){return {users:{},bets:[],daily:{},results:{},resultSync:{},odds:{},oddsSync:{},scoreOdds:{},scoreOddsSync:{},comments:[]};}})();
 DB.users=DB.users||{};DB.bets=DB.bets||[];DB.daily=DB.daily||{};DB.results=DB.results||{};DB.resultSync=DB.resultSync||{};DB.odds=DB.odds||{};DB.oddsSync=DB.oddsSync||{};DB.scoreOdds=DB.scoreOdds||{};DB.scoreOddsSync=DB.scoreOddsSync||{};DB.comments=Array.isArray(DB.comments)?DB.comments:[];
@@ -1945,8 +1947,8 @@ function buildPicks(){
 function updatePayout(){
   const stake=parseInt(document.getElementById("betStake").value,10)||0;
   normalizeBalances();
-  const u=DB.users[curUser()],max=u?Math.floor(u.balance*MAX_PCT):0;
-  document.getElementById("betStakeLabel").textContent=`下注金额（${MIN_STAKE} ~ ${max} 币 · 当前余额 ${u?u.balance:0}）`;
+  const u=DB.users[curUser()],bal=u?u.balance:0,min=minStakeFor(bal),max=maxStakeFor(bal);
+  document.getElementById("betStakeLabel").textContent=`下注金额（${min} ~ ${max} 币 · 当前余额 ${bal}）`;
   const out=document.getElementById("betPayout");
   out.textContent=(slip&&slip.pick&&stake>0)?Math.round(stake*slip.odds)+" 币":"—";
 }
@@ -1970,8 +1972,9 @@ function confirmBet(){
     slip.odds=currentOdds;
   }
   normalizeBalances();
-  const stake=parseInt(document.getElementById("betStake").value,10),max=Math.floor(u.balance*MAX_PCT);
-  if(!stake||stake<MIN_STAKE){msg.textContent=`最低下注 ${MIN_STAKE} 币`;return;}
+  const stake=parseInt(document.getElementById("betStake").value,10),min=minStakeFor(u.balance),max=maxStakeFor(u.balance);
+  if(max<1){msg.textContent="余额不足，无法投注";return;}
+  if(!stake||stake<min){msg.textContent=`最低下注 ${min} 币`;return;}
   if(stake>max){msg.textContent=`单注上限为当前余额的 50%（${max} 币）`;return;}
   if(stake>u.balance){msg.textContent="余额不足";return;}
   u.updatedAt=Date.now();
