@@ -109,6 +109,28 @@ function norm(s){
     .replace(/Cote d'Ivoire/g,"Cote d Ivoire")
     .toLowerCase();
 }
+function makeResult(score, extra = {}){
+  if(!score)return null;
+  const penaltyScore = extra.penaltyScore || "";
+  return {
+    score,
+    ...(penaltyScore ? {penaltyScore, displayScore:`${score}（点球 ${penaltyScore}）`} : {}),
+    ...(extra.detail ? {detail:extra.detail} : {})
+  };
+}
+function penaltyScoreFromText(text){
+  const s = String(text || "");
+  const patterns = [
+    /\((?:penalties|pens|pen|pso|点球)[^\d]{0,18}(\d{1,2})\s*[-–:]\s*(\d{1,2})\)/i,
+    /\((\d{1,2})\s*[-–:]\s*(\d{1,2})[^\)]{0,18}(?:penalties|pens|pen|pso|点球)\)/i,
+    /(?:penalties|pens|penalty shootout|shootout|pso|点球)[^\d]{0,40}(\d{1,2})\s*[-–:]\s*(\d{1,2})/i
+  ];
+  for(const rx of patterns){
+    const m = s.match(rx);
+    if(m)return `${Number(m[1])}-${Number(m[2])}`;
+  }
+  return "";
+}
 function scoreFromWindow(text, homeEn, awayEn){
   const clean = text.replace(/\s+/g," ");
   const n = norm(clean), h = norm(homeEn), a = norm(awayEn);
@@ -123,16 +145,16 @@ function scoreFromWindow(text, homeEn, awayEn){
     new RegExp(`${escapeRe(awayEn)}.{0,120}?(\\d{1,2})\\s*[-–:]\\s*(\\d{1,2}).{0,120}?${escapeRe(homeEn)}`,"i")
   ];
   const first = win.match(patterns[0]);
-  if(first)return `${Number(first[1])}-${Number(first[2])}`;
+  if(first)return makeResult(`${Number(first[1])}-${Number(first[2])}`,{penaltyScore:penaltyScoreFromText(win)});
   const second = win.match(patterns[1]);
-  if(second)return `${Number(second[2])}-${Number(second[1])}`;
+  if(second)return makeResult(`${Number(second[2])}-${Number(second[1])}`,{penaltyScore:penaltyScoreFromText(win)});
   return null;
 }
 function scoreFromCanadaSoccer(html){
   if(!/Full Time/i.test(html))return null;
   const m = html.match(/id=["']match-score["'][^>]*>\s*(\d{1,2})\s*[-–]\s*(\d{1,2})\s*</i)
     || html.match(/<div class=["']score["'][\s\S]{0,260}?(\d{1,2})\s*[-–]\s*(\d{1,2})[\s\S]{0,260}?Full Time/i);
-  return m ? `${Number(m[1])}-${Number(m[2])}` : null;
+  return m ? makeResult(`${Number(m[1])}-${Number(m[2])}`,{penaltyScore:penaltyScoreFromText(html)}) : null;
 }
 function scoreFromGenericHtml(html, homeEn, awayEn){
   const text = html
@@ -152,10 +174,10 @@ async function fetchFallbackScore(m){
         if(!r.ok)throw new Error(`${r.status} ${r.statusText}`);
         return r.text();
       });
-      const score = source.parser === "canada-soccer"
+      const result = source.parser === "canada-soccer"
         ? scoreFromCanadaSoccer(html)
         : scoreFromGenericHtml(html, TEAM_EN[home] || home, TEAM_EN[away] || away);
-      if(score)return {score, source:source.name, url:source.url};
+      if(result)return {...result, source:source.name, url:source.url};
       console.log(`Fallback source had no final score: ${source.name} ${home} vs ${away}`);
     }catch(e){
       console.warn(`Fallback source failed: ${source.name} ${id}: ${e.message}`);
@@ -196,6 +218,27 @@ async function fetchEspnScore(m){
   const found = await fetchEspnMatch(m,{allowLive:false});
   return found?.status === "final" ? found : null;
 }
+function numberField(obj, keys){
+  for(const key of keys){
+    const n = Number(obj?.[key]);
+    if(Number.isFinite(n))return n;
+  }
+  return null;
+}
+function espnPenaltyScore(event, matched, status){
+  const keys = ["shootoutScore","penaltyScore","penalties","penaltyShootoutScore","psoScore"];
+  const hp = numberField(matched.homeComp, keys);
+  const ap = numberField(matched.awayComp, keys);
+  if(hp != null && ap != null)return `${hp}-${ap}`;
+  const text = [
+    status?.shortDetail,
+    status?.detail,
+    status?.description,
+    event?.note,
+    event?.competitions?.[0]?.note
+  ].filter(Boolean).join(" ");
+  return penaltyScoreFromText(text);
+}
 async function fetchEspnMatch(m,{allowLive = true} = {}){
   const home = rawName(m.h), away = rawName(m.a);
   for(const dateKey of candidateEspnDates(m)){
@@ -212,8 +255,11 @@ async function fetchEspnMatch(m,{allowLive = true} = {}){
         const live = !completed && (state === "in" || /progress|halftime|live/i.test(status.description || status.detail || ""));
         if(!completed && !(allowLive && live))continue;
         const link = event.links?.find(l => l.rel?.includes("summary"))?.href || board.url;
+        const score = `${hs}-${as}`;
+        const penaltyScore = completed ? espnPenaltyScore(event, matched, status) : "";
         return {
-          score:`${hs}-${as}`,
+          score,
+          ...(penaltyScore ? {penaltyScore, displayScore:`${score}（点球 ${penaltyScore}）`} : {}),
           status:completed ? "final" : "live",
           source:completed ? "ESPN" : "ESPN live",
           url:link,
@@ -243,14 +289,15 @@ const stateClient=makeClient({url:SUPABASE_URL,anonKey:SUPABASE_ANON_KEY,legacyT
 const loadState=()=>stateClient.loadState();
 const saveState=data=>stateClient.saveState(data);
 function parseScore(score){
-  const parts = String(score || "").split(/[–-]/).map(x => Number.parseInt(x.trim(), 10));
+  const m = String(score || "").match(/(\d{1,2})\s*[-–:]\s*(\d{1,2})/);
+  const parts = m ? [Number(m[1]),Number(m[2])] : [];
   return parts.length === 2 && parts.every(Number.isFinite) ? parts : null;
 }
 function resultScore(entry){
   if(!entry)return "";
-  if(typeof entry === "string")return entry;
+  if(typeof entry === "string")return parseScore(entry)?.join("-") || "";
   const status = String(entry.status || "").toLowerCase();
-  return entry.score && ["final","done","full-time","ft"].includes(status) ? entry.score : "";
+  return entry.score && ["final","done","full-time","ft"].includes(status) ? (parseScore(entry.score)?.join("-") || "") : "";
 }
 function todayRomeKey(){
   return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome"}).format(new Date());
@@ -352,6 +399,8 @@ for(const m of liveCandidates){
   }
   state.results[matchId(m)] = {
     score:live.score,
+    ...(live.displayScore ? {displayScore:live.displayScore} : {}),
+    ...(live.penaltyScore ? {penaltyScore:live.penaltyScore} : {}),
     status:"live",
     source:live.source,
     sourceUrl:live.url,
@@ -363,30 +412,32 @@ for(const m of liveCandidates){
 }
 for(const m of finalCandidates){
   const home = rawName(m.h), away = rawName(m.a);
-  let score = officialText ? scoreFromWindow(officialText, TEAM_EN[home] || home, TEAM_EN[away] || away) : null;
+  let result = officialText ? scoreFromWindow(officialText, TEAM_EN[home] || home, TEAM_EN[away] || away) : null;
   let source = "FIFA";
   let sourceUrl = FIFA_URL;
-  if(!score){
+  if(!result){
     const fallback = await fetchEspnScore(m) || await fetchFallbackScore(m);
     if(fallback){
-      score = fallback.score;
+      result = fallback;
       source = `FIFA fallback: ${fallback.source}`;
       sourceUrl = fallback.url;
     }
   }
-  if(!score){
+  if(!result?.score){
     console.log(`No final score found: ${home} vs ${away}`);
     continue;
   }
   state.results[matchId(m)] = {
-    score,
+    score:result.score,
+    ...(result.displayScore ? {displayScore:result.displayScore} : {}),
+    ...(result.penaltyScore ? {penaltyScore:result.penaltyScore} : {}),
     status:"final",
     source,
     sourceUrl,
     updatedAt:checkedAt
   };
   finalUpdated += 1;
-  console.log(`Final: ${home} ${score} ${away}`);
+  console.log(`Final: ${home} ${result.displayScore || result.score} ${away}`);
 }
 const settled = settleBets(state,matches);
 state.resultSync = {source:"FIFA + ESPN", mode:"smart-live-and-final", lastCheckedAt:checkedAt, updated:liveUpdated + finalUpdated, liveUpdated, finalUpdated, unchanged, settled, liveCandidates:liveCandidates.length, finalCandidates:finalCandidates.length};

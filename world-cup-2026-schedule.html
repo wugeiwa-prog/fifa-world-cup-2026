@@ -192,6 +192,7 @@ body:not(.locked) .access-gate{display:none}
 .teams .vs{font-family:var(--num);font-weight:700;font-size:13px;color:var(--ink-soft);background:#F5F2E9;border-radius:999px;padding:2px 8px}
 .teams .score{font-family:var(--num);font-weight:800;font-size:23px;line-height:1;color:#fff;background:var(--host-red);
   border-radius:8px;padding:4px 10px;box-shadow:0 4px 12px rgba(200,55,45,.16)}
+.teams .score.pens{font-size:15px;padding:6px 8px}
 .venue{margin-top:5px;font-size:12.5px;color:var(--ink-soft);display:flex;gap:6px;align-items:center}
 .note{margin-top:4px;font-size:12px;color:#8A6A1F}
 .watch{margin-top:6px;display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;font-size:12px;color:#5E4C17}
@@ -715,13 +716,14 @@ body:not(.locked) .access-gate{display:none}
     <div class="update-strip" aria-label="网站最新更新">
       <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
       <ol class="update-list">
+        <li><time datetime="2026-06-30T11:42+02:00">06/30 11:42</time><div class="txt"><span class="taggy">赛果</span>点球大战结果只作展示，竞猜结算保留点球前比分。</div></li>
         <li><time datetime="2026-06-30T10:41+02:00">06/30 10:41</time><div class="txt"><span class="taggy">规则</span>补充淘汰赛结算说明，并把本站更新移到核心内容之后。</div></li>
         <li><time datetime="2026-06-28T09:15+02:00">06/28 09:15</time><div class="txt"><span class="taggy">竞猜</span>赔率规则收紧：胜平负与正确比分均需真实快照，缺少快照暂不开放下注。</div></li>
-        <li><time datetime="2026-06-28T08:30+02:00">06/28 08:30</time><div class="txt"><span class="taggy">赛程</span>小组赛结束，32强赛对阵已按可靠赛事接口核对更新。</div></li>
       </ol>
       <details class="update-more">
         <summary>查看更早更新</summary>
         <ol class="update-list">
+          <li><time datetime="2026-06-28T08:30+02:00">06/28 08:30</time><div class="txt"><span class="taggy">赛程</span>小组赛结束，32强赛对阵已按可靠赛事接口核对更新。</div></li>
           <li><time datetime="2026-06-26T23:43+02:00">06/26 23:43</time><div class="txt"><span class="taggy">彩蛋</span>新增一只懒洋洋的世界杯气氛足球，点击、拖拽才会兴奋起来。</div></li>
           <li><time datetime="2026-06-26T23:34+02:00">06/26 23:34</time><div class="txt"><span class="taggy">竞猜</span>正确比分优先采用真实赔率快照；缺少快照的比分暂不开放下注。</div></li>
           <li><time datetime="2026-06-26T23:14+02:00">06/26 23:14</time><div class="txt"><span class="taggy">比分</span>可选比分数量扩展，覆盖更多常见赛果。</div></li>
@@ -794,7 +796,7 @@ body:not(.locked) .access-gate{display:none}
     <div class="status-grid">
       <div class="status-card"><b>赛果进度</b><span id="resultSummary">页面打开后自动读取最新比分和进度。</span></div>
       <div class="status-card"><b>竞猜开放</b><span>仅开放今天和明天、且尚未开赛的比赛；开赛即停止，按官方完场比分结算。</span></div>
-      <div class="status-card"><b>淘汰赛结算</b><span>加时赛进球计入比分；点球大战只决定晋级，不计入胜平负或正确比分竞猜。</span></div>
+      <div class="status-card"><b>淘汰赛结算</b><span>加时赛进球计入比分；点球大战结果会显示在比赛信息中，但不计入胜平负或正确比分竞猜。</span></div>
       <div class="status-card"><b>留言互动</b><span>未登录可浏览留言；登录后可自由发布或回复，支持 @球队 与 #球星。</span></div>
       <div class="status-card"><b>专题动态</b><span>球星专题与人文纪事为人工精选；FIFA 动态只同步官方标题、时间、来源和链接。</span></div>
       <div class="status-card"><b>排名来源</b><span>FIFA 男足世界排名官方更新时间：2026年6月11日；下一次：2026年7月20日。</span></div>
@@ -1118,16 +1120,22 @@ function enrichMatch(m){
 }
 const M=RAW_MATCHES.map(enrichMatch);
 const STATIC_RESULTS=Object.fromEntries(M.filter(m=>m.score).map(m=>[matchId(m),{score:m.score,status:"final",source:"static",updatedAt:SNAPSHOT_AT}]));
+function settlementScoreText(value){
+  const m=String(value||"").match(/(\d{1,2})\s*[-–:]\s*(\d{1,2})/);
+  return m?`${Number(m[1])}-${Number(m[2])}`:"";
+}
 function resultScore(entry){
   if(!entry)return "";
-  if(typeof entry==="string")return entry;
+  if(typeof entry==="string")return settlementScoreText(entry);
   const status=String(entry.status||"").toLowerCase();
-  if(entry.score&&(status==="final"||status==="done"||status==="full-time"||status==="ft"))return entry.score;
+  if(entry.score&&(status==="final"||status==="done"||status==="full-time"||status==="ft"))return settlementScoreText(entry.score);
   return "";
 }
 function resultDisplayScore(entry){
   if(!entry)return "";
   if(typeof entry==="string")return entry;
+  if(entry.displayScore)return entry.displayScore;
+  if(entry.score&&entry.penaltyScore)return `${settlementScoreText(entry.score)||entry.score}（点球 ${entry.penaltyScore}）`;
   return entry.score||"";
 }
 function resultEntryStatus(entry){
@@ -1146,8 +1154,9 @@ function applyResults(){
     if(!display)return;
     const status=resultEntryStatus(entry);
     const finalStatus=status==="final"||status==="done"||status==="full-time"||status==="ft";
-    m.score=display;m.sourceUpdatedAt=resultUpdatedAt(entry)||SNAPSHOT_AT;
-    if(finalStatus){m.s=display;m.status="done";}
+    const settle=resultScore(entry);
+    m.score=display;m.penaltyScore=entry?.penaltyScore||"";m.sourceUpdatedAt=resultUpdatedAt(entry)||SNAPSHOT_AT;
+    if(finalStatus){m.s=settle||settlementScoreText(display);m.status="done";}
     else if(status==="live"||status==="in"||status==="in-progress"){m.status="live";}
   });
 }
@@ -1229,11 +1238,13 @@ function teamBriefHtml(team,raw,ref){
 function openMatchDetail(mid){
   const m=MID2M[mid];if(!m)return;
   const home=teamOf(m.h),away=teamOf(m.a),score=m.score||m.s||"未开赛";
+  const settleNote=m.penaltyScore&&m.s?`<div class="detail-note">竞猜结算比分：${esc(m.s)}；点球大战结果仅作比赛信息展示。</div>`:"";
   document.getElementById("matchDetailTitle").textContent=shortMatchName(m);
   document.getElementById("matchDetailBody").innerHTML=`<section class="detail-head">
     <div class="detail-meta">${STAGE_NAME[m.st]}${m.st==="group"?` · ${m.g} 组`:` · ${esc(m.g)}`} · ${m.d} ${m.t} CEST · ${chinaTime(m.d,m.t)}</div>
     <div class="detail-score">${esc(score)}</div>
     <div class="detail-meta">📍 ${esc(m.v)} ${m.c} · ${statusChip(m).replace(/<[^>]+>/g,"")}</div>
+    ${settleNote}
     ${m.watchNote?`<div class="detail-note">${esc(m.watchNote)}</div>`:""}
   </section>
   <div class="detail-grid">${teamBriefHtml(home,m.h,m)}${teamBriefHtml(away,m.a,m)}</div>
@@ -1368,7 +1379,7 @@ function render(){
     const status=statusChip(m);
     const level=`<span class="tag ${m.importance===3?"hot":""}">${importanceLabel(m)}</span>`;
     const tags=m.tags.slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join("");
-    const mid=m.score?`<span class="score">${m.score}</span>`:`<span class="vs">VS</span>`;
+    const mid=m.score?`<span class="score ${m.penaltyScore?"pens":""}">${m.score}</span>`:`<span class="vs">VS</span>`;
     const mine=myBetSummary(m);
     const live=matchLiveState(m)==="live";
     const mineTag=mine?`<span class="tag mine">我的 ${mine.count} 注 · ${mine.stake} 币</span>`:"";
@@ -1990,7 +2001,7 @@ function confirmBet(){
 }
 
 /* ---- 结算 ---- */
-function parseScore(s){const a=s.split(/[–-]/).map(x=>parseInt(x.trim(),10));return a.length===2&&a.every(n=>!isNaN(n))?a:null;}
+function parseScore(s){const clean=settlementScoreText(s);const a=clean.split(/[–-]/).map(x=>parseInt(x.trim(),10));return a.length===2&&a.every(n=>!isNaN(n))?a:null;}
 function settleBets(){
   let changed=false;
   DB.bets.forEach(b=>{
