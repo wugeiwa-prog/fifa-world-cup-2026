@@ -117,11 +117,25 @@ function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
     db.comments=(rows.comments||[]).map(r=>({id:r.id,user:r.user_name,text:r.text,createdAt:Number(r.created_at)||0,updatedAt:Number(r.updated_at)||0,replies:(repliesByComment[r.id]||[]).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,200);
     (rows.meta||[]).forEach(r=>{
       if(r.key==="resultSync")db.resultSync=r.data||{};
+      if(r.key==="resultExtras"){
+        Object.entries(r.data||{}).forEach(([mid,extra])=>{
+          if(db.results[mid])db.results[mid]={...db.results[mid],...extra};
+        });
+      }
       if(r.key==="oddsSync")db.oddsSync=r.data||{};
       if(r.key==="scoreOdds")db.scoreOdds=r.data||{};
       if(r.key==="scoreOddsSync")db.scoreOddsSync=r.data||{};
     });
     return normalizeBalances(db);
+  }
+  function resultExtras(db){
+    return Object.fromEntries(Object.entries(db.results||{})
+      .filter(([,r])=>r?.displayScore||r?.penaltyScore)
+      .map(([mid,r])=>[mid,{
+        ...(r.displayScore?{displayScore:r.displayScore}:{}),
+        ...(r.penaltyScore?{penaltyScore:r.penaltyScore}:{}),
+        ...(r.detail?{detail:r.detail}:{})
+      }]));
   }
   async function pullTables(){
     const [users,bets,daily,results,odds,comments,replies,meta]=await Promise.all([
@@ -139,6 +153,7 @@ function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
   function rowsFromDB(db){
     db=normalizeBalances(db);
     const nowIso=new Date().toISOString();
+    const extras=resultExtras(db);
     return {
       users:Object.values(db.users).map(u=>({name:u.name,balance:u.balance||0,created_at:u.createdAt||Date.now(),updated_at:u.updatedAt||Date.now()})),
       bets:db.bets.map(b=>({id:b.id,user_name:b.user,mid:b.mid,type:b.type,pick:b.pick,odds:b.odds,stake:b.stake,status:b.status,payout:b.payout??null,placed_at:b.placedAt||Date.now(),settled_at:b.settledAt??null,updated_at:b.updatedAt||b.settledAt||b.placedAt||Date.now()})),
@@ -149,6 +164,7 @@ function makeClient({url,anonKey,legacyTable="wc2026_state",rowId="global"}){
       replies:db.comments.flatMap(c=>(c.replies||[]).map(r=>({id:r.id,comment_id:c.id,user_name:r.user,text:r.text,created_at:r.createdAt||Date.now()}))),
       meta:[
         ...(Object.keys(db.resultSync||{}).length?[{key:"resultSync",data:db.resultSync,updated_at:nowIso}]:[]),
+        ...(Object.keys(extras).length?[{key:"resultExtras",data:extras,updated_at:nowIso}]:[]),
         ...(Object.keys(db.oddsSync||{}).length?[{key:"oddsSync",data:db.oddsSync,updated_at:nowIso}]:[]),
         ...(Object.keys(db.scoreOdds||{}).length?[{key:"scoreOdds",data:db.scoreOdds,updated_at:nowIso}]:[]),
         ...(Object.keys(db.scoreOddsSync||{}).length?[{key:"scoreOddsSync",data:db.scoreOddsSync,updated_at:nowIso}]:[])
