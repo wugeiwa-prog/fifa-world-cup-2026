@@ -1584,6 +1584,9 @@ const BOOK_ODDS={
   "卡塔尔-瑞士":{h:12.840,d:6.830,a:1.230,url:"https://www.pinnacle.com/en/soccer/fifa-world-cup/qatar-vs-switzerland/1620858176/"}
 };
 function oddsKey(m){return `${rawName(m.h)}-${rawName(m.a)}`;}
+const BET_GRACE_MINUTES_BY_MATCH={
+  "07-02#21:00#西班牙#奥地利":10
+};
 function cleanBookOdds(o){
   if(!o)return null;
   const h=Number(o.h),d=Number(o.d),a=Number(o.a);
@@ -1668,6 +1671,9 @@ function matchKickoffTime(m){
   const[hh,mm]=m.t.split(":").map(Number);
   return new Date(Date.UTC(2026,mo-1,dd,hh-2,mm));
 }
+function bettingCloseTime(m){
+  return new Date(matchKickoffTime(m).getTime()+(BET_GRACE_MINUTES_BY_MATCH[matchId(m)]||0)*60_000);
+}
 function hasKickedOff(m){return Date.now()>=matchKickoffTime(m).getTime();}
 function expectedFinalTime(m){
   const minutes=m.st==="group"?135:180;
@@ -1691,6 +1697,7 @@ function betLockReason(m){
   if(state==="done")return "已结束";
   if(state==="unknown")return "对阵确定后开放竞猜";
   if(state==="awaiting-result")return "赛果待更新，竞猜已关闭";
+  if(state==="live"&&Date.now()<bettingCloseTime(m).getTime())return "";
   if(state==="live")return "比赛进行中，竞猜停止";
   if(!inBetWindow(m))return "仅开放今天/明天场次";
   return "";

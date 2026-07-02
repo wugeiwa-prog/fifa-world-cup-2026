@@ -15,6 +15,9 @@ const ESPN_ODDS_BACKUP = process.env.ESPN_ODDS_BACKUP !== "0";
 const SCORE_ODDS_SYNC = process.env.SCORE_ODDS_SYNC !== "0";
 const SPORTSGAMBLER_SCORE_BACKUP = process.env.SPORTSGAMBLER_SCORE_BACKUP !== "0";
 const SCORE_GRID = Number(process.env.SCORE_GRID || 7);
+const ODDS_GRACE_MINUTES = {
+  "07-02#21:00#西班牙#奥地利":10
+};
 
 const PINNACLE_MATCHUPS_URLS = [
   "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/",
@@ -78,8 +81,9 @@ function isOddsCandidate(m, now = new Date()){
   if(!FORCE_ALL && !inBetWindow(m, now))return false;
   if(!PINNACLE_URLS[matchId(m)] && !ALLOW_MATCHUPS_PARSE && !ESPN_ODDS_BACKUP)return false;
   const kick = romeKickoffUtc(m).getTime();
+  const graceHours = (ODDS_GRACE_MINUTES[matchId(m)] || 0) / 60;
   const diffHours = (kick - now.getTime()) / 3_600_000;
-  return FORCE_ALL || (diffHours > 0 && diffHours <= LOOKAHEAD_HOURS);
+  return FORCE_ALL || (diffHours > -graceHours && diffHours <= LOOKAHEAD_HOURS);
 }
 function syncCadenceMinutes(candidates, now = new Date()){
   if(!candidates.length)return {minutes:360, tier:"no-odds-candidate"};
