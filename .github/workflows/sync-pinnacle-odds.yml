@@ -12,7 +12,7 @@ on:
           - "false"
           - "true"
   schedule:
-    - cron: "17 * * * *"
+    - cron: "*/10 * * * *"
 
 permissions:
   contents: read
@@ -41,6 +41,10 @@ jobs:
           SUPABASE_TABLE: wc2026_state
           SUPABASE_ROW_ID: global
           ODDS_LOOKAHEAD_HOURS: "48"
+          POST_KICKOFF_ODDS_GRACE_MINUTES: "30"
+          HIGH_FREQ_LOOKAHEAD_MINUTES: "90"
+          HIGH_FREQ_MISSING_RATIO: "0.8"
+          HIGH_FREQ_CADENCE_MINUTES: "10"
           ODDS_PLAN_ONLY: "1"
           ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
           PINNACLE_ALLOW_MATCHUPS_PARSE: "1"
@@ -63,6 +67,10 @@ jobs:
           SUPABASE_TABLE: wc2026_state
           SUPABASE_ROW_ID: global
           ODDS_LOOKAHEAD_HOURS: "48"
+          POST_KICKOFF_ODDS_GRACE_MINUTES: "30"
+          HIGH_FREQ_LOOKAHEAD_MINUTES: "90"
+          HIGH_FREQ_MISSING_RATIO: "0.8"
+          HIGH_FREQ_CADENCE_MINUTES: "10"
           ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
           PINNACLE_ALLOW_MATCHUPS_PARSE: "1"
           ESPN_ODDS_BACKUP: "1"
