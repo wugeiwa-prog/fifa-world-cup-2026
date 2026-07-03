@@ -16,9 +16,9 @@ const SCORE_ODDS_SYNC = process.env.SCORE_ODDS_SYNC !== "0";
 const SPORTSGAMBLER_SCORE_BACKUP = process.env.SPORTSGAMBLER_SCORE_BACKUP !== "0";
 const SCORE_GRID = Number(process.env.SCORE_GRID || 7);
 const POST_KICKOFF_ODDS_GRACE_MINUTES = Number(process.env.POST_KICKOFF_ODDS_GRACE_MINUTES || 30);
-const HIGH_FREQ_LOOKAHEAD_MINUTES = Number(process.env.HIGH_FREQ_LOOKAHEAD_MINUTES || 90);
-const HIGH_FREQ_MISSING_RATIO = Number(process.env.HIGH_FREQ_MISSING_RATIO || 0.8);
-const HIGH_FREQ_CADENCE_MINUTES = Number(process.env.HIGH_FREQ_CADENCE_MINUTES || 10);
+const HIGH_FREQ_LOOKAHEAD_MINUTES = Number(process.env.HIGH_FREQ_LOOKAHEAD_MINUTES || 720);
+const HIGH_FREQ_MISSING_RATIO = Number(process.env.HIGH_FREQ_MISSING_RATIO || 0.5);
+const HIGH_FREQ_CADENCE_MINUTES = Number(process.env.HIGH_FREQ_CADENCE_MINUTES || 30);
 
 const PINNACLE_MATCHUPS_URLS = [
   "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/",
@@ -89,7 +89,7 @@ function isOddsCandidate(m, now = new Date()){
 function syncCadenceMinutes(candidates, now = new Date(), health = null){
   if(!candidates.length)return {minutes:360, tier:"no-odds-candidate"};
   const nextMinutes = Math.min(...candidates.map(m => (romeKickoffUtc(m).getTime() - now.getTime()) / 60_000));
-  if(health?.widespreadMissing && nextMinutes <= HIGH_FREQ_LOOKAHEAD_MINUTES){
+  if(health?.widespreadMissing && health.nextMissingMinutes <= HIGH_FREQ_LOOKAHEAD_MINUTES){
     return {minutes:HIGH_FREQ_CADENCE_MINUTES, tier:"near-kickoff-widespread-missing"};
   }
   const nextHours = nextMinutes / 60;
@@ -106,27 +106,32 @@ function hasUsableScoreOdds(state, m){
   const o = state?.scoreOdds?.[matchId(m)] || state?.scoreOdds?.[oddsKey(m)];
   return Object.values(o?.scores || o?.prices || o?.correctScores || {}).filter(v => Number(v) > 1).length >= 4;
 }
-function oddsHealth(state, candidates){
+function oddsHealth(state, candidates, now = new Date()){
   const checked = candidates.length;
   const bookMissing = candidates.filter(m => !hasUsableBookOdds(state, m)).length;
   const scoreMissing = candidates.filter(m => !hasUsableScoreOdds(state, m)).length;
+  const missing = missingSnapshotMatches(state, candidates);
+  const nextMissingMinutes = missing.length
+    ? Math.min(...missing.map(m => (romeKickoffUtc(m).getTime() - now.getTime()) / 60_000))
+    : Infinity;
   const ratio = n => checked ? n / checked : 0;
   return {
     checked,
     bookMissing,
     scoreMissing,
+    nextMissingMinutes,
     bookMissingRatio:ratio(bookMissing),
     scoreMissingRatio:ratio(scoreMissing),
     widespreadMissing:checked > 0 &&
-      ratio(bookMissing) >= HIGH_FREQ_MISSING_RATIO &&
-      ratio(scoreMissing) >= HIGH_FREQ_MISSING_RATIO
+      (ratio(bookMissing) >= HIGH_FREQ_MISSING_RATIO ||
+       ratio(scoreMissing) >= HIGH_FREQ_MISSING_RATIO)
   };
 }
 function missingSnapshotMatches(state, candidates){
   return candidates.filter(m => !hasUsableBookOdds(state, m) || !hasUsableScoreOdds(state, m));
 }
 function shouldFetchOdds(state, candidates, now = new Date()){
-  const health = oddsHealth(state, candidates);
+  const health = oddsHealth(state, candidates, now);
   const cadence = syncCadenceMinutes(candidates, now, health);
   if(FORCE_SYNC)return {...cadence, shouldFetch:true, reason:"forced"};
   if(!candidates.length)return {...cadence, shouldFetch:false, reason:"no odds candidate in lookahead window"};
