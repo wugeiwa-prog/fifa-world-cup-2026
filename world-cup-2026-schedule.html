@@ -132,8 +132,6 @@ body:not(.locked) .access-gate{display:none}
 .tab.hot.on{background:var(--host-red);border-color:var(--host-red)}
 .tab.link{position:relative;border-radius:7px;padding:6px 10px}
 .tab.link.primary{background:#E5F4EB;border-color:#BFE0C9;color:#10663C;font-weight:800}
-.tab.link.standings-tab{background:#E5F4EB;border-color:#BFE0C9;color:#10663C;font-weight:800}
-.tab.link.standings-tab.on{background:var(--pitch);border-color:var(--pitch);color:var(--chalk)}
 .tab.link.on{background:#E8EEF9;border-color:#CAD7EF;color:var(--host-blue)}
 .notify-badge{display:none;min-width:18px;height:18px;border-radius:999px;background:var(--host-red);color:#fff;font-family:var(--num);font-size:12px;font-weight:800;line-height:18px;text-align:center;padding:0 5px;margin-left:4px}
 .notify-badge.show{display:inline-flex;align-items:center;justify-content:center}
@@ -155,6 +153,13 @@ body:not(.locked) .access-gate{display:none}
 .day .fold-btn{border:1px solid var(--line);background:#fff;border-radius:999px;color:var(--pitch);font-size:12px;font-weight:800;padding:3px 9px;cursor:pointer;font-family:var(--cjk)}
 .day.old{border-bottom-color:#BDB7A9;color:var(--ink-soft)}
 .grid.folded{display:none}
+.stage-archive{margin:18px 0 12px;border:1px dashed #C9C2B4;background:#FFFDF8;border-radius:12px;
+  padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.stage-archive .txt{font-size:13px;color:var(--ink-soft)}
+.stage-archive b{color:var(--pitch)}
+.stage-archive button{border:1px solid var(--line);background:#fff;color:var(--pitch);font-family:var(--cjk);
+  border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer}
+.stage-archive button:hover{border-color:var(--grass)}
 
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:760px){.grid{grid-template-columns:1fr}}
@@ -654,7 +659,7 @@ body:not(.locked) .access-gate{display:none}
         <button class="tab link" data-action="open-bettable">下注</button>
         <button class="tab link" data-target="betHall">我的 <span class="notify-badge" id="betNotifyBadge">0</span></button>
         <button class="tab link" data-target="betBoard">榜单</button>
-        <button class="tab link standings-tab" data-target="standingsPanel">小组积分</button>
+        <button class="tab link" data-target="standingsPanel">小组积分</button>
         <a class="tab link" href="stories.html">专题</a>
         <a class="tab link" href="comments.html?focus=replies">留言 <span class="notify-badge" id="commentNotifyBadge">0</span></a>
         <button class="tab link" data-target="schedulePanel">赛程</button>
@@ -716,13 +721,14 @@ body:not(.locked) .access-gate{display:none}
     <div class="update-strip" aria-label="网站最新更新">
       <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
       <ol class="update-list">
+        <li><time datetime="2026-07-03T13:30+02:00">07/03 13:30</time><div class="txt"><span class="taggy">赛程</span>更新已确定的16强对阵，赛程筛选会自动高亮当前阶段。</div></li>
         <li><time datetime="2026-06-30T14:51+02:00">06/30 14:51</time><div class="txt"><span class="taggy">赛果</span>补齐已结束淘汰赛点球信息，并加固云端同步展示。</div></li>
         <li><time datetime="2026-06-30T11:42+02:00">06/30 11:42</time><div class="txt"><span class="taggy">赛果</span>点球大战结果只作展示，竞猜结算保留点球前比分。</div></li>
-        <li><time datetime="2026-06-30T10:41+02:00">06/30 10:41</time><div class="txt"><span class="taggy">规则</span>补充淘汰赛结算说明，并把本站更新移到核心内容之后。</div></li>
       </ol>
       <details class="update-more">
         <summary>查看更早更新</summary>
         <ol class="update-list">
+          <li><time datetime="2026-06-30T10:41+02:00">06/30 10:41</time><div class="txt"><span class="taggy">规则</span>补充淘汰赛结算说明，并把本站更新移到核心内容之后。</div></li>
           <li><time datetime="2026-06-28T09:15+02:00">06/28 09:15</time><div class="txt"><span class="taggy">竞猜</span>赔率规则收紧：胜平负与正确比分均需真实快照，缺少快照暂不开放下注。</div></li>
           <li><time datetime="2026-06-28T08:30+02:00">06/28 08:30</time><div class="txt"><span class="taggy">赛程</span>小组赛结束，32强赛对阵已按可靠赛事接口核对更新。</div></li>
           <li><time datetime="2026-06-26T23:43+02:00">06/26 23:43</time><div class="txt"><span class="taggy">彩蛋</span>新增一只懒洋洋的世界杯气氛足球，点击、拖拽才会兴奋起来。</div></li>
@@ -991,14 +997,14 @@ const RAW_MATCHES=[
 {d:"07-04",t:"00:00",st:"r32",g:"第86场",h:"🇦🇷 阿根廷",a:"🇨🇻 佛得角",v:"迈阿密体育场",c:"🇺🇸"},
 {d:"07-04",t:"03:30",st:"r32",g:"第87场",h:"🇨🇴 哥伦比亚",a:"🇬🇭 加纳",v:"堪萨斯城体育场",c:"🇺🇸"},
 // —— 16强赛（Round of 16）——
-{d:"07-04",t:"19:00",st:"r16",g:"第90场",h:"第73场胜者",a:"第75场胜者",v:"休斯敦体育场",c:"🇺🇸"},
-{d:"07-04",t:"23:00",st:"r16",g:"第89场",h:"第74场胜者",a:"第77场胜者",v:"费城体育场",c:"🇺🇸"},
-{d:"07-05",t:"22:00",st:"r16",g:"第91场",h:"第76场胜者",a:"第78场胜者",v:"纽约/新泽西体育场",c:"🇺🇸"},
-{d:"07-06",t:"02:00",st:"r16",g:"第92场",h:"第79场胜者",a:"第80场胜者",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽"},
-{d:"07-06",t:"21:00",st:"r16",g:"第93场",h:"第83场胜者",a:"第84场胜者",v:"达拉斯体育场",c:"🇺🇸"},
-{d:"07-07",t:"02:00",st:"r16",g:"第94场",h:"第81场胜者",a:"第82场胜者",v:"西雅图体育场",c:"🇺🇸"},
+{d:"07-04",t:"19:00",st:"r16",g:"第90场",h:"🇨🇦 加拿大",a:"🇲🇦 摩洛哥",v:"休斯敦体育场",c:"🇺🇸"},
+{d:"07-04",t:"23:00",st:"r16",g:"第89场",h:"🇵🇾 巴拉圭",a:"🇫🇷 法国",v:"费城体育场",c:"🇺🇸"},
+{d:"07-05",t:"22:00",st:"r16",g:"第91场",h:"🇧🇷 巴西",a:"🇳🇴 挪威",v:"纽约/新泽西体育场",c:"🇺🇸"},
+{d:"07-06",t:"02:00",st:"r16",g:"第92场",h:"🇲🇽 墨西哥",a:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽"},
+{d:"07-06",t:"21:00",st:"r16",g:"第93场",h:"🇵🇹 葡萄牙",a:"🇪🇸 西班牙",v:"达拉斯体育场",c:"🇺🇸"},
+{d:"07-07",t:"02:00",st:"r16",g:"第94场",h:"🇺🇸 美国",a:"🇧🇪 比利时",v:"西雅图体育场",c:"🇺🇸"},
 {d:"07-07",t:"18:00",st:"r16",g:"第95场",h:"第86场胜者",a:"第88场胜者",v:"亚特兰大体育场",c:"🇺🇸"},
-{d:"07-07",t:"22:00",st:"r16",g:"第96场",h:"第85场胜者",a:"第87场胜者",v:"温哥华 BC Place",c:"🇨🇦"},
+{d:"07-07",t:"22:00",st:"r16",g:"第96场",h:"🇨🇭 瑞士",a:"第87场胜者",v:"温哥华 BC Place",c:"🇨🇦"},
 // —— 1/4 决赛 ——
 {d:"07-09",t:"22:00",st:"qf",g:"第97场",h:"第89场胜者",a:"第90场胜者",v:"波士顿体育场",c:"🇺🇸"},
 {d:"07-10",t:"21:00",st:"qf",g:"第98场",h:"第93场胜者",a:"第94场胜者",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
@@ -1166,7 +1172,7 @@ const WK=["周日","周一","周二","周三","周四","周五","周六"];
 const STAGE_NAME={group:"小组赛",r32:"32强赛",r16:"16强赛",qf:"1/4决赛",fin:"半决赛/决赛"};
 const todayRome=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome"}).format(new Date()); // YYYY-MM-DD
 
-let curStage="all",curQ="";
+let curStage="all",curQ="",stageAuto=true;
 const OLD_DAYS_KEY="wc2026_expanded_old_days",BET_HISTORY_KEY="wc2026_bet_history_open";
 const expandedOldDays=new Set(JSON.parse(sessionStorage.getItem(OLD_DAYS_KEY)||"[]"));
 let betHistoryOpen=sessionStorage.getItem(BET_HISTORY_KEY)==="1";
@@ -1349,13 +1355,28 @@ function updateResultSummary(){
 
 function render(){
   const q=curQ.trim().toLowerCase();
-  const rows=M.filter(m=>{
+  const archivedStages=(curStage==="all"&&!q)?archivedStagesForSchedule():new Set();
+  const baseRows=M.filter(m=>{
     const stageOk=curStage==="all"||(curStage==="hot"?m.importance>=2:m.st===curStage);
     const queryOk=!q||m.searchText.includes(q);
     return stageOk&&queryOk;
   });
+  const rows=baseRows.filter(m=>!archivedStages.has(m.st));
   list.innerHTML="";
-  empty.style.display=rows.length?"none":"block";
+  empty.style.display=(rows.length||archivedStages.size)?"none":"block";
+  if(archivedStages.size){
+    const archive=document.createElement("div");
+    archive.className="stage-archive";
+    const firstStage=[...archivedStages][0];
+    const labels=[...archivedStages].map(st=>{
+      const ms=M.filter(m=>m.st===st);
+      const first=ms[0]?.d,last=ms[ms.length-1]?.d;
+      return `<b>${STAGE_NAME[st]}</b> ${ms.length} 场${first&&last?`（${first} - ${last}）`:""}`;
+    }).join("、");
+    archive.innerHTML=`<div class="txt">${labels}已结束，当前默认折叠；需要复盘可切换对应赛程 tab。</div>
+      <button type="button" data-stage="${attr(firstStage)}">查看${STAGE_NAME[firstStage]}</button>`;
+    list.appendChild(archive);
+  }
   let day=null,grid=null;
   const oldCutoff=addDays(todayRome,-1);
   rows.forEach(m=>{
@@ -1403,8 +1424,7 @@ function render(){
 
 document.getElementById("tabs").addEventListener("click",e=>{
   const b=e.target.closest(".tab");if(!b)return;
-  document.querySelectorAll("#tabs .tab").forEach(t=>t.classList.remove("on"));
-  b.classList.add("on");curStage=b.dataset.st;render();
+  stageAuto=false;curStage=b.dataset.st;syncScheduleTabs();render();
   document.getElementById("schedulePanel")?.scrollIntoView({behavior:"smooth",block:"start"});
 });
 document.getElementById("pageTabs").addEventListener("click",e=>{
@@ -1417,23 +1437,23 @@ document.getElementById("pageTabs").addEventListener("click",e=>{
   document.getElementById(b.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});
 });
 function jumpToBettable(){
-  curStage="all";curQ="";document.getElementById("q").value="";
-  document.querySelectorAll("#tabs .tab").forEach(t=>t.classList.toggle("on",t.dataset.st==="all"));
+  stageAuto=false;curStage="all";curQ="";document.getElementById("q").value="";
+  syncScheduleTabs();
   render();
   const first=list.querySelector("[data-bet]");
   (first?.closest(".m")||document.getElementById("schedulePanel"))?.scrollIntoView({behavior:"smooth",block:"center"});
 }
 function jumpToToday(){
-  curStage="all";curQ="";document.getElementById("q").value="";
-  document.querySelectorAll("#tabs .tab").forEach(t=>t.classList.toggle("on",t.dataset.st==="all"));
+  stageAuto=false;curStage="all";curQ="";document.getElementById("q").value="";
+  syncScheduleTabs();
   render();
   const today=list.querySelector(`.day[data-day="${todayRome}"]`);
   const next=list.querySelector(".day:not(.old)");
   (today||next||document.getElementById("schedulePanel"))?.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function jumpToStage(stage){
-  curStage=stage;curQ="";document.getElementById("q").value="";
-  document.querySelectorAll("#tabs .tab").forEach(t=>t.classList.toggle("on",t.dataset.st===stage));
+  stageAuto=false;curStage=stage;curQ="";document.getElementById("q").value="";
+  syncScheduleTabs();
   render();
   document.getElementById("schedulePanel")?.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -1457,6 +1477,8 @@ document.addEventListener("click",e=>{
   if(act){e.preventDefault();jumpToBettable();return;}
   const today=e.target.closest("[data-action='jump-today']");
   if(today){e.preventDefault();jumpToToday();return;}
+  const stage=e.target.closest("[data-stage]");
+  if(stage){e.preventDefault();jumpToStage(stage.dataset.stage);return;}
   const focusLink=e.target.closest(".focus-card,.focus-match");
   if(focusLink&&activateFocusLink(focusLink)){e.preventDefault();return;}
   const target=e.target.closest(".focus-actions [data-target]");
@@ -1688,6 +1710,33 @@ function matchLiveState(m){
   if(now<kick)return "scheduled";
   if(now<final)return "live";
   return "awaiting-result";
+}
+const STAGE_ORDER=["group","r32","r16","qf","fin"];
+function stageRank(st){const i=STAGE_ORDER.indexOf(st);return i<0?99:i;}
+function stageComplete(st){
+  const ms=M.filter(m=>m.st===st);
+  return !!ms.length&&ms.every(m=>matchLiveState(m)==="done");
+}
+function currentTournamentStage(){
+  const byTime=(a,b)=>matchKickoffTime(a)-matchKickoffTime(b);
+  const live=M.filter(m=>matchLiveState(m)==="live").sort(byTime)[0];
+  if(live)return live.st;
+  const next=M.filter(m=>teamOf(m.h)&&teamOf(m.a)&&matchLiveState(m)==="scheduled").sort(byTime)[0];
+  if(next)return next.st;
+  const awaiting=M.filter(m=>matchLiveState(m)==="awaiting-result").sort(byTime)[0];
+  if(awaiting)return awaiting.st;
+  return "fin";
+}
+function archivedStagesForSchedule(){
+  const active=currentTournamentStage();
+  return new Set(["r32","r16","qf"].filter(st=>stageComplete(st)&&stageRank(st)<stageRank(active)));
+}
+function syncScheduleTabs(){
+  document.querySelectorAll("#tabs .tab").forEach(t=>t.classList.toggle("on",t.dataset.st===curStage));
+}
+function syncAutoStage(){
+  if(stageAuto)curStage=currentTournamentStage();
+  syncScheduleTabs();
 }
 function inBetWindow(m){
   const md=matchDateKey(m),tomorrow=addDays(todayRome,1);
@@ -2179,7 +2228,7 @@ function betButtonHtml(m){
   return `<div class="betline ${mine?"mine":""}">${oddsHtml}${scoreOnly?`<span class="bet-note">仅开放比分玩法</span>`:""}${note}${detail}<button class="bet-btn sm" data-bet="${attr(matchId(m))}">竞猜</button></div>`;
 }
 
-function refreshAll(){applyResults();settleBets();renderLoginBar();renderWallet();renderFocusPanel();renderLeaderboard();renderStandings();updateTournamentProgress();updateResultSummary();render();renderNotifyBadges();emojify(document.body);}
+function refreshAll(){applyResults();settleBets();syncAutoStage();renderLoginBar();renderWallet();renderFocusPanel();renderLeaderboard();renderStandings();updateTournamentProgress();updateResultSummary();render();renderNotifyBadges();emojify(document.body);}
 
 /* ---- 事件绑定（一次）---- */
 document.getElementById("loginGo").addEventListener("click",doLogin);
