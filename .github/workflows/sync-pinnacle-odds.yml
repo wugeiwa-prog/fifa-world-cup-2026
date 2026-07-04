@@ -41,6 +41,8 @@ jobs:
           SUPABASE_TABLE: wc2026_state
           SUPABASE_ROW_ID: global
           ODDS_LOOKAHEAD_HOURS: "48"
+          SCORE_PICK_COUNT: "24"
+          SCORE_ODDS_MIN_COVERAGE: "0.8"
           POST_KICKOFF_ODDS_GRACE_MINUTES: "30"
           HIGH_FREQ_LOOKAHEAD_MINUTES: "720"
           HIGH_FREQ_MISSING_RATIO: "0.5"
@@ -67,6 +69,8 @@ jobs:
           SUPABASE_TABLE: wc2026_state
           SUPABASE_ROW_ID: global
           ODDS_LOOKAHEAD_HOURS: "48"
+          SCORE_PICK_COUNT: "24"
+          SCORE_ODDS_MIN_COVERAGE: "0.8"
           POST_KICKOFF_ODDS_GRACE_MINUTES: "30"
           HIGH_FREQ_LOOKAHEAD_MINUTES: "720"
           HIGH_FREQ_MISSING_RATIO: "0.5"

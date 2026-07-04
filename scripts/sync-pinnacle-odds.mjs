@@ -15,6 +15,9 @@ const ESPN_ODDS_BACKUP = process.env.ESPN_ODDS_BACKUP !== "0";
 const SCORE_ODDS_SYNC = process.env.SCORE_ODDS_SYNC !== "0";
 const SPORTSGAMBLER_SCORE_BACKUP = process.env.SPORTSGAMBLER_SCORE_BACKUP !== "0";
 const SCORE_GRID = Number(process.env.SCORE_GRID || 7);
+const SCORE_PICK_COUNT = Number(process.env.SCORE_PICK_COUNT || 24);
+const SCORE_ODDS_MIN_COVERAGE = Number(process.env.SCORE_ODDS_MIN_COVERAGE || 0.8);
+const SCORE_ODDS_MIN_LINES = Math.max(4, Math.ceil(SCORE_PICK_COUNT * SCORE_ODDS_MIN_COVERAGE));
 const POST_KICKOFF_ODDS_GRACE_MINUTES = Number(process.env.POST_KICKOFF_ODDS_GRACE_MINUTES || 30);
 const HIGH_FREQ_LOOKAHEAD_MINUTES = Number(process.env.HIGH_FREQ_LOOKAHEAD_MINUTES || 720);
 const HIGH_FREQ_MISSING_RATIO = Number(process.env.HIGH_FREQ_MISSING_RATIO || 0.5);
@@ -104,7 +107,7 @@ function hasUsableBookOdds(state, m){
 function hasUsableScoreOdds(state, m){
   if(!SCORE_ODDS_SYNC)return true;
   const o = state?.scoreOdds?.[matchId(m)] || state?.scoreOdds?.[oddsKey(m)];
-  return Object.values(o?.scores || o?.prices || o?.correctScores || {}).filter(v => Number(v) > 1).length >= 4;
+  return Object.values(o?.scores || o?.prices || o?.correctScores || {}).filter(v => Number(v) > 1).length >= SCORE_ODDS_MIN_LINES;
 }
 function oddsHealth(state, candidates, now = new Date()){
   const checked = candidates.length;
@@ -470,6 +473,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
       missingSnapshots:plan.missingSnapshots || 0,
       bookMissingRatio:plan.bookMissingRatio || 0,
       scoreMissingRatio:plan.scoreMissingRatio || 0,
+      scoreOddsMinLines:SCORE_ODDS_MIN_LINES,
       cadenceMinutes:plan.minutes,
       cadenceTier:plan.tier,
       skipReason:plan.reason,
@@ -566,6 +570,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
     missingSnapshots:plan.missingSnapshots || 0,
     bookMissingRatio:plan.bookMissingRatio || 0,
     scoreMissingRatio:plan.scoreMissingRatio || 0,
+    scoreOddsMinLines:SCORE_ODDS_MIN_LINES,
     updated,
     pinnacleUpdated,
     espnUpdated,
@@ -592,6 +597,8 @@ if(PLAN_ONLY || !plan.shouldFetch){
     directPagesOnly:false,
     sportsgamblerBackup:SPORTSGAMBLER_SCORE_BACKUP,
     scoreGrid:SCORE_GRID,
+    minLines:SCORE_ODDS_MIN_LINES,
+    minCoverage:SCORE_ODDS_MIN_COVERAGE,
     note:"Correct-score odds prefer direct Pinnacle match pages and fall back to SportsGambler/BetMGM match pages.",
     warnings:warnings.filter(w => w.includes("correct-score")).slice(0,20)
   };
