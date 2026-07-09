@@ -42,6 +42,49 @@ function rawName(name){
   return String(name).replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u{E0060}-\u{E007F}\s]+/u,"").trim();
 }
 function matchId(m){return `${m.d}#${m.t}#${rawName(m.h)}#${rawName(m.a)}`;}
+function matchNo(m){
+  const hit = String(m.g || "").match(/第(\d+)场/);
+  return hit ? hit[1] : "";
+}
+function parseScoreParts(value){
+  const hit = String(value || "").match(/(\d{1,2})\s*[-–:]\s*(\d{1,2})/);
+  return hit ? [Number(hit[1]), Number(hit[2])] : null;
+}
+function resultEntryForMatch(state, m){
+  return state?.results?.[matchId(m)] || null;
+}
+function winnerNameFromResult(state, m){
+  const result = resultEntryForMatch(state, m);
+  const score = parseScoreParts(result?.score || m.s || m.score || "");
+  if(!score)return "";
+  if(score[0] > score[1])return rawName(m.h);
+  if(score[1] > score[0])return rawName(m.a);
+  const penalty = parseScoreParts(result?.penaltyScore || result?.displayScore || "");
+  if(!penalty)return "";
+  if(penalty[0] > penalty[1])return rawName(m.h);
+  if(penalty[1] > penalty[0])return rawName(m.a);
+  return "";
+}
+function resolveTeamRef(value, state, byNo){
+  const ref = String(value || "").match(/^第(\d+)场胜者$/);
+  if(!ref)return value;
+  const source = byNo.get(ref[1]);
+  return source ? (winnerNameFromResult(state, source) || value) : value;
+}
+function resolveKnockoutPlaceholders(matches, state){
+  const byNo = new Map(matches.map(m => [matchNo(m), m]).filter(([no]) => no));
+  for(let pass = 0; pass < 8; pass += 1){
+    let changed = false;
+    for(const m of matches){
+      const h = resolveTeamRef(rawName(m.h), state, byNo);
+      const a = resolveTeamRef(rawName(m.a), state, byNo);
+      if(h !== rawName(m.h)){m.h = h; changed = true;}
+      if(a !== rawName(m.a)){m.a = a; changed = true;}
+    }
+    if(!changed)break;
+  }
+  return matches;
+}
 function loadMatches(){
   const html = fs.readFileSync("world-cup-2026-schedule.html","utf8");
   const block = html.match(/const RAW_MATCHES\s*=\s*\[([\s\S]*?)\]\s*;\s*const GROUPS=/);
@@ -84,6 +127,12 @@ function hasFinalResult(state,m){
   const status = String(r?.status || "").toLowerCase();
   return Boolean(r?.score && ["final","done","full-time","ft"].includes(status));
 }
+function needsPenaltyBackfill(state,m){
+  const r = state?.results?.[matchId(m)];
+  if(!r?.score || r?.penaltyScore)return false;
+  const score = parseScoreParts(r.score);
+  return Boolean(score && score[0] === score[1] && m.st !== "group");
+}
 function isLiveCandidate(m,state,now = new Date()){
   if(!LIVE_SCORE_SYNC && !FORCE_ALL)return false;
   if(!FORCE_ALL && (m.s || hasFinalResult(state,m)))return false;
@@ -92,8 +141,10 @@ function isLiveCandidate(m,state,now = new Date()){
   return FORCE_ALL || (now.getTime() >= kick && now.getTime() < end);
 }
 function isFinalCandidate(m,state,now = new Date()){
-  if(!FORCE_ALL && (m.s || hasFinalResult(state,m)))return false;
   const end = expectedFinalUtc(m).getTime();
+  if(!FORCE_ALL && m.s)return false;
+  if(!FORCE_ALL && needsPenaltyBackfill(state,m))return now.getTime() >= end;
+  if(!FORCE_ALL && hasFinalResult(state,m))return false;
   const max = end + FINAL_LOOKBACK_HOURS * 3_600_000;
   return FORCE_ALL || (now.getTime() >= end && now.getTime() <= max);
 }
@@ -348,6 +399,7 @@ const matches = loadMatches();
 const state = await loadState();
 state.results ||= {};
 state.resultSync ||= {};
+resolveKnockoutPlaceholders(matches, state);
 
 const liveCandidates = matches.filter(m => isLiveCandidate(m,state));
 const finalCandidates = matches.filter(m => isFinalCandidate(m,state));

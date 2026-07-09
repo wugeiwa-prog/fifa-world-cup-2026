@@ -1003,13 +1003,13 @@ const RAW_MATCHES=[
 {d:"07-06",t:"02:00",st:"r16",g:"第92场",h:"🇲🇽 墨西哥",a:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰",v:"墨西哥城体育场（阿兹特克）",c:"🇲🇽"},
 {d:"07-06",t:"21:00",st:"r16",g:"第93场",h:"🇵🇹 葡萄牙",a:"🇪🇸 西班牙",v:"达拉斯体育场",c:"🇺🇸"},
 {d:"07-07",t:"02:00",st:"r16",g:"第94场",h:"🇺🇸 美国",a:"🇧🇪 比利时",v:"西雅图体育场",c:"🇺🇸"},
-{d:"07-07",t:"18:00",st:"r16",g:"第95场",h:"第86场胜者",a:"第88场胜者",v:"亚特兰大体育场",c:"🇺🇸"},
-{d:"07-07",t:"22:00",st:"r16",g:"第96场",h:"🇨🇭 瑞士",a:"第87场胜者",v:"温哥华 BC Place",c:"🇨🇦"},
+{d:"07-07",t:"18:00",st:"r16",g:"第95场",h:"🇦🇷 阿根廷",a:"🇪🇬 埃及",v:"亚特兰大体育场",c:"🇺🇸"},
+{d:"07-07",t:"22:00",st:"r16",g:"第96场",h:"🇨🇭 瑞士",a:"🇨🇴 哥伦比亚",v:"温哥华 BC Place",c:"🇨🇦"},
 // —— 1/4 决赛 ——
-{d:"07-09",t:"22:00",st:"qf",g:"第97场",h:"第89场胜者",a:"第90场胜者",v:"波士顿体育场",c:"🇺🇸"},
-{d:"07-10",t:"21:00",st:"qf",g:"第98场",h:"第93场胜者",a:"第94场胜者",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
-{d:"07-11",t:"23:00",st:"qf",g:"第99场",h:"第91场胜者",a:"第92场胜者",v:"迈阿密体育场",c:"🇺🇸"},
-{d:"07-12",t:"03:00",st:"qf",g:"第100场",h:"第95场胜者",a:"第96场胜者",v:"堪萨斯城体育场",c:"🇺🇸"},
+{d:"07-09",t:"22:00",st:"qf",g:"第97场",h:"🇫🇷 法国",a:"🇲🇦 摩洛哥",v:"波士顿体育场",c:"🇺🇸"},
+{d:"07-10",t:"21:00",st:"qf",g:"第98场",h:"🇪🇸 西班牙",a:"🇧🇪 比利时",v:"洛杉矶体育场（SoFi）",c:"🇺🇸"},
+{d:"07-11",t:"23:00",st:"qf",g:"第99场",h:"🇳🇴 挪威",a:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰",v:"迈阿密体育场",c:"🇺🇸"},
+{d:"07-12",t:"03:00",st:"qf",g:"第100场",h:"🇦🇷 阿根廷",a:"🇨🇭 瑞士",v:"堪萨斯城体育场",c:"🇺🇸"},
 // —— 半决赛（Semi-final）/ 三四名决赛（Third-place match）/ 决赛（Final）——
 {d:"07-14",t:"21:00",st:"fin",g:"半决赛 1",h:"第97场胜者",a:"第98场胜者",v:"达拉斯体育场",c:"🇺🇸"},
 {d:"07-15",t:"21:00",st:"fin",g:"半决赛 2",h:"第99场胜者",a:"第100场胜者",v:"亚特兰大体育场",c:"🇺🇸"},
@@ -1153,7 +1153,54 @@ function resultEntryStatus(entry){
 function resultUpdatedAt(entry){
   return typeof entry==="object"&&entry?entry.updatedAt||entry.sourceUpdatedAt||"":SNAPSHOT_AT;
 }
+function matchNo(m){
+  const hit=String(m.g||"").match(/第(\d+)场/);
+  return hit?hit[1]:"";
+}
+function winnerNameFromResult(m){
+  const entry=(DB?.results&&DB.results[matchId(m)])||STATIC_RESULTS[matchId(m)];
+  const score=parseScore(entry?.score||m.s||m.score||"");
+  if(!score)return "";
+  if(score[0]>score[1])return rawName(m.h);
+  if(score[1]>score[0])return rawName(m.a);
+  const penalty=parseScore(entry?.penaltyScore||entry?.displayScore||"");
+  if(!penalty)return "";
+  if(penalty[0]>penalty[1])return rawName(m.h);
+  if(penalty[1]>penalty[0])return rawName(m.a);
+  return "";
+}
+function teamLabel(name){
+  const t=TEAMS[name];
+  return t?`${t.flag} ${name}`:name;
+}
+function resolveTeamRef(value,byNo){
+  const ref=String(value||"").match(/^第(\d+)场胜者$/);
+  if(!ref)return value;
+  const source=byNo.get(ref[1]);
+  const winner=source?winnerNameFromResult(source):"";
+  return winner?teamLabel(winner):value;
+}
+function updateMatchTeams(m,h,a){
+  const enriched=enrichMatch({...m,h,a,s:m._baseScore||""});
+  Object.assign(m,{
+    h:enriched.h,a:enriched.a,home:enriched.home,away:enriched.away,
+    importance:enriched.importance,tags:enriched.tags,stars:enriched.stars,
+    watchNote:enriched.watchNote,searchText:enriched.searchText
+  });
+}
+function resolveKnockoutPlaceholders(){
+  const byNo=new Map(M.map(m=>[matchNo(m),m]).filter(([no])=>no));
+  for(let pass=0;pass<8;pass++){
+    let changed=false;
+    M.forEach(m=>{
+      const h=resolveTeamRef(rawName(m.h),byNo),a=resolveTeamRef(rawName(m.a),byNo);
+      if(h!==rawName(m.h)||a!==rawName(m.a)){updateMatchTeams(m,h,a);changed=true;}
+    });
+    if(!changed)break;
+  }
+}
 function applyResults(){
+  resolveKnockoutPlaceholders();
   M.forEach(m=>{
     const id=matchId(m),entry=(DB?.results&&DB.results[id])||STATIC_RESULTS[id];
     m.s=m._baseScore||"";m.score=m._baseScore||"";m.status=m._baseScore?"done":"scheduled";
@@ -1166,6 +1213,7 @@ function applyResults(){
     if(finalStatus){m.s=settle||settlementScoreText(display);m.status="done";}
     else if(status==="live"||status==="in"||status==="in-progress"){m.status="live";}
   });
+  rebuildMatchIndex();
 }
 
 const WK=["周日","周一","周二","周三","周四","周五","周六"];
@@ -1762,7 +1810,9 @@ function oddsBetLockReason(m){
   return "";
 }
 function canPlaceBet(m){return !oddsBetLockReason(m);}
-const MID2M={};M.forEach(m=>MID2M[matchId(m)]=m);
+let MID2M={};
+function rebuildMatchIndex(){MID2M=Object.fromEntries(M.map(m=>[matchId(m),m]));}
+rebuildMatchIndex();
 
 /* ---- 持久化 ---- */
 const DB_KEY="wc2026_betting_v1",USER_KEY="wc2026_user",MAX_USERS=50,INIT_BAL=1000,MIN_STAKE=10,MAX_PCT=0.5;

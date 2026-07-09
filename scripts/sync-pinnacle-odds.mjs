@@ -49,6 +49,46 @@ function rawName(name){
 }
 function matchId(m){return `${m.d}#${m.t}#${rawName(m.h)}#${rawName(m.a)}`;}
 function oddsKey(m){return `${rawName(m.h)}-${rawName(m.a)}`;}
+function matchNo(m){
+  const hit = String(m.g || "").match(/第(\d+)场/);
+  return hit ? hit[1] : "";
+}
+function parseScoreParts(value){
+  const hit = String(value || "").match(/(\d{1,2})\s*[-–:]\s*(\d{1,2})/);
+  return hit ? [Number(hit[1]), Number(hit[2])] : null;
+}
+function winnerNameFromResult(state, m){
+  const result = state?.results?.[matchId(m)] || null;
+  const score = parseScoreParts(result?.score || m.s || m.score || "");
+  if(!score)return "";
+  if(score[0] > score[1])return rawName(m.h);
+  if(score[1] > score[0])return rawName(m.a);
+  const penalty = parseScoreParts(result?.penaltyScore || result?.displayScore || "");
+  if(!penalty)return "";
+  if(penalty[0] > penalty[1])return rawName(m.h);
+  if(penalty[1] > penalty[0])return rawName(m.a);
+  return "";
+}
+function resolveTeamRef(value, state, byNo){
+  const ref = String(value || "").match(/^第(\d+)场胜者$/);
+  if(!ref)return value;
+  const source = byNo.get(ref[1]);
+  return source ? (winnerNameFromResult(state, source) || value) : value;
+}
+function resolveKnockoutPlaceholders(matches, state){
+  const byNo = new Map(matches.map(m => [matchNo(m), m]).filter(([no]) => no));
+  for(let pass = 0; pass < 8; pass += 1){
+    let changed = false;
+    for(const m of matches){
+      const h = resolveTeamRef(rawName(m.h), state, byNo);
+      const a = resolveTeamRef(rawName(m.a), state, byNo);
+      if(h !== rawName(m.h)){m.h = h; changed = true;}
+      if(a !== rawName(m.a)){m.a = a; changed = true;}
+    }
+    if(!changed)break;
+  }
+  return matches;
+}
 function loadMatches(){
   const html = fs.readFileSync("world-cup-2026-schedule.html","utf8");
   const block = html.match(/const RAW_MATCHES\s*=\s*\[([\s\S]*?)\]\s*;\s*const GROUPS=/);
@@ -439,15 +479,15 @@ const stateClient=makeClient({url:SUPABASE_URL,anonKey:SUPABASE_ANON_KEY,legacyT
 const loadState=()=>stateClient.loadState();
 const saveState=data=>stateClient.saveState(data);
 
-const matches = loadMatches();
-const candidates = matches.filter(m => isOddsCandidate(m));
-console.log(`Bookmaker odds candidate matches: ${candidates.length}`);
-
 const state = await loadState();
 state.odds ||= {};
 state.oddsSync ||= {};
 state.scoreOdds ||= {};
 state.scoreOddsSync ||= {};
+
+const matches = resolveKnockoutPlaceholders(loadMatches(), state);
+const candidates = matches.filter(m => isOddsCandidate(m));
+console.log(`Bookmaker odds candidate matches: ${candidates.length}`);
 
 const plan = shouldFetchOdds(state, candidates);
 console.log(`Odds sync plan: ${plan.shouldFetch ? "fetch" : "skip"} (${plan.tier}, every ${plan.minutes}m, ${plan.reason})`);
