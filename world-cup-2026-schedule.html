@@ -142,7 +142,7 @@ body:not(.locked) .access-gate{display:none}
 .tab:focus-visible,.search:focus-within{outline:2px solid var(--host-blue);outline-offset:2px}
 
 /* ---------- 主体 ---------- */
-.wrap{max-width:1080px;margin:0 auto;padding:26px 20px 60px}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 20px 60px}
 .day{margin:30px 0 14px;display:flex;align-items:baseline;gap:12px;
   border-bottom:2px solid var(--pitch);padding-bottom:6px}
 .day .date{font-family:var(--num);font-weight:700;font-size:24px;color:var(--pitch);letter-spacing:.03em}
@@ -212,7 +212,7 @@ body:not(.locked) .access-gate{display:none}
 .empty .t{font-size:34px}
 
 /* ---------- 信息板块 ---------- */
-.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-top:36px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-top:30px}
 .panel h2{font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .panel h2::before{content:"";width:5px;height:18px;background:var(--grass);border-radius:3px}
 .reset-notice{border-color:#E7C78B;background:linear-gradient(180deg,#FFF8E6,#fff);box-shadow:0 10px 28px rgba(138,106,31,.08)}
@@ -230,7 +230,20 @@ body:not(.locked) .access-gate{display:none}
 .focus-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:12px}
 .focus-head h2{margin-bottom:0}
 .focus-meta{font-size:12px;color:var(--ink-soft)}
-.focus-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.focus-now{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;
+  border:1px solid #BFE0C9;background:#fff;border-radius:12px;padding:14px 15px;margin-bottom:12px;
+  box-shadow:0 9px 22px rgba(11,59,42,.06)}
+.focus-now.live{border-color:#F0C0B8;background:#FFF8F6}
+.focus-now .k{font-size:11px;color:var(--ink-soft);font-weight:800;letter-spacing:.12em;margin-bottom:4px}
+.focus-now h3{font-size:20px;line-height:1.25;color:var(--pitch);margin:0}
+.focus-now .s{font-size:13px;color:var(--ink-soft);line-height:1.65;margin-top:5px}
+.focus-now .chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.focus-now .go{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.focus-now .go button{border:1px solid var(--pitch);background:var(--pitch);color:#fff;border-radius:999px;
+  padding:7px 13px;font-size:12.5px;font-weight:800;font-family:var(--cjk);cursor:pointer;white-space:nowrap}
+.focus-now .go button.ghost{background:#fff;color:var(--pitch);border-color:var(--line)}
+.focus-now .go button:hover{filter:brightness(1.05)}
+.focus-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px}
 .focus-card{border:1px solid var(--line);border-radius:10px;background:#fff;padding:11px 12px;min-width:0}
 .focus-card[data-target],.focus-card[data-action],.focus-card[data-stage],.focus-match[data-detail]{cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
 .focus-card[data-target]:hover,.focus-card[data-action]:hover,.focus-card[data-stage]:hover,.focus-match[data-detail]:hover{border-color:var(--grass);box-shadow:0 8px 18px rgba(11,59,42,.08);transform:translateY(-1px)}
@@ -246,6 +259,7 @@ body:not(.locked) .access-gate{display:none}
 .focus-empty{font-size:13px;color:var(--ink-soft);line-height:1.75}
 .focus-matches{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}
 .focus-match{border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px 11px;min-width:0}
+.focus-match.primary{border-color:#BFE0C9;box-shadow:0 6px 15px rgba(11,59,42,.05)}
 .focus-match.hot{border-color:#F0C0B8;background:#FFF8F6}
 .focus-match .top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}
 .focus-match .when{font-family:var(--num);font-size:15px;font-weight:800;color:var(--pitch);white-space:nowrap}
@@ -255,6 +269,17 @@ body:not(.locked) .access-gate{display:none}
 .focus-match .pair .team .name{max-width:120px}
 .focus-match .pair .vs{font-family:var(--num);font-size:14px;color:var(--ink-soft)}
 .focus-match .meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.schedule-intro{margin:26px 0 14px;border:1px solid #D8E9D1;background:linear-gradient(180deg,#F8FBF6,#fff);
+  border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.schedule-intro .copy{min-width:0}
+.schedule-intro .k{font-size:11px;font-weight:800;color:var(--ink-soft);letter-spacing:.12em;margin-bottom:2px}
+.schedule-intro .v{font-size:16px;font-weight:800;color:var(--pitch);line-height:1.35}
+.schedule-intro .s{font-size:12.5px;color:var(--ink-soft);line-height:1.55;margin-top:3px}
+.schedule-intro .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.schedule-intro button{border:1px solid var(--line);background:#fff;color:var(--pitch);border-radius:999px;
+  padding:6px 12px;font-size:12px;font-weight:800;font-family:var(--cjk);cursor:pointer;white-space:nowrap}
+.schedule-intro button.primary{background:var(--pitch);border-color:var(--pitch);color:#fff}
+.schedule-intro button:hover{border-color:var(--grass)}
 .quick-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.quick-strip button{border:1px solid var(--line);background:#fff;color:var(--pitch);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;font-family:var(--cjk);cursor:pointer}.quick-strip button:hover{border-color:var(--grass)}
 .standings-panel{border-color:#BFE0C9;background:linear-gradient(180deg,#F4FBF6,#fff)}
 .standings-panel h2::before{background:#10663C}
@@ -400,10 +425,17 @@ body:not(.locked) .access-gate{display:none}
 }
 @media (max-width:560px){
   .hero::before{width:300px;height:300px;right:-150px}
-  .hero-in{padding:34px 16px 24px}
-  .stats{gap:18px}
+  .hero-in{padding:28px 14px 20px}
+  .hero h1{font-size:28px;line-height:1.18}
+  .hero .sub{font-size:13.5px;line-height:1.65}
+  .tz-pill{align-items:flex-start;border-radius:12px;padding:7px 10px;font-size:12.5px;line-height:1.55}
+  .stats{gap:10px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:18px}
   .stat .n{font-size:27px}
-  .prank-ball{width:30px;height:30px}
+  .stat .l{font-size:10.5px;letter-spacing:0}
+  .progress-card{margin-top:16px}
+  .timeline{margin-top:18px}
+  .tl{min-width:104px;padding:8px 11px}
+  .prank-ball,.ball-dismiss,.ball-fx{display:none}
   .ball-bubble{right:28px;top:-18px;max-width:128px;font-size:11.5px}
   .ball-art::before{left:10px;top:8px;width:10px;height:10px;box-shadow:-10px 2px 0 -4px #171915,10px 2px 0 -4px #171915,0 12px 0 -4px #171915}
   .ball-dismiss{width:17px;height:17px;font-size:12px;line-height:15px}
@@ -422,7 +454,7 @@ body:not(.locked) .access-gate{display:none}
   .search{flex:1 1 58%;min-width:0}
   .search input{width:96px}
   .bet-login{margin-left:auto}
-  .wrap{padding:18px 12px 54px}
+  .wrap{padding:14px 12px 54px}
   .day{margin:22px 0 10px}
   .day .date{font-size:21px}
   .m{grid-template-columns:52px 1fr;gap:10px;padding:11px 10px;border-radius:9px}
@@ -441,19 +473,28 @@ body:not(.locked) .access-gate{display:none}
   .phrase-title{padding-top:0}
   .mention-group{grid-template-columns:1fr;gap:5px}
   .mention-title{padding-top:0}
-  .panel{padding:16px 14px;margin-top:24px;border-radius:10px}
+  .panel{padding:15px 13px;margin-top:18px;border-radius:10px}
   .panel h2{font-size:16px}
   .reset-grid{grid-template-columns:1fr}
   .reset-notice .lead{font-size:13px}
   .reset-actions a,.reset-actions button{width:100%}
   .focus-head{display:block}
   .focus-meta{margin-top:3px}
+  .focus-now{grid-template-columns:1fr;gap:10px;padding:12px;margin-bottom:10px}
+  .focus-now h3{font-size:17px}
+  .focus-now .s{font-size:12.5px}
+  .focus-now .go{justify-content:stretch}
+  .focus-now .go button{flex:1 1 auto;padding:7px 9px}
   .focus-grid{grid-template-columns:1fr 1fr;gap:8px}
   .focus-card{padding:10px}
   .focus-card .v{font-size:15px}
   .focus-matches{grid-template-columns:1fr}
   .focus-match .pair .team .name{max-width:140px}
   .focus-actions a,.focus-actions button{flex:1 1 45%;padding:7px 8px}
+  .schedule-intro{display:block;margin:18px 0 10px;padding:11px 12px;border-radius:10px}
+  .schedule-intro .v{font-size:15px}
+  .schedule-intro .actions{justify-content:stretch;margin-top:9px}
+  .schedule-intro button{flex:1 1 45%;padding:7px 8px}
   .story-banner{padding:18px 14px;background:linear-gradient(155deg,#082D21 0%,#0B3B2A 62%,#154B3B 100%)}
   .story-banner::after{display:none}
   .story-photo-strip{grid-template-columns:repeat(2,1fr)}
@@ -692,7 +733,7 @@ body:not(.locked) .access-gate{display:none}
 <main class="wrap">
   <section class="panel focus-panel" id="focusPanel">
     <div class="focus-head">
-      <h2>今日焦点</h2>
+      <h2>现在看什么</h2>
       <div class="focus-meta" id="focusMeta">根据比赛状态、竞猜窗口和我的注单自动整理</div>
     </div>
     <div id="attentionFocus"></div>
@@ -772,6 +813,7 @@ body:not(.locked) .access-gate{display:none}
   </section>
 
   <section id="schedulePanel" aria-label="赛程列表">
+    <div class="schedule-intro" id="scheduleIntro"></div>
     <div id="list"></div>
     <div class="empty" id="empty"><div class="t">⚽</div>没有找到相关比赛，换个球队名试试</div>
   </section>
@@ -1266,6 +1308,34 @@ function matchLine(m){
   const score=m.score||m.s||"VS";
   return `${m.d} ${m.t} · ${shortMatchName(m)} · ${score}`;
 }
+function byKickoff(a,b){return matchKickoffTime(a)-matchKickoffTime(b);}
+function relativeDayLabel(m){
+  const md=matchDateKey(m);
+  if(md===todayRome)return "今天";
+  if(md===addDays(todayRome,1))return "明天";
+  if(md===addDays(todayRome,-1))return "昨天";
+  return `${Number(m.d.slice(0,2))}/${Number(m.d.slice(3))}`;
+}
+function matchFocusLabel(m){
+  const state=matchLiveState(m);
+  if(state==="live")return "正在进行";
+  if(canPlaceBet(m))return "可竞猜";
+  if(state==="awaiting-result")return "等待赛果";
+  if(state==="done")return "最新赛果";
+  return "下一场";
+}
+function pickUserFirstMatch(){
+  const future=M.filter(m=>teamOf(m.h)&&teamOf(m.a)&&matchDateKey(m)>=addDays(todayRome,-1));
+  const live=future.filter(m=>matchLiveState(m)==="live").sort(byKickoff)[0];
+  if(live)return live;
+  const betNow=future.filter(bettable).sort(byKickoff)[0];
+  if(betNow)return betNow;
+  const scheduled=future.filter(m=>matchLiveState(m)==="scheduled").sort(byKickoff)[0];
+  if(scheduled)return scheduled;
+  const awaiting=future.filter(m=>matchLiveState(m)==="awaiting-result").sort(byKickoff)[0];
+  if(awaiting)return awaiting;
+  return M.filter(m=>matchLiveState(m)==="done").sort((a,b)=>byKickoff(b,a))[0] || null;
+}
 function teamMatchRows(teamName,ref,dir){
   if(!teamName)return [];
   const refTime=matchKickoffTime(ref).getTime(),refId=matchId(ref);
@@ -1336,7 +1406,7 @@ function renderFocusPanel(){
   if(!box)return;
   const meta=document.getElementById("focusMeta");
   if(meta)meta.textContent=groupStageComplete()
-    ?"淘汰赛阶段优先整理晋级赛程、竞猜窗口和关键赛果"
+    ?"按直播、可竞猜、下一场和最新赛果自动排序"
     :"根据比赛状态、竞猜窗口和我的注单自动整理";
   const tomorrow=addDays(todayRome,1);
   const todayTomorrow=M.filter(m=>[todayRome,tomorrow].includes(matchDateKey(m)));
@@ -1348,10 +1418,27 @@ function renderFocusPanel(){
   const hot=todayTomorrow.filter(m=>m.importance>=2);
   const myOpen=(curUser()?DB.bets.filter(b=>b.user===curUser()&&b.status==="open"):[])
     .map(b=>MID2M[b.mid]).filter(Boolean);
-  const nextBet=bettableRows[0],nextHot=hot[0],nextMine=myOpen[0],lastDone=recentFinal[recentFinal.length-1];
+  const primary=pickUserFirstMatch();
+  const nextBet=bettableRows.sort(byKickoff)[0],nextHot=hot.sort(byKickoff)[0],nextMine=myOpen.sort(byKickoff)[0],lastDone=recentFinal[recentFinal.length-1];
+  const primaryState=primary?matchLiveState(primary):"";
+  const primaryScore=primary?(primary.score||primary.s||"VS"):"";
+  const primaryBet=primary&&canPlaceBet(primary);
+  const primaryNow=primary?`<article class="focus-now ${primaryState==="live"?"live":""}">
+    <div>
+      <div class="k">${matchFocusLabel(primary)}</div>
+      <h3>${esc(shortMatchName(primary))}</h3>
+      <div class="s">${relativeDayLabel(primary)} ${primary.t} CEST · ${chinaTime(primary.d,primary.t)} · ${primaryScore}</div>
+      <div class="chips">${statusChip(primary)}<span class="tag ${primary.importance===3?"hot":""}">${importanceLabel(primary)}</span>${primaryBet?`<span class="tag mine">竞猜开放</span>`:""}</div>
+    </div>
+    <div class="go">
+      ${primaryBet?`<button type="button" data-bet="${attr(matchId(primary))}">竞猜</button>`:""}
+      <button class="ghost" type="button" data-detail="${attr(matchId(primary))}">详情</button>
+      <button class="ghost" type="button" data-action="jump-today">赛程</button>
+    </div>
+  </article>`:"";
   const card=(k,v,s,cls="",attrs="")=>`<article class="focus-card ${cls}" ${attrs} tabindex="0" role="button"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></article>`;
   const cards=[
-    card("今天赛程",`${todayMatches.length} 场`,todayMatches[0]?`${shortMatchName(todayMatches[0])} · ${todayMatches[0].t} CEST`:"今天暂无比赛","","data-action=\"jump-today\""),
+    card("今日",`${todayMatches.length} 场`,todayMatches[0]?`${shortMatchName(todayMatches[0])} · ${todayMatches[0].t} CEST`:"今天暂无比赛","","data-action=\"jump-today\""),
     card("可竞猜",`${bettableRows.length} 场`,nextBet?`${shortMatchName(nextBet)} · ${nextBet.t} CEST`:"今天/明天暂无开放场次","mine","data-action=\"open-bettable\""),
     card("进行中",`${live.length} 场`,live[0]?`${shortMatchName(live[0])} · ${live[0].score||"实时比分"}`:"当前没有进行中的比赛",live.length?"hot":"","data-action=\"jump-today\""),
     card("我的未结",`${myOpen.length} 注`,nextMine?`${shortMatchName(nextMine)} · 等待赛果`:(curUser()?"暂无未结注单":"登录后显示个人焦点"),"mine","data-target=\"betHall\""),
@@ -1362,9 +1449,10 @@ function renderFocusPanel(){
     :(lastDone?`<div class="focus-empty">最近赛果：${shortMatchName(lastDone)} ${lastDone.score||lastDone.s||""}</div>`:"");
   const upcomingPool=M.filter(m=>matchDateKey(m)>=todayRome&&matchLiveState(m)!=="done");
   const focusPool=[
+    primary,
     ...todayTomorrow.filter(m=>matchLiveState(m)!=="done"),
     ...upcomingPool
-  ];
+  ].filter(Boolean);
   const seenNear=new Set();
   const nearRows=focusPool.filter(m=>{
     const id=matchId(m);
@@ -1379,13 +1467,14 @@ function renderFocusPanel(){
     const score=m.score||m.s||"VS";
     const hotCls=m.importance>=2?" hot":"";
     const bet=canPlaceBet(m)?`<span class="tag mine">可竞猜</span>`:`<span class="tag">${importanceLabel(m)}</span>`;
-    return `<article class="focus-match${hotCls}" data-detail="${attr(matchId(m))}" tabindex="0" role="button" aria-label="${attr(`${shortMatchName(m)} 比赛详情`)}">
+    const primaryCls=primary&&matchId(primary)===matchId(m)?" primary":"";
+    return `<article class="focus-match${primaryCls}${hotCls}" data-detail="${attr(matchId(m))}" tabindex="0" role="button" aria-label="${attr(`${shortMatchName(m)} 比赛详情`)}">
       <div class="top"><div class="when">${m.t}<small>${chinaTime(m.d,m.t)}</small></div>${statusChip(m)}</div>
       <div class="pair">${teamHtml(m.home,m.h)}<span class="vs">${esc(score)}</span>${teamHtml(m.away,m.a)}</div>
-      <div class="meta">${bet}<span class="tag">${esc(m.g)}${m.st==="group"?" 组":""}</span></div>
+      <div class="meta"><span class="tag">${relativeDayLabel(m)}</span>${bet}<span class="tag">${esc(m.g)}${m.st==="group"?" 组":""}</span></div>
     </article>`;
   }).join("")}</div>`:"";
-  box.innerHTML=`<div class="focus-grid">${cards}</div>${near}${extra}<div class="focus-actions">
+  box.innerHTML=`${primaryNow}<div class="focus-grid">${cards}</div>${near}${extra}<div class="focus-actions">
     <button type="button" data-action="jump-today">今天赛程</button>
     <button class="primary" type="button" data-action="open-bettable">查看可竞猜</button>
     <button type="button" data-target="betHall">我的注单</button>
@@ -1400,6 +1489,30 @@ function updateResultSummary(){
   const pending=M.filter(m=>matchLiveState(m)==="awaiting-result").length;
   el.textContent=`已录入 ${done} 场赛果，剩余 ${remain} 场${pending?`，其中 ${pending} 场赛果待确认`:""}；比分和榜单会自动更新。`;
 }
+function renderScheduleIntro(rows,archivedStages){
+  const el=document.getElementById("scheduleIntro");
+  if(!el)return;
+  const primary=pickUserFirstMatch();
+  const stageLabel=curStage==="all"?"当前阶段":(curStage==="hot"?"重要赛事":STAGE_NAME[curStage]);
+  const activeStage=STAGE_NAME[currentTournamentStage()]||"赛程";
+  const visible=rows.length;
+  const hidden=archivedStages?.size?[...archivedStages].map(st=>STAGE_NAME[st]).join("、"):"";
+  const primaryText=primary
+    ?`${matchFocusLabel(primary)}：${shortMatchName(primary)} · ${relativeDayLabel(primary)} ${primary.t} CEST`
+    :"暂无已确认后续比赛";
+  const sub=hidden
+    ?`${hidden}已默认收起；当前列表显示 ${visible} 场，优先保留最近和未完成比赛。`
+    :`当前列表显示 ${visible} 场；按比赛时间展示，旧比赛会自动减少占屏。`;
+  el.innerHTML=`<div class="copy">
+    <div class="k">${stageLabel}</div>
+    <div class="v">${activeStage} · ${esc(primaryText)}</div>
+    <div class="s">${esc(sub)}</div>
+  </div>
+  <div class="actions">
+    <button class="primary" type="button" data-action="jump-today">最近比赛</button>
+    <button type="button" data-action="open-bettable">可竞猜</button>
+  </div>`;
+}
 
 function render(){
   const q=curQ.trim().toLowerCase();
@@ -1410,6 +1523,7 @@ function render(){
     return stageOk&&queryOk;
   });
   const rows=baseRows.filter(m=>!archivedStages.has(m.st));
+  renderScheduleIntro(rows,archivedStages);
   list.innerHTML="";
   empty.style.display=(rows.length||archivedStages.size)?"none":"block";
   if(archivedStages.size){
@@ -1521,6 +1635,10 @@ function activateFocusLink(el){
   return false;
 }
 document.addEventListener("click",e=>{
+  const focusBet=e.target.closest("#focusPanel [data-bet]");
+  if(focusBet){e.preventDefault();openBet(focusBet.dataset.bet);return;}
+  const focusDetail=e.target.closest(".focus-now [data-detail]");
+  if(focusDetail){e.preventDefault();openMatchDetail(focusDetail.dataset.detail);return;}
   const act=e.target.closest("[data-action='open-bettable']");
   if(act){e.preventDefault();jumpToBettable();return;}
   const today=e.target.closest("[data-action='jump-today']");
