@@ -17,6 +17,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: sync-pinnacle-odds
+  cancel-in-progress: false
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -40,13 +44,15 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_TABLE: wc2026_state
           SUPABASE_ROW_ID: global
-          ODDS_LOOKAHEAD_HOURS: "48"
+          ODDS_LOOKAHEAD_HOURS: "120"
+          ODDS_UPCOMING_MATCH_LIMIT: "3"
           SCORE_PICK_COUNT: "24"
           SCORE_ODDS_MIN_COVERAGE: "0.8"
           POST_KICKOFF_ODDS_GRACE_MINUTES: "30"
-          HIGH_FREQ_LOOKAHEAD_MINUTES: "720"
+          HIGH_FREQ_LOOKAHEAD_MINUTES: "1440"
           HIGH_FREQ_MISSING_RATIO: "0.5"
-          HIGH_FREQ_CADENCE_MINUTES: "30"
+          HIGH_FREQ_CADENCE_MINUTES: "10"
+          SCORE_ODDS_MAX_AGE_MINUTES: "30"
           ODDS_PLAN_ONLY: "1"
           ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
           PINNACLE_ALLOW_MATCHUPS_PARSE: "1"
@@ -68,13 +74,15 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_TABLE: wc2026_state
           SUPABASE_ROW_ID: global
-          ODDS_LOOKAHEAD_HOURS: "48"
+          ODDS_LOOKAHEAD_HOURS: "120"
+          ODDS_UPCOMING_MATCH_LIMIT: "3"
           SCORE_PICK_COUNT: "24"
           SCORE_ODDS_MIN_COVERAGE: "0.8"
           POST_KICKOFF_ODDS_GRACE_MINUTES: "30"
-          HIGH_FREQ_LOOKAHEAD_MINUTES: "720"
+          HIGH_FREQ_LOOKAHEAD_MINUTES: "1440"
           HIGH_FREQ_MISSING_RATIO: "0.5"
-          HIGH_FREQ_CADENCE_MINUTES: "30"
+          HIGH_FREQ_CADENCE_MINUTES: "10"
+          SCORE_ODDS_MAX_AGE_MINUTES: "30"
           ODDS_FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force == 'true' }}
           PINNACLE_ALLOW_MATCHUPS_PARSE: "1"
           ESPN_ODDS_BACKUP: "1"
