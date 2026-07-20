@@ -12,5 +12,7 @@ https://wugeiwa-prog.github.io/fifa-world-cup-2026/
 
 - `index.html`：入口页
 - `world-cup-2026-schedule.html`：主页面
+- `dashboard.html`：竞猜数据看板
+- `scripts/export-supabase-backup.mjs`：生成本地离线归档
 
 数据以页面内说明为准。

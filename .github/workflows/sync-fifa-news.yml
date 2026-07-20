@@ -2,8 +2,6 @@ name: Sync FIFA news snapshot
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "37 */6 * * *"
 
 permissions:
   contents: read

@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>2026 世界杯决赛 · 西班牙 vs 阿根廷</title>
-<meta name="description" content="2026 世界杯决赛周末：西班牙对阿根廷，法国对英格兰。含意大利时间、中国时间、比分、竞猜与赛事信息。">
-<meta property="og:title" content="2026 世界杯决赛 · 西班牙 vs 阿根廷">
+<title>西班牙夺得 2026 世界杯冠军 · 最终赛果与竞猜数据</title>
+<meta name="description" content="西班牙 1-0 战胜阿根廷，夺得 2026 世界杯冠军。查看全部 104 场赛果、最终竞猜榜单与数据归档。">
+<meta property="og:title" content="西班牙，2026 世界冠军">
 <meta property="og:description" content="决赛周末赛程、比分、竞猜与焦点信息。">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -269,6 +269,23 @@ body:not(.locked) .access-gate{display:none}
 .focus-match .pair .team .name{max-width:120px}
 .focus-match .pair .vs{font-family:var(--num);font-size:14px;color:var(--ink-soft)}
 .focus-match .meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.sunset-notice{position:relative;overflow:hidden;margin:0 0 16px;border:1px solid #DFC878;border-radius:14px;
+  background:linear-gradient(110deg,#0B3B2A 0%,#16563C 74%,#F4E5A7 74.1%,#FFFDF5 100%);
+  box-shadow:0 14px 32px rgba(11,59,42,.13)}
+.sunset-notice::after{content:"";position:absolute;right:32%;top:-42px;width:110px;height:110px;border:1px solid rgba(255,213,106,.34);
+  border-radius:50%;box-shadow:0 0 0 18px rgba(255,213,106,.07),0 0 0 42px rgba(255,213,106,.04);pointer-events:none}
+.sunset-inner{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px;padding:22px 26px;color:#fff}
+.sunset-kicker{font-family:var(--num);font-size:11px;font-weight:800;letter-spacing:.18em;color:#FFD56A}
+.sunset-notice h2{display:block;margin:5px 0 7px;font-size:clamp(22px,3.1vw,32px);line-height:1.15;color:#fff}
+.sunset-notice h2::before{display:none}
+.sunset-notice p{max-width:680px;font-size:13.5px;line-height:1.72;color:rgba(255,255,255,.84)}
+.sunset-status{display:inline-flex;align-items:center;gap:7px;margin-top:10px;font-size:12px;font-weight:800;color:#FFE28C}
+.sunset-status::before{content:"";width:7px;height:7px;border-radius:50%;background:#FFD56A;box-shadow:0 0 0 4px rgba(255,213,106,.13)}
+.sunset-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.sunset-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 14px;border-radius:999px;
+  border:1px solid rgba(11,59,42,.18);background:#fff;color:var(--pitch);font-size:12.5px;font-weight:850;text-decoration:none;white-space:nowrap}
+.sunset-actions a.primary{background:#FFD56A;border-color:#D9B444;color:#182117}
+.sunset-actions a:hover{filter:brightness(.97)}
 .final-weekend{position:relative;isolation:isolate;overflow:hidden;min-height:390px;margin-top:0;border-radius:14px;
   border:1px solid rgba(255,213,106,.42);color:#fff;background:#081912;
   box-shadow:0 18px 42px rgba(11,59,42,.2)}
@@ -300,6 +317,9 @@ body:not(.locked) .access-gate{display:none}
 .final-actions button.primary{background:#FFD56A;border-color:#FFD56A;color:#182117}
 .final-actions button:disabled{opacity:.62;cursor:default}
 .final-actions button:not(:disabled):hover{filter:brightness(1.08)}
+.final-weekend.final-complete{border-color:rgba(255,213,106,.7);box-shadow:0 18px 42px rgba(78,61,18,.22)}
+.final-weekend.final-complete::before{background:linear-gradient(90deg,rgba(35,28,8,.94) 0%,rgba(57,43,8,.82) 39%,rgba(91,66,7,.28) 72%,rgba(24,20,8,.14) 100%)}
+.final-weekend.final-complete .final-countdown{color:#FFE28C}
 .bronze-ribbon{position:absolute;right:18px;bottom:18px;width:min(320px,34%);border-left:3px solid #FFD56A;
   background:rgba(4,17,13,.74);backdrop-filter:blur(8px);padding:11px 13px;color:#fff}
 .bronze-ribbon .k{font-family:var(--num);font-size:11px;font-weight:700;letter-spacing:.13em;color:#FFD56A}
@@ -353,6 +373,13 @@ body:not(.locked) .access-gate{display:none}
 .scard a:hover{text-decoration:underline}
 .bcast{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
 @media (max-width:620px){.bcast{grid-template-columns:1fr}}
+@media (max-width:720px){
+  .sunset-notice{background:linear-gradient(180deg,#0B3B2A 0%,#16563C 100%)}
+  .sunset-inner{grid-template-columns:1fr;padding:19px 18px 24px;gap:15px}
+  .sunset-notice p{font-size:12.5px;line-height:1.68}
+  .sunset-actions{display:grid;grid-template-columns:1fr;justify-content:stretch}
+  .sunset-actions a{width:100%}
+}
 .bc{border:1px solid var(--line);border-radius:10px;padding:13px 15px;background:#FCFBF7}
 .bc b{font-size:15px}
 .bc p{font-size:13px;color:var(--ink-soft);margin-top:3px}
@@ -749,6 +776,7 @@ body:not(.locked) .access-gate{display:none}
         <button class="tab link" data-action="open-bettable">下注</button>
         <button class="tab link" data-target="betHall">我的 <span class="notify-badge" id="betNotifyBadge">0</span></button>
         <button class="tab link" data-target="betBoard">榜单</button>
+        <a class="tab link" href="dashboard.html">数据看板</a>
         <button class="tab link" data-target="standingsPanel">小组积分</button>
         <a class="tab link" href="stories.html">专题</a>
         <a class="tab link" href="comments.html?focus=replies">留言 <span class="notify-badge" id="commentNotifyBadge">0</span></a>
@@ -780,22 +808,35 @@ body:not(.locked) .access-gate{display:none}
 </nav>
 
 <main class="wrap">
+  <section class="sunset-notice" aria-labelledby="sunsetTitle">
+    <div class="sunset-inner">
+      <div>
+        <div class="sunset-kicker">THE FINAL WHISTLE</div>
+        <h2 id="sunsetTitle">终场哨响，本站也将暂时谢幕</h2>
+        <p>39天、104场比赛，以及22位朋友留下的939次判断，都已成为这一届世界杯的共同记忆。本站将在完成最终数据归档后下线；赛果、竞猜记录和留言会被妥善保存。</p>
+        <div class="sunset-status">最终数据归档中 · 完成后下线</div>
+      </div>
+      <div class="sunset-actions">
+        <a class="primary" href="dashboard.html">查看最终数据</a>
+        <a href="comments.html">留下最后一句</a>
+      </div>
+    </div>
+  </section>
+
   <section class="final-weekend" id="finalWeekend" aria-label="2026 世界杯决赛周末">
     <img src="assets/final-night-2026.jpg" alt="" width="1922" height="818" fetchpriority="high">
     <div class="final-content">
-      <div class="final-kicker">The Final · 最后一场</div>
-      <h2>世界冠军，只差这一晚</h2>
-      <div class="final-pair">
-        <span class="side">🇪🇸 西班牙</span><span class="versus">VS</span><span class="side">🇦🇷 阿根廷</span>
-      </div>
+      <div class="final-kicker">World Champions · 2026</div>
+      <h2 id="finalTitle">西班牙，2026 世界冠军</h2>
+      <div class="final-pair" id="finalPair">🇪🇸 西班牙 <span class="versus">1 - 0</span> 🇦🇷 阿根廷</div>
       <div class="final-time"><b>7月19日 21:00 CEST</b> · 中国时间 7月20日 03:00 · 纽约/新泽西体育场</div>
-      <p class="final-story">世界排名前二会师决赛：西班牙以严密防线冲击第二座冠军，卫冕冠军阿根廷向连续夺冠发起最后冲锋。梅西与亚马尔，一场跨越世代的绿茵对话。</p>
-      <div class="final-chips"><span>世界第 2 vs 世界第 1</span><span>梅西 vs 亚马尔</span><span>卫冕与新王</span><span>104 场的终章</span></div>
-      <div class="final-status"><strong class="final-countdown" id="finalCountdown">决赛倒计时</strong><span class="final-hint" id="finalHint">竞猜按赛前开放规则执行</span></div>
+      <p class="final-story" id="finalStory">终场哨响，西班牙以 1-0 战胜阿根廷，捧起队史第二座世界杯冠军奖杯。39 天的赛程在冠军金色中落幕，也为这一届共同守候的夏天写下结尾。</p>
+      <div class="final-chips"><span>2026 世界冠军</span><span>队史第二冠</span><span>决赛零封</span><span>104 场全部结束</span></div>
+      <div class="final-status"><strong class="final-countdown" id="finalCountdown">104 场比赛全部结束</strong><span class="final-hint" id="finalHint">西班牙 1-0 阿根廷</span></div>
       <div class="final-actions">
         <button class="primary" type="button" data-final-detail>查看决赛详情</button>
-        <button type="button" id="finalBetButton" data-final-bet>竞猜决赛</button>
-        <button type="button" data-target="schedulePanel">查看最后两场</button>
+        <button type="button" id="finalBetButton" data-final-bet hidden>竞猜决赛</button>
+        <button type="button" data-target="betBoard">查看最终榜单</button>
       </div>
     </div>
     <aside class="bronze-ribbon">
@@ -837,13 +878,14 @@ body:not(.locked) .access-gate{display:none}
     <div class="update-strip" aria-label="网站最新更新">
       <div class="update-head"><b>📣 本站刚热身完毕</b><span>最新 3 条 · 更多可展开</span></div>
       <ol class="update-list">
+        <li><time datetime="2026-07-20T12:00+02:00">07/20 12:00</time><div class="txt"><span class="taggy">收官</span>西班牙夺得冠军，104场比赛全部结束；最终竞猜数据正在归档，本站随后将暂时下线。</div></li>
         <li><time datetime="2026-07-17T12:46+02:00">07/17 12:46</time><div class="txt"><span class="taggy">决赛</span>最后两场对阵确定：法国迎战英格兰，西班牙与阿根廷争夺冠军。</div></li>
         <li><time datetime="2026-07-03T13:30+02:00">07/03 13:30</time><div class="txt"><span class="taggy">赛程</span>更新已确定的16强对阵，赛程筛选会自动高亮当前阶段。</div></li>
-        <li><time datetime="2026-06-30T14:51+02:00">06/30 14:51</time><div class="txt"><span class="taggy">赛果</span>补齐已结束淘汰赛点球信息，并加固云端同步展示。</div></li>
       </ol>
       <details class="update-more">
         <summary>查看更早更新</summary>
         <ol class="update-list">
+          <li><time datetime="2026-06-30T14:51+02:00">06/30 14:51</time><div class="txt"><span class="taggy">赛果</span>补齐已结束淘汰赛点球信息，并加固云端同步展示。</div></li>
           <li><time datetime="2026-06-30T11:42+02:00">06/30 11:42</time><div class="txt"><span class="taggy">赛果</span>点球大战结果只作展示，竞猜结算保留点球前比分。</div></li>
           <li><time datetime="2026-06-30T10:41+02:00">06/30 10:41</time><div class="txt"><span class="taggy">规则</span>补充淘汰赛结算说明，并把本站更新移到核心内容之后。</div></li>
           <li><time datetime="2026-06-28T09:15+02:00">06/28 09:15</time><div class="txt"><span class="taggy">竞猜</span>赔率规则收紧：胜平负与正确比分均需真实快照，缺少快照暂不开放下注。</div></li>
@@ -1131,8 +1173,8 @@ const RAW_MATCHES=[
 // —— 半决赛（Semi-final）/ 三四名决赛（Third-place match）/ 决赛（Final）——
 {d:"07-14",t:"21:00",st:"fin",g:"半决赛 1",h:"🇪🇸 西班牙",a:"🇫🇷 法国",v:"达拉斯体育场",c:"🇺🇸",s:"2-0",n:"西班牙零封法国，率先晋级决赛。"},
 {d:"07-15",t:"21:00",st:"fin",g:"半决赛 2",h:"🏴 英格兰",a:"🇦🇷 阿根廷",v:"亚特兰大体育场",c:"🇺🇸",s:"1-2",n:"阿根廷逆转英格兰，连续两届世界杯闯入决赛。"},
-{d:"07-18",t:"23:00",st:"fin",g:"三四名决赛",h:"🇫🇷 法国",a:"🏴 英格兰",v:"迈阿密体育场",c:"🇺🇸",n:"季军之争：姆巴佩与凯恩仍将为荣誉和金靴悬念全力冲刺。"},
-{d:"07-19",t:"21:00",st:"fin",g:"🏆 决赛",h:"🇪🇸 西班牙",a:"🇦🇷 阿根廷",v:"纽约/新泽西体育场（MetLife）",c:"🇺🇸",n:"决赛看点：世界排名前二会师，梅西与亚马尔上演跨越世代的冠军对话。"}
+{d:"07-18",t:"23:00",st:"fin",g:"三四名决赛",h:"🇫🇷 法国",a:"🏴 英格兰",v:"迈阿密体育场",c:"🇺🇸",s:"4-6",n:"英格兰在进球大战中战胜法国，获得本届世界杯季军。"},
+{d:"07-19",t:"21:00",st:"fin",g:"🏆 决赛",h:"🇪🇸 西班牙",a:"🇦🇷 阿根廷",v:"纽约/新泽西体育场（MetLife）",c:"🇺🇸",s:"1-0",n:"西班牙 1-0 战胜阿根廷，捧起队史第二座世界杯冠军奖杯。"}
 ];
 
 const GROUPS={A:"🇲🇽 墨西哥 · 🇿🇦 南非 · 🇰🇷 韩国 · 🇨🇿 捷克",B:"🇨🇦 加拿大 · 🇧🇦 波黑 · 🇶🇦 卡塔尔 · 🇨🇭 瑞士",C:"🇧🇷 巴西 · 🇲🇦 摩洛哥 · 🇭🇹 海地 · 🏴󠁧󠁢󠁳󠁣󠁴󠁿 苏格兰",D:"🇺🇸 美国 · 🇵🇾 巴拉圭 · 🇦🇺 澳大利亚 · 🇹🇷 土耳其",E:"🇩🇪 德国 · 🇨🇼 库拉索 · 🇨🇮 科特迪瓦 · 🇪🇨 厄瓜多尔",F:"🇳🇱 荷兰 · 🇯🇵 日本 · 🇸🇪 瑞典 · 🇹🇳 突尼斯",G:"🇧🇪 比利时 · 🇪🇬 埃及 · 🇮🇷 伊朗 · 🇳🇿 新西兰",H:"🇪🇸 西班牙 · 🇨🇻 佛得角 · 🇸🇦 沙特阿拉伯 · 🇺🇾 乌拉圭",I:"🇫🇷 法国 · 🇸🇳 塞内加尔 · 🇮🇶 伊拉克 · 🇳🇴 挪威",J:"🇦🇷 阿根廷 · 🇩🇿 阿尔及利亚 · 🇦🇹 奥地利 · 🇯🇴 约旦",K:"🇵🇹 葡萄牙 · 🇨🇩 刚果（金）· 🇺🇿 乌兹别克斯坦 · 🇨🇴 哥伦比亚",L:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰 · 🇭🇷 克罗地亚 · 🇬🇭 加纳 · 🇵🇦 巴拿马"};
@@ -1470,8 +1512,9 @@ function myBetSummary(m){
   return {count:mine.length,stake,open,won,lost};
 }
 function updateTournamentProgress(){
-  const total=M.length,done=M.filter(m=>m.status==="done"||m.s).length,remain=total-done;
-  const pending=M.filter(m=>matchLiveState(m)==="awaiting-result").length;
+  const total=M.length,final=M.find(m=>m.g==="🏆 决赛"),tournamentDone=final&&matchLiveState(final)==="done";
+  const done=tournamentDone?total:M.filter(m=>m.status==="done"||m.s).length,remain=total-done;
+  const pending=tournamentDone?0:M.filter(m=>matchLiveState(m)==="awaiting-result").length;
   const pct=total?Math.round(done/total*100):0;
   document.getElementById("progressPct").textContent=`${pct}%`;
   document.getElementById("progressBar").style.width=`${pct}%`;
@@ -1496,10 +1539,11 @@ function renderFinalWeekend(){
   const state=matchLiveState(final),count=document.getElementById("finalCountdown"),hint=document.getElementById("finalHint");
   const bet=document.getElementById("finalBetButton");
   section.classList.toggle("final-live",state==="live");
-  count.textContent=finalCountdownText(final);
+  section.classList.toggle("final-complete",state==="done");
+  count.textContent=state==="done"?"104 场比赛全部结束":finalCountdownText(final);
   const lock=oddsBetLockReason(final);
   if(state==="done"){
-    hint.textContent=`完场 ${final.score||final.s||""} · 冠军之夜已写入赛果`;
+    hint.textContent=`西班牙 ${final.score||final.s||"1-0"} 阿根廷 · 冠军之夜已写入赛果`;
   }else if(state==="live"){
     hint.textContent=`实时 ${final.score||"进行中"} · 开赛后竞猜已停止`;
   }else if(canPlaceBet(final)){
@@ -1595,9 +1639,12 @@ function renderFocusPanel(){
 function updateResultSummary(){
   const el=document.getElementById("resultSummary");
   if(!el)return;
-  const total=M.length,done=M.filter(m=>m.status==="done"||m.s).length,remain=total-done;
-  const pending=M.filter(m=>matchLiveState(m)==="awaiting-result").length;
-  el.textContent=`已录入 ${done} 场赛果，剩余 ${remain} 场${pending?`，其中 ${pending} 场赛果待确认`:""}；比分和榜单会自动更新。`;
+  const total=M.length,final=M.find(m=>m.g==="🏆 决赛"),tournamentDone=final&&matchLiveState(final)==="done";
+  const done=tournamentDone?total:M.filter(m=>m.status==="done"||m.s).length,remain=total-done;
+  const pending=tournamentDone?0:M.filter(m=>matchLiveState(m)==="awaiting-result").length;
+  el.textContent=tournamentDone
+    ?`104 场赛果已全部确认，竞猜结算与最终榜单均已完成。`
+    :`已录入 ${done} 场赛果，剩余 ${remain} 场${pending?`，其中 ${pending} 场赛果待确认`:""}；比分和榜单会自动更新。`;
 }
 function renderScheduleIntro(rows,archivedStages){
   const el=document.getElementById("scheduleIntro");
