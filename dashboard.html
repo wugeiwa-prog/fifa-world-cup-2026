@@ -36,12 +36,21 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 .kpi .label{font-size:11.5px;color:var(--muted);font-weight:750}.kpi .value{font-family:var(--num);font-size:24px;line-height:1.2;margin-top:4px;font-weight:850;color:var(--pitch);font-variant-numeric:tabular-nums}.kpi .note{font-size:10.5px;color:var(--muted);margin-top:4px}
 .kpi.gold{background:var(--gold-soft);border-color:#E7CF80}.kpi.red .value{color:var(--red)}
 .grid-2{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-bottom:16px}.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:17px;min-width:0}
+.analysis-heading{display:flex;align-items:center;gap:10px;margin:27px 0 12px;color:var(--pitch)}
+.analysis-heading::before{content:"";width:5px;height:22px;border-radius:3px;background:var(--gold)}
+.analysis-heading h3{margin:0;font-size:17px}.analysis-heading span{font-size:11.5px;color:var(--muted)}
 .panel h3{margin:0 0 4px;color:var(--pitch);font-size:15px}.panel-sub{font-size:11.5px;color:var(--muted);margin-bottom:14px}.chart{min-height:220px;width:100%}.chart svg{width:100%;height:auto;display:block;overflow:visible}
 .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px;font-size:11px;color:var(--muted)}.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
 .donut-layout{display:grid;grid-template-columns:minmax(150px,.75fr) 1fr;align-items:center;gap:14px}.donut-layout svg{width:100%;max-height:220px}.donut-center{font-family:var(--num);font-size:18px;font-weight:850;fill:var(--pitch)}.donut-sub{font-size:9px;fill:var(--muted)}
 .stat-list{display:grid;gap:9px}.stat-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;font-size:11.5px}.stat-item i{width:9px;height:9px;border-radius:2px}.stat-item b{font-family:var(--num);font-size:13px}.stat-item small{color:var(--muted)}
 .awards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.award{border-left:3px solid var(--gold);background:#FAFAF6;padding:10px 11px;min-width:0}.award .k{font-size:10.5px;color:var(--muted)}.award b{display:block;margin-top:2px;color:var(--pitch);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.award span{font-family:var(--num);font-size:11px;color:var(--muted)}
 .bar-list{display:grid;gap:10px}.bar-row{display:grid;grid-template-columns:92px minmax(80px,1fr) 72px;align-items:center;gap:8px;font-size:11.5px}.bar-row .name{font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar-track{height:8px;background:#EEF1EF;border-radius:4px;overflow:hidden}.bar-fill{height:100%;border-radius:4px;background:var(--grass)}.bar-fill.red{background:var(--red)}.bar-fill.gold{background:var(--gold)}.bar-value{text-align:right;font-family:var(--num);font-variant-numeric:tabular-nums;color:var(--muted)}
+.dual-bars{display:grid;gap:13px}.dual-row{display:grid;grid-template-columns:90px minmax(130px,1fr) 76px;align-items:center;gap:9px}.dual-name{font-size:11.5px;font-weight:800}.dual-track{display:grid;gap:4px}.dual-track span{display:block;height:7px;border-radius:3px;min-width:1px}.dual-track .stake{background:#E5BF55}.dual-track .payout{background:#287B4B}.dual-value{text-align:right;font-family:var(--num);font-size:10.5px}.dual-value b{display:block;font-size:12px}.dual-value .negative{color:var(--red)}
+.heatmap-wrap{overflow:auto;padding-bottom:3px}.heatmap{display:grid;grid-template-columns:128px repeat(5,minmax(82px,1fr));min-width:650px;gap:4px}.heatmap>*{min-height:34px;border-radius:5px;display:flex;align-items:center;justify-content:center;padding:5px;font-size:10.5px}.heatmap .head{background:#F1F5F2;color:var(--muted);font-weight:800}.heatmap .user{justify-content:flex-start;background:#FAFAF6;color:var(--pitch);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.heatmap .cell{font-family:var(--num);font-weight:800;border:1px solid rgba(11,59,42,.06)}
+.persona-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.persona-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;padding:10px;border:1px solid var(--line);border-radius:7px;background:#FAFAF6}.persona-icon{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--gold-soft);font-size:16px}.persona-card b{display:block;font-size:12px;color:var(--pitch)}.persona-card small{display:block;color:var(--muted);font-size:10px;margin-top:1px}.persona-card strong{font-family:var(--num);font-size:18px;color:var(--grass)}
+.moment-list{display:grid;gap:8px}.moment{display:grid;grid-template-columns:94px minmax(0,1fr) auto;align-items:center;gap:9px;border-bottom:1px solid #EDF0EE;padding:7px 0}.moment:last-child{border-bottom:0}.moment .k{font-size:10.5px;color:var(--muted)}.moment b{font-size:12px;color:var(--pitch);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.moment span{font-family:var(--num);font-size:10.5px;color:var(--blue);text-align:right}
+.duel{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch}.duel-side{border:1px solid var(--line);border-radius:8px;padding:14px;background:#FAFAF6}.duel-side.win{border-color:#D6BA57;background:#FFF9E8}.duel-side h3{font-size:17px;margin:0 0 2px}.duel-side .persona{font-size:10.5px;color:var(--muted)}.duel-score{display:grid;gap:7px;margin-top:12px}.duel-stat{display:flex;justify-content:space-between;gap:8px;font-size:11px}.duel-stat b{font-family:var(--num)}.duel-vs{align-self:center;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--pitch);color:#fff;font-family:var(--num);font-size:11px;font-weight:850}.duel-verdict{margin-top:12px;padding:10px 12px;border-left:3px solid var(--gold);background:#FFFDF5;font-size:11.5px;color:var(--muted);line-height:1.65}
+.profile-persona{display:grid;gap:11px}.persona-title{display:flex;align-items:center;gap:10px}.persona-title .badge{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--gold-soft);font-size:21px}.persona-title b{display:block;color:var(--pitch);font-size:17px}.persona-title span{font-size:10.5px;color:var(--muted)}.persona-copy{font-size:12px;line-height:1.7;color:var(--muted)}.persona-tags{display:flex;gap:6px;flex-wrap:wrap}.persona-tags span{padding:3px 7px;border-radius:4px;background:#F1F5F2;color:var(--pitch);font-size:10.5px;font-weight:750}
 .filters{display:flex;flex-wrap:wrap;align-items:end;gap:9px;margin-bottom:14px;padding:12px;background:#F1F5F2;border:1px solid var(--line);border-radius:8px}.field{display:grid;gap:4px;min-width:130px}.field.grow{flex:1;min-width:190px}.field label{font-size:10.5px;font-weight:750;color:var(--muted)}.field select,.field input{height:36px;border:1px solid #CCD6D0;border-radius:6px;background:#fff;color:var(--ink);padding:6px 9px;min-width:0}.filter-count{margin-left:auto;padding-bottom:8px;font-size:11.5px;color:var(--muted)}
 .compare-chart{display:grid;gap:9px}.compare-row{display:grid;grid-template-columns:130px minmax(110px,1fr) 86px;align-items:center;gap:9px}.compare-user{min-width:0}.compare-user b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.compare-user small{color:var(--muted);font-size:10px}.compare-track{position:relative;height:11px;background:#EEF1EF;border-radius:4px;overflow:hidden}.compare-fill{position:absolute;inset:0 auto 0 0;background:var(--grass);border-radius:4px}.compare-fill.negative{background:var(--red)}.compare-value{text-align:right;font-family:var(--num);font-size:12px;font-weight:800}
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px;background:#fff}.data-table{width:100%;border-collapse:collapse;font-size:12px;min-width:840px}.data-table th{position:sticky;top:0;background:#F1F5F2;color:var(--muted);font-size:10.5px;text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}.data-table th:first-child,.data-table td:first-child{text-align:left}.data-table td{text-align:right;padding:10px;border-bottom:1px solid #EDF0EE;font-variant-numeric:tabular-nums}.data-table tr:last-child td{border-bottom:0}.data-table tr:hover td{background:#FBFCFA}.rank-no{font-family:var(--num);color:var(--muted);margin-right:8px}.user-link{border:0;background:none;color:var(--pitch);font-weight:850;padding:0}.positive{color:var(--grass)!important}.negative{color:var(--red)!important}.sample{display:inline-block;margin-left:5px;padding:1px 5px;border-radius:4px;background:#FFF2CC;color:#866513;font-size:9px}
@@ -62,6 +71,8 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
   .profile-head{align-items:flex-start;flex-wrap:wrap}.profile-select{width:100%;margin-left:0}.profile-select select{width:100%;max-width:none}
   .bar-row{grid-template-columns:78px 1fr 62px}.compare-row{grid-template-columns:86px 1fr 68px}
   .donut-layout{grid-template-columns:1fr}.donut-layout svg{max-height:185px}
+  .persona-grid{grid-template-columns:1fr}.moment{grid-template-columns:76px minmax(0,1fr)}.moment span{grid-column:2;text-align:left}
+  .duel{grid-template-columns:1fr}.duel-vs{margin:auto;width:34px;height:34px}.analysis-heading{align-items:flex-start}.analysis-heading span{line-height:1.5}
   .table-wrap.slip-wrap{border:0;background:transparent;overflow:visible}.slip{grid-template-columns:1fr auto;gap:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:8px;padding:11px}.slip .when{grid-column:1/-1}.slip .match{grid-column:1/-1;white-space:normal}.slip .pick{grid-column:1/-1}.slip .num{text-align:left}.slip .num::before{content:attr(data-label) " ";color:var(--muted)}.outcome{grid-column:2;grid-row:4;align-self:center}
   .footer-in{flex-direction:column}.gate-form{display:grid}
 }
@@ -108,7 +119,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 
   <nav class="tabbar" aria-label="数据看板">
     <div class="tabs" id="dashTabs">
-      <button class="tab on" data-view="overview">全局概览</button>
+      <button class="tab on" data-view="overview">玩家全景</button>
       <button class="tab" data-view="compare">用户对比</button>
       <button class="tab" data-view="profile">用户档案</button>
       <button class="tab" data-view="bets">注单明细</button>
@@ -117,12 +128,30 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 
   <main class="main">
     <section class="view on" id="view-overview">
-      <div class="section-head"><div><h2>全局概览</h2><p>以全部注单为依据，余额统一由投入与返还推导。</p></div><div class="fresh status-line"><i class="status-dot" id="statusDot"></i><span id="freshText">读取中</span></div></div>
+      <div class="section-head"><div><h2>玩家全景</h2><p>先看 22 位朋友如何参与，再看资金、阶段与玩法表现。</p></div><div class="fresh status-line"><i class="status-dot" id="statusDot"></i><span id="freshText">读取中</span></div></div>
       <div class="kpis" id="globalKpis"></div>
+      <div class="analysis-heading"><h3>玩家群像</h3><span>从真实选择中读出每个人的竞猜风格</span></div>
+      <div class="grid-2">
+        <article class="panel"><h3>竞猜人格分布</h3><div class="panel-sub">每位参与者按最鲜明的行为特征归入一种风格</div><div id="personaDistribution"></div></article>
+        <article class="panel"><h3>朋友们的世界杯瞬间</h3><div class="panel-sub">不是奖惩，只记录这一届独一无二的参与方式</div><div id="playerMoments"></div></article>
+      </div>
+      <div class="analysis-heading"><h3>资金与总体表现</h3><span>余额、资金流和最终回报</span></div>
       <div class="grid-2">
         <article class="panel"><h3>最终余额分布</h3><div class="panel-sub">每位参与者的推导余额，含无下注用户</div><div class="chart" id="balanceChart"></div></article>
         <article class="panel"><h3>赛事记忆点</h3><div class="panel-sub">由本届完整竞猜记录计算</div><div class="awards" id="awards"></div></article>
       </div>
+      <article class="panel"><h3>累计资金流</h3><div class="panel-sub">随赛事推进累计投入与累计返还，终点差额即总体净收益</div><div class="chart" id="cashflowChart"></div></article>
+      <div class="analysis-heading"><h3>参与行为</h3><span>时间、金额、场次和阶段选择</span></div>
+      <div class="grid-2">
+        <article class="panel"><h3>竞猜热度时间线</h3><div class="panel-sub">每日注单数与参与用户数，观察赛事进程中的关注起伏</div><div class="chart" id="activityTimeline"></div></article>
+        <article class="panel"><h3>下注金额分布</h3><div class="panel-sub">每笔投入落在哪个金额区间</div><div class="chart" id="stakeHistogram"></div></article>
+      </div>
+      <div class="grid-2">
+        <article class="panel"><h3>热门比赛</h3><div class="panel-sub">按注单数量排序的关注度前十场</div><div id="popularMatches"></div></article>
+        <article class="panel"><h3>阶段参与度</h3><div class="panel-sub">从小组赛到决赛，大家在哪些阶段最投入</div><div id="stageBars"></div></article>
+      </div>
+      <article class="panel"><h3>用户阶段热力图</h3><div class="panel-sub">颜色越深，代表该用户在对应阶段留下的判断越多</div><div id="participationHeatmap"></div></article>
+      <div class="analysis-heading"><h3>策略与结果</h3><span>玩法、赔率、命中和阶段回报</span></div>
       <div class="grid-2">
         <article class="panel"><h3>玩法表现</h3><div class="panel-sub">胜平负与正确比分的投入、命中和返还</div><div id="typeBars"></div></article>
         <article class="panel"><h3>赔率分层</h3><div class="panel-sub">高赔率意味着更难命中，不代表更高的实际回报</div><div id="oddsBars"></div></article>
@@ -131,8 +160,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
         <article class="panel"><h3>胜负构成</h3><div class="panel-sub">全部已结注单的结果比例</div><div id="outcomeDonut"></div></article>
         <article class="panel"><h3>风险与回报</h3><div class="panel-sub">至少 5 注用户的命中率与 ROI，越靠右上表现越稳健</div><div class="chart" id="riskScatter"></div></article>
       </div>
-      <article class="panel"><h3>阶段参与度</h3><div class="panel-sub">从小组赛到决赛，大家在哪些阶段最投入</div><div id="stageBars"></div></article>
-      <article class="panel" style="margin-top:16px"><h3>竞猜热度时间线</h3><div class="panel-sub">按下注日期汇总参与次数，观察赛事进程中的关注起伏</div><div class="chart" id="activityTimeline"></div></article>
+      <article class="panel"><h3>阶段投入与返还</h3><div class="panel-sub">黄色为投入，绿色为返还，并标出各阶段 ROI</div><div id="stageReturns"></div></article>
     </section>
 
     <section class="view" id="view-compare">
@@ -142,6 +170,14 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
         <div class="field"><label for="compareMin">最低样本</label><select id="compareMin"><option value="0">全部用户</option><option value="5">至少 5 注</option><option value="20">至少 20 注</option><option value="50">至少 50 注</option></select></div>
         <div class="filter-count" id="compareCount"></div>
       </div>
+      <article class="panel" style="margin-bottom:16px">
+        <h3>好友对决</h3><div class="panel-sub">选择两位朋友，从风格与结果两个角度并排看看</div>
+        <div class="filters" style="margin:0 0 12px">
+          <div class="field"><label for="duelA">左侧用户</label><select id="duelA"></select></div>
+          <div class="field"><label for="duelB">右侧用户</label><select id="duelB"></select></div>
+        </div>
+        <div id="duelArena"></div>
+      </article>
       <article class="panel" style="margin-bottom:16px"><h3>排名对比</h3><div class="panel-sub">点击用户名可进入个人档案</div><div class="compare-chart" id="compareChart"></div></article>
       <div class="table-wrap"><table class="data-table"><thead><tr><th>用户</th><th>余额</th><th>净收益</th><th>ROI</th><th>命中率</th><th>注单</th><th>总投入</th><th>总返还</th><th>平均赔率</th></tr></thead><tbody id="compareTable"></tbody></table></div>
     </section>
@@ -154,7 +190,11 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
       <div class="kpis" id="profileKpis"></div>
       <div class="grid-2">
         <article class="panel"><h3>余额轨迹</h3><div class="panel-sub">下注时扣除本金，赢单结算时加入返还</div><div class="chart" id="profileCurve"></div></article>
+        <article class="panel"><h3>个人五维雷达</h3><div class="panel-sub">活跃、精准、冒险、比分偏好与全程参与</div><div class="chart" id="profileRadar"></div></article>
+      </div>
+      <div class="grid-2">
         <article class="panel"><h3>玩法画像</h3><div class="panel-sub">玩法和赔率偏好</div><div id="profileStyle"></div></article>
+        <article class="panel"><h3>我的竞猜人格</h3><div class="panel-sub">根据完整行为生成，可随筛选数据重新计算</div><div id="profilePersona"></div></article>
       </div>
       <article class="panel"><h3>代表注单</h3><div class="panel-sub">最高单笔净收益与最大单笔损失</div><div class="awards" id="profileAwards"></div></article>
     </section>
@@ -301,12 +341,19 @@ function renderOverview(){
   ].join("");
   renderBalanceChart();
   renderAwards();
+  renderCashflowChart();
+  renderActivityTimeline();
+  renderStakeHistogram();
+  renderPopularMatches();
+  renderStageBars();
+  renderParticipationHeatmap();
+  renderPersonaDistribution();
+  renderPlayerMoments();
   renderTypeBars();
   renderOddsBars();
   renderOutcomeDonut();
   renderRiskScatter();
-  renderStageBars();
-  renderActivityTimeline();
+  renderStageReturns();
 }
 function renderBalanceChart(){
   const rows=[...MODEL.metrics].sort((a,b)=>b.balance-a.balance),w=900,h=260,p={l:38,r:10,t:12,b:50};
@@ -334,6 +381,98 @@ function renderAwards(){
     ["共同完成","全部参与者",`${MODEL.global.settled} 注全部结算`]
   ];
   $("#awards").innerHTML=rows.map(r=>`<div class="award"><div class="k">${r[0]}</div><b>${esc(r[1]||"-")}</b><span>${esc(r[2])}</span></div>`).join("");
+}
+function dayKey(value){return value?new Date(value).toISOString().slice(0,10):""}
+function metricStageCount(metric){return new Set(metric.bets.map(b=>stageOf(b.mid))).size}
+function personaOf(metric){
+  if(!metric?.count)return{name:"场边观察员",icon:"👀",copy:"更享受观察全局，把热闹留给场内。"};
+  const scoreShare=metric.scoreCount/metric.count,stages=metricStageCount(metric);
+  if(metric.count<5)return{name:"轻装观赛者",icon:"🎈",copy:"出手不多，每一次选择都更像一张世界杯纪念票。"};
+  if(scoreShare>=.6)return{name:"比分艺术家",icon:"🎨",copy:"比起只猜胜负，更愿意描绘比赛最终会停在哪个数字。"};
+  if(metric.avgOdds>=10)return{name:"冷门猎手",icon:"🧭",copy:"愿意走向人少的一侧，寻找赔率背后的意外剧情。"};
+  if(metric.hit>=.5)return{name:"稳准派",icon:"🎯",copy:"选择相对克制，命中表现是最鲜明的个人签名。"};
+  if(stages>=5&&metric.count>=50)return{name:"全程守候者",icon:"🗓️",copy:"从小组赛一路看到决赛，赛事阶段没有缺席。"};
+  if(metric.count>=100)return{name:"高频观察员",icon:"📡",copy:"用大量判断记录比赛变化，是数据中心里最忙碌的身影之一。"};
+  return{name:"均衡派",icon:"⚖️",copy:"胜负、比分、热门与冷门之间保持自己的节奏。"};
+}
+function renderCashflowChart(){
+  const days={};
+  const row=day=>(days[day]||={day,stake:0,payout:0});
+  MODEL.bets.forEach(b=>{
+    const placed=dayKey(b.placedAt);if(placed)row(placed).stake+=b.stake;
+    const settled=dayKey(b.settledAt||b.updatedAt);if(b.status==="won"&&settled)row(settled).payout+=b.payout;
+  });
+  let cumStake=0,cumPayout=0;
+  const rows=Object.values(days).sort((a,b)=>a.day.localeCompare(b.day)).map(d=>({...d,cumStake:(cumStake+=d.stake),cumPayout:(cumPayout+=d.payout)}));
+  if(!rows.length){$("#cashflowChart").innerHTML='<div class="empty">暂无资金流数据</div>';return}
+  const w=920,h=270,p={l:52,r:16,t:18,b:38},max=Math.max(1,...rows.flatMap(r=>[r.cumStake,r.cumPayout]));
+  const x=i=>p.l+i/Math.max(1,rows.length-1)*(w-p.l-p.r),y=v=>p.t+(max-v)/max*(h-p.t-p.b);
+  const line=key=>rows.map((r,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(r[key]).toFixed(1)}`).join(" ");
+  const end=rows.at(-1),net=end.cumPayout-end.cumStake;
+  $("#cashflowChart").innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="累计投入与返还折线图">
+    <line x1="${p.l}" y1="${h-p.b}" x2="${w-p.r}" y2="${h-p.b}" stroke="#D7DEDA"/>
+    <path d="${line("cumStake")}" fill="none" stroke="#D4A928" stroke-width="3"/><path d="${line("cumPayout")}" fill="none" stroke="#287B4B" stroke-width="3"/>
+    <circle cx="${x(rows.length-1)}" cy="${y(end.cumStake)}" r="4" fill="#D4A928"/><circle cx="${x(rows.length-1)}" cy="${y(end.cumPayout)}" r="4" fill="#287B4B"/>
+    <text x="${p.l-5}" y="${p.t+5}" text-anchor="end" font-size="9" fill="#68736D">${money(max)}</text>
+    <text x="${p.l}" y="${h-12}" font-size="9" fill="#68736D">${rows[0].day.slice(5).replace("-","/")}</text><text x="${w-p.r}" y="${h-12}" text-anchor="end" font-size="9" fill="#68736D">${end.day.slice(5).replace("-","/")}</text>
+    <text x="${w-p.r}" y="${p.t+5}" text-anchor="end" font-size="10" font-weight="800" fill="${net<0?"#B8493E":"#287B4B"}">最终净额 ${net>0?"+":""}${money(net)}</text>
+  </svg><div class="legend"><span><i style="background:#D4A928"></i>累计投入 ${money(end.cumStake)}</span><span><i style="background:#287B4B"></i>累计返还 ${money(end.cumPayout)}</span></div>`;
+}
+function renderStakeHistogram(){
+  const bands=[
+    {label:"10-19",min:10,max:19},{label:"20-49",min:20,max:49},{label:"50-99",min:50,max:99},
+    {label:"100-199",min:100,max:199},{label:"200-499",min:200,max:499},{label:"500+",min:500,max:Infinity}
+  ].map(b=>({...b,rows:MODEL.bets.filter(x=>x.stake>=b.min&&x.stake<=b.max)}));
+  const w=620,h=250,p={l:40,r:12,t:18,b:45},max=Math.max(1,...bands.map(b=>b.rows.length)),bw=(w-p.l-p.r)/bands.length;
+  const bars=bands.map((b,i)=>{
+    const height=b.rows.length/max*(h-p.t-p.b),x=p.l+i*bw+bw*.17,y=h-p.b-height;
+    return`<g><rect x="${x}" y="${y}" width="${bw*.66}" height="${Math.max(1,height)}" rx="3" fill="${i>=4?"#D4A928":"#287B4B"}"><title>${b.label}：${b.rows.length} 注，合计 ${money(b.rows.reduce((s,x)=>s+x.stake,0))}</title></rect><text x="${x+bw*.33}" y="${y-6}" text-anchor="middle" font-size="9" fill="#0B3B2A">${b.rows.length}</text><text x="${x+bw*.33}" y="${h-22}" text-anchor="middle" font-size="9" fill="#68736D">${b.label}</text></g>`;
+  }).join("");
+  $("#stakeHistogram").innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="下注金额区间分布柱状图"><line x1="${p.l}" y1="${h-p.b}" x2="${w-p.r}" y2="${h-p.b}" stroke="#D7DEDA"/>${bars}</svg>`;
+}
+function renderPopularMatches(){
+  const rows=groupedMetrics(b=>b.mid).sort((a,b)=>b.bets-a.bets).slice(0,10);
+  const max=Math.max(1,...rows.map(r=>r.bets));
+  $("#popularMatches").innerHTML=`<div class="bar-list">${rows.map(r=>{
+    const match=parseMid(r.key),label=match.label.length>18?match.label.slice(0,17)+"…":match.label;
+    return`<div class="bar-row" style="grid-template-columns:minmax(120px,180px) minmax(80px,1fr) 58px"><div class="name" title="${esc(match.label)}">${esc(label)}</div><div class="bar-track"><div class="bar-fill ${r.key.startsWith("07-19")?"gold":""}" style="width:${r.bets/max*100}%"></div></div><div class="bar-value">${r.bets} 注</div></div>`;
+  }).join("")}</div>`;
+}
+function renderParticipationHeatmap(){
+  const order=["group","r32","r16","qf","finals"],rows=MODEL.metrics.filter(m=>m.count).sort((a,b)=>b.count-a.count);
+  const values=rows.flatMap(m=>order.map(st=>m.bets.filter(b=>stageOf(b.mid)===st).length)),max=Math.max(1,...values);
+  $("#participationHeatmap").innerHTML=`<div class="heatmap-wrap"><div class="heatmap"><div class="head">用户</div>${order.map(st=>`<div class="head">${STAGE_LABEL[st]}</div>`).join("")}${rows.map(m=>{
+    const cells=order.map(st=>{
+      const count=m.bets.filter(b=>stageOf(b.mid)===st).length,alpha=.06+count/max*.82,color=alpha>.52?"#fff":"#173126";
+      return`<div class="cell" style="background:rgba(40,123,75,${alpha.toFixed(2)});color:${color}" title="${esc(m.name)} · ${STAGE_LABEL[st]}：${count} 注">${count}</div>`;
+    }).join("");
+    return`<div class="user" title="${esc(m.name)}">${esc(m.name)}</div>${cells}`;
+  }).join("")}</div></div>`;
+}
+function renderStageReturns(){
+  const order=["group","r32","r16","qf","finals"],rows=groupedMetrics(b=>stageOf(b.mid)).sort((a,b)=>order.indexOf(a.key)-order.indexOf(b.key)),max=Math.max(1,...rows.flatMap(r=>[r.stake,r.payout]));
+  $("#stageReturns").innerHTML=`<div class="dual-bars">${rows.map(r=>`<div class="dual-row"><div class="dual-name">${STAGE_LABEL[r.key]}</div><div class="dual-track"><span class="stake" style="width:${r.stake/max*100}%"></span><span class="payout" style="width:${r.payout/max*100}%"></span></div><div class="dual-value"><b class="${r.roi<0?"negative":"positive"}">${pct(r.roi)}</b>${money(r.stake)} / ${money(r.payout)}</div></div>`).join("")}</div>`;
+}
+function renderPersonaDistribution(){
+  const groups={};
+  MODEL.metrics.forEach(m=>{const p=personaOf(m);const row=groups[p.name]||={...p,count:0,names:[]};row.count++;row.names.push(m.name);groups[p.name]=row});
+  const rows=Object.values(groups).sort((a,b)=>b.count-a.count);
+  $("#personaDistribution").innerHTML=`<div class="persona-grid">${rows.map(r=>`<div class="persona-card" title="${esc(r.names.join("、"))}"><span class="persona-icon">${r.icon}</span><div><b>${esc(r.name)}</b><small>${esc(r.copy)}</small></div><strong>${r.count}</strong></div>`).join("")}</div>`;
+}
+function renderPlayerMoments(){
+  const placed=[...MODEL.bets].filter(b=>b.placedAt).sort((a,b)=>a.placedAt-b.placedAt),won=[...MODEL.bets].filter(b=>b.status==="won").sort((a,b)=>b.odds-a.odds);
+  const unique=MODEL.metrics.map(m=>({name:m.name,value:new Set(m.bets.map(b=>b.mid)).size})).sort((a,b)=>b.value-a.value)[0];
+  const stages=MODEL.metrics.map(m=>({name:m.name,value:metricStageCount(m),count:m.count})).sort((a,b)=>b.value-a.value||b.count-a.count)[0];
+  const close=MODEL.metrics.filter(m=>m.count).sort((a,b)=>Math.abs(a.net)-Math.abs(b.net))[0];
+  const rows=[
+    ["最早入场",placed[0]?.user,placed[0]?new Date(placed[0].placedAt).toLocaleDateString("zh-CN"):"-"],
+    ["守到最后",placed.at(-1)?.user,placed.at(-1)?new Date(placed.at(-1).placedAt).toLocaleDateString("zh-CN"):"-"],
+    ["看得最广",unique?.name,`${unique?.value||0} 场`],
+    ["阶段全勤",stages?.name,`${stages?.value||0} 个阶段`],
+    ["最冷命中",won[0]?.user,won[0]?`${won[0].odds.toFixed(2)} 倍`:"-"],
+    ["最接近平衡",close?.name,close?`净额 ${money(close.net)}`:"-"]
+  ];
+  $("#playerMoments").innerHTML=`<div class="moment-list">${rows.map(r=>`<div class="moment"><div class="k">${r[0]}</div><b>${esc(r[1]||"-")}</b><span>${esc(r[2])}</span></div>`).join("")}</div>`;
 }
 function groupedMetrics(groupFn){
   const map={};
@@ -391,16 +530,17 @@ function renderActivityTimeline(){
   MODEL.bets.forEach(b=>{
     if(!b.placedAt)return;
     const day=new Date(b.placedAt).toISOString().slice(0,10);
-    const row=byDay[day]||={day,count:0,stake:0};row.count++;row.stake+=b.stake;byDay[day]=row;
+    const row=byDay[day]||={day,count:0,stake:0,users:new Set()};row.count++;row.stake+=b.stake;row.users.add(b.user);byDay[day]=row;
   });
   const rows=Object.values(byDay).sort((a,b)=>a.day.localeCompare(b.day));
   if(!rows.length){$("#activityTimeline").innerHTML='<div class="empty">暂无时间数据</div>';return}
-  const w=920,h=250,p={l:42,r:14,t:18,b:38},max=Math.max(...rows.map(r=>r.count),1);
-  const x=i=>p.l+i/Math.max(1,rows.length-1)*(w-p.l-p.r),y=v=>p.t+(max-v)/max*(h-p.t-p.b);
-  const line=rows.map((r,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(r.count).toFixed(1)}`).join(" ");
-  const area=`${line} L${x(rows.length-1)},${h-p.b} L${x(0)},${h-p.b} Z`;
-  const dots=rows.map((r,i)=>`<circle cx="${x(i)}" cy="${y(r.count)}" r="2.5" fill="#0B3B2A"><title>${r.day}：${r.count} 注，投入 ${money(r.stake)}</title></circle>`).join("");
-  $("#activityTimeline").innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="每日竞猜热度折线图"><path d="${area}" fill="#DDEDE2" opacity=".8"/><path d="${line}" fill="none" stroke="#0B3B2A" stroke-width="2.5" stroke-linejoin="round"/>${dots}<text x="${p.l}" y="${h-13}" font-size="9" fill="#68736D">${rows[0].day.slice(5).replace("-","/")}</text><text x="${w-p.r}" y="${h-13}" text-anchor="end" font-size="9" fill="#68736D">${rows.at(-1).day.slice(5).replace("-","/")}</text><text x="${p.l-5}" y="${p.t+4}" text-anchor="end" font-size="9" fill="#68736D">${max}</text></svg>`;
+  const w=920,h=250,p={l:42,r:26,t:18,b:38},betMax=Math.max(...rows.map(r=>r.count),1),userMax=Math.max(...rows.map(r=>r.users.size),1);
+  const x=i=>p.l+i/Math.max(1,rows.length-1)*(w-p.l-p.r),yBet=v=>p.t+(betMax-v)/betMax*(h-p.t-p.b),yUser=v=>p.t+(userMax-v)/userMax*(h-p.t-p.b);
+  const betLine=rows.map((r,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${yBet(r.count).toFixed(1)}`).join(" ");
+  const userLine=rows.map((r,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${yUser(r.users.size).toFixed(1)}`).join(" ");
+  const area=`${betLine} L${x(rows.length-1)},${h-p.b} L${x(0)},${h-p.b} Z`;
+  const dots=rows.map((r,i)=>`<circle cx="${x(i)}" cy="${yBet(r.count)}" r="2.4" fill="#0B3B2A"><title>${r.day}：${r.count} 注，${r.users.size} 位用户，投入 ${money(r.stake)}</title></circle>`).join("");
+  $("#activityTimeline").innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="每日注单和参与人数双折线图"><path d="${area}" fill="#DDEDE2" opacity=".72"/><path d="${betLine}" fill="none" stroke="#0B3B2A" stroke-width="2.5"/><path d="${userLine}" fill="none" stroke="#D4A928" stroke-width="2.2" stroke-dasharray="5 4"/>${dots}<text x="${p.l}" y="${h-13}" font-size="9" fill="#68736D">${rows[0].day.slice(5).replace("-","/")}</text><text x="${w-p.r}" y="${h-13}" text-anchor="end" font-size="9" fill="#68736D">${rows.at(-1).day.slice(5).replace("-","/")}</text><text x="${p.l-5}" y="${p.t+4}" text-anchor="end" font-size="9" fill="#68736D">${betMax} 注</text><text x="${w-p.r+4}" y="${p.t+4}" font-size="9" fill="#9A7620">${userMax} 人</text></svg><div class="legend"><span><i style="background:#0B3B2A"></i>每日注单</span><span><i style="background:#D4A928"></i>每日参与用户</span></div>`;
 }
 function fillUserSelects(){
   const sorted=[...MODEL.metrics].sort((a,b)=>String(a.name).localeCompare(String(b.name),"zh-CN"));
@@ -408,6 +548,11 @@ function fillUserSelects(){
   const profile=$("#profileUser"),oldProfile=profile.value||localStorage.getItem(USER_KEY)||sorted[0]?.name;
   profile.innerHTML=options;profile.value=sorted.some(m=>m.name===oldProfile)?oldProfile:sorted[0]?.name||"";
   const betUser=$("#betUser"),oldBet=betUser.value;betUser.innerHTML=`<option value="">全部用户</option>${options}`;betUser.value=oldBet;
+  const duelA=$("#duelA"),duelB=$("#duelB"),active=MODEL.metrics.filter(m=>m.count).sort((a,b)=>b.balance-a.balance);
+  const oldA=duelA.value||localStorage.getItem(USER_KEY),oldB=duelB.value;
+  duelA.innerHTML=options;duelB.innerHTML=options;
+  duelA.value=sorted.some(m=>m.name===oldA)?oldA:(active[0]?.name||sorted[0]?.name||"");
+  duelB.value=sorted.some(m=>m.name===oldB&&m.name!==duelA.value)?oldB:(active.find(m=>m.name!==duelA.value)?.name||sorted[1]?.name||duelA.value);
 }
 function compareValue(m,key){return key==="roi"?m.roi:key==="hit"?m.hit:m[key]}
 function compareDisplay(v,key){return key==="roi"||key==="hit"?pct(v):money(v)}
@@ -415,6 +560,7 @@ function renderCompare(){
   const key=$("#compareMetric").value,min=n($("#compareMin").value);
   const rows=MODEL.metrics.filter(m=>m.count>=min).sort((a,b)=>compareValue(b,key)-compareValue(a,key));
   $("#compareCount").textContent=`${rows.length} 位用户`;
+  renderDuel();
   const vals=rows.map(m=>compareValue(m,key)),maxAbs=Math.max(1,...vals.map(Math.abs));
   $("#compareChart").innerHTML=rows.map(m=>{
     const v=compareValue(m,key);
@@ -422,6 +568,24 @@ function renderCompare(){
   }).join("")||`<div class="empty">没有符合样本条件的用户</div>`;
   $("#compareTable").innerHTML=rows.map((m,i)=>`<tr><td><span class="rank-no">${i+1}</span><button class="user-link" data-user="${esc(m.name)}">${esc(m.name)}</button>${m.count<5?'<span class="sample">样本较少</span>':""}</td><td class="${m.balance<0?"negative":""}">${money(m.balance)}</td><td class="${m.net<0?"negative":"positive"}">${money(m.net)}</td><td>${pct(m.roi)}</td><td>${pct(m.hit)}</td><td>${m.count}</td><td>${money(m.stake)}</td><td>${money(m.payout)}</td><td>${m.avgOdds.toFixed(2)}</td></tr>`).join("");
   $$("[data-user]").forEach(btn=>btn.onclick=()=>openProfile(btn.dataset.user));
+}
+function renderDuel(){
+  const a=MODEL.metrics.find(m=>m.name===$("#duelA").value),b=MODEL.metrics.find(m=>m.name===$("#duelB").value);
+  if(!a||!b){$("#duelArena").innerHTML='<div class="empty">请选择两位用户</div>';return}
+  const card=(m,other)=>{
+    const persona=personaOf(m),lead=m.balance>other.balance;
+    return`<div class="duel-side ${lead?"win":""}"><h3>${esc(m.name)}</h3><div class="persona">${persona.icon} ${esc(persona.name)}</div><div class="duel-score">
+      <div class="duel-stat"><span>最终余额</span><b class="${m.balance<0?"negative":""}">${money(m.balance)}</b></div>
+      <div class="duel-stat"><span>净收益</span><b class="${m.net<0?"negative":"positive"}">${money(m.net)}</b></div>
+      <div class="duel-stat"><span>命中率</span><b>${pct(m.hit)}</b></div>
+      <div class="duel-stat"><span>平均赔率</span><b>${m.avgOdds.toFixed(2)}</b></div>
+      <div class="duel-stat"><span>留下判断</span><b>${m.count} 注</b></div>
+    </div></div>`;
+  };
+  const moreActive=a.count===b.count?"两人的出手次数恰好相同":`${a.count>b.count?a.name:b.name} 留下了更多判断`;
+  const moreBold=Math.abs(a.avgOdds-b.avgOdds)<.1?"两人的赔率偏好十分接近":`${a.avgOdds>b.avgOdds?a.name:b.name} 更偏爱高赔率剧情`;
+  const moreAccurate=Math.abs(a.hit-b.hit)<.01?"命中率几乎不分上下":`${a.hit>b.hit?a.name:b.name} 的命中率更高`;
+  $("#duelArena").innerHTML=`<div class="duel">${card(a,b)}<div class="duel-vs">VS</div>${card(b,a)}</div><div class="duel-verdict">${esc(moreActive)}；${esc(moreBold)}；${esc(moreAccurate)}。风格不同，才让这届世界杯更有故事。</div>`;
 }
 function bankrollEvents(m){
   const events=[];
@@ -435,6 +599,30 @@ function lineChart(points){
   const path=points.map((d,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(d.balance).toFixed(1)}`).join(" ");
   const zero=y(0);
   return`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="余额变化曲线"><line x1="${p.l}" y1="${zero}" x2="${w-p.r}" y2="${zero}" stroke="#D4DBD7"/><path d="${path}" fill="none" stroke="#287B4B" stroke-width="3" stroke-linejoin="round"/><circle cx="${x(points.length-1)}" cy="${y(points.at(-1).balance)}" r="4" fill="${points.at(-1).balance<0?"#B8493E":"#287B4B"}"/><text x="${p.l}" y="${h-8}" font-size="9" fill="#68736D">${points[0]?.at?new Date(points[0].at).toLocaleDateString("zh-CN"):""}</text><text x="${w-p.r}" y="${h-8}" text-anchor="end" font-size="9" fill="#68736D">${points.at(-1)?.at?new Date(points.at(-1).at).toLocaleDateString("zh-CN"):""}</text><text x="${w-p.r}" y="${Math.max(11,y(points.at(-1).balance)-8)}" text-anchor="end" font-size="11" font-weight="800" fill="#0B3B2A">${money(points.at(-1).balance)}</text></svg>`;
+}
+function profileDimensions(metric){
+  const maxCount=Math.max(1,...MODEL.metrics.map(m=>m.count)),maxOdds=Math.max(2,...MODEL.metrics.filter(m=>m.count).map(m=>m.avgOdds));
+  return[
+    {label:"活跃",value:metric.count/maxCount},
+    {label:"精准",value:metric.hit},
+    {label:"冒险",value:Math.min(1,Math.log(Math.max(1,metric.avgOdds))/Math.log(maxOdds))},
+    {label:"比分",value:metric.count?metric.scoreCount/metric.count:0},
+    {label:"全程",value:metricStageCount(metric)/5}
+  ].map(x=>({...x,value:Math.max(0,Math.min(1,x.value))}));
+}
+function radarChart(metric){
+  const dims=profileDimensions(metric),cx=160,cy=126,r=83,angles=dims.map((_,i)=>-Math.PI/2+i*2*Math.PI/dims.length);
+  const point=(angle,scale)=>[cx+Math.cos(angle)*r*scale,cy+Math.sin(angle)*r*scale];
+  const polygon=scale=>angles.map(a=>point(a,scale).join(",")).join(" ");
+  const data=dims.map((d,i)=>point(angles[i],d.value).join(",")).join(" ");
+  const axes=angles.map((a,i)=>{const [x,y]=point(a,1),[lx,ly]=point(a,1.23);return`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#DCE3DE"/><text x="${lx}" y="${ly+3}" text-anchor="middle" font-size="10" font-weight="800" fill="#0B3B2A">${dims[i].label}</text><text x="${lx}" y="${ly+15}" text-anchor="middle" font-size="8" fill="#68736D">${Math.round(dims[i].value*100)}</text>`}).join("");
+  return`<svg viewBox="0 0 320 255" role="img" aria-label="${esc(metric.name)}个人五维雷达图"><polygon points="${polygon(.5)}" fill="none" stroke="#E7ECE9"/><polygon points="${polygon(1)}" fill="#F8FBF9" stroke="#C8D3CC"/>${axes}<polygon points="${data}" fill="rgba(40,123,75,.28)" stroke="#287B4B" stroke-width="2.5"/>${dims.map((d,i)=>{const[x,y]=point(angles[i],d.value);return`<circle cx="${x}" cy="${y}" r="3.5" fill="#D4A928"/>`}).join("")}</svg>`;
+}
+function renderProfilePersona(metric){
+  const persona=personaOf(metric),stages=metricStageCount(metric),scoreShare=metric.count?metric.scoreCount/metric.count:0;
+  const bestStage=groupedForUser(metric.bets,b=>stageOf(b.mid)).sort((a,b)=>b.bets-a.bets)[0];
+  const pace=metric.avgStake>=100?"大步出手":metric.avgStake>=50?"节奏明快":"轻量判断";
+  $("#profilePersona").innerHTML=`<div class="profile-persona"><div class="persona-title"><span class="badge">${persona.icon}</span><div><b>${esc(persona.name)}</b><span>${metric.count<5?"样本较少，标签仅供纪念":"由全部注单生成"}</span></div></div><div class="persona-copy">${esc(persona.copy)}</div><div class="persona-tags"><span>${esc(pace)}</span><span>比分占比 ${Math.round(scoreShare*100)}%</span><span>参与 ${stages} 个阶段</span>${bestStage?`<span>最常出现：${STAGE_LABEL[bestStage.key]}</span>`:""}</div></div>`;
 }
 function betDescription(b){const m=parseMid(b.mid);return`${m.label} · ${typeLabel(b)} ${pickLabel(b)}`}
 function renderProfile(){
@@ -450,12 +638,14 @@ function renderProfile(){
     kpi("平均赔率",metric.avgOdds.toFixed(2),`平均每注 ${money(metric.avgStake)}`)
   ].join("");
   $("#profileCurve").innerHTML=lineChart(bankrollEvents(metric));
+  $("#profileRadar").innerHTML=radarChart(metric);
   const styleRows=[
     {name:"胜平负",value:metric.count-metric.scoreCount,note:`${metric.count?((metric.count-metric.scoreCount)/metric.count*100).toFixed(0):0}%`},
     {name:"正确比分",value:metric.scoreCount,note:`${metric.count?(metric.scoreCount/metric.count*100).toFixed(0):0}%`},
     ...groupedForUser(metric.bets,oddsBand).map(r=>({name:`赔率 ${r.key}`,value:r.bets,note:`命中 ${pct(r.hit)}`}))
   ];
   $("#profileStyle").innerHTML=barRows(styleRows,r=>r.value,r=>`${r.name} · ${r.note}`);
+  renderProfilePersona(metric);
   const won=metric.bets.filter(b=>b.status==="won").sort((a,b)=>(b.payout-b.stake)-(a.payout-a.stake))[0];
   const lost=metric.bets.filter(b=>b.status==="lost").sort((a,b)=>b.stake-a.stake)[0];
   $("#profileAwards").innerHTML=[
@@ -499,6 +689,7 @@ function activateView(name){
 function bind(){
   $$("#dashTabs .tab").forEach(b=>b.onclick=()=>activateView(b.dataset.view));
   $("#compareMetric").onchange=renderCompare;$("#compareMin").onchange=renderCompare;$("#profileUser").onchange=renderProfile;
+  $("#duelA").onchange=renderDuel;$("#duelB").onchange=renderDuel;
   ["betUser","betStage","betType","betOutcome"].forEach(id=>$("#"+id).onchange=()=>{betPage=1;renderBets()});
   $("#betSearch").oninput=()=>{betPage=1;renderBets()};
   const initial=location.hash.slice(1);if(["overview","compare","profile","bets"].includes(initial))activateView(initial);
