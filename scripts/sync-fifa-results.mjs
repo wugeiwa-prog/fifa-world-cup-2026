@@ -65,6 +65,14 @@ function winnerNameFromResult(state, m){
   if(penalty[1] > penalty[0])return rawName(m.a);
   return "";
 }
+function loserNameFromResult(state, m){
+  const winner = winnerNameFromResult(state, m);
+  if(!winner)return "";
+  const home = rawName(m.h), away = rawName(m.a);
+  if(winner === home)return away;
+  if(winner === away)return home;
+  return "";
+}
 function resolveTeamRef(value, state, byNo){
   const ref = String(value || "").match(/^第(\d+)场胜者$/);
   if(!ref)return value;
@@ -82,6 +90,18 @@ function resolveKnockoutPlaceholders(matches, state){
       if(a !== rawName(m.a)){m.a = a; changed = true;}
     }
     if(!changed)break;
+  }
+  const semifinals = matches
+    .filter(m => /^半决赛\s*[12]$/.test(String(m.g || "")))
+    .sort((a,b) => romeKickoffUtc(a) - romeKickoffUtc(b));
+  const winners = semifinals.map(m => winnerNameFromResult(state,m));
+  const losers = semifinals.map(m => loserNameFromResult(state,m));
+  for(const m of matches){
+    for(const [index,side] of ["h","a"].entries()){
+      const team = rawName(m[side]);
+      if(team === "半决赛胜者" && winners[index])m[side] = winners[index];
+      if(team === "半决赛负者" && losers[index])m[side] = losers[index];
+    }
   }
   return matches;
 }

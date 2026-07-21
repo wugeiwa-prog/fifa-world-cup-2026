@@ -1330,6 +1330,14 @@ function winnerNameFromResult(m){
   if(penalty[1]>penalty[0])return rawName(m.a);
   return "";
 }
+function loserNameFromResult(m){
+  const winner=winnerNameFromResult(m);
+  if(!winner)return "";
+  const home=rawName(m.h),away=rawName(m.a);
+  if(winner===home)return away;
+  if(winner===away)return home;
+  return "";
+}
 function teamLabel(name){
   const t=TEAMS[name];
   return t?`${t.flag} ${name}`:name;
@@ -1359,6 +1367,18 @@ function resolveKnockoutPlaceholders(){
     });
     if(!changed)break;
   }
+  const semifinals=M.filter(m=>/^半决赛\s*[12]$/.test(String(m.g||""))).sort((a,b)=>matchKickoffTime(a)-matchKickoffTime(b));
+  const winners=semifinals.map(winnerNameFromResult),losers=semifinals.map(loserNameFromResult);
+  M.forEach(m=>{
+    const sides=["h","a"];
+    let h=m.h,a=m.a,changed=false;
+    sides.forEach((side,index)=>{
+      const team=rawName(m[side]);
+      const resolved=team==="半决赛胜者"?winners[index]:team==="半决赛负者"?losers[index]:"";
+      if(resolved){if(side==="h")h=teamLabel(resolved);else a=teamLabel(resolved);changed=true;}
+    });
+    if(changed)updateMatchTeams(m,h,a);
+  });
 }
 function applyResults(){
   resolveKnockoutPlaceholders();

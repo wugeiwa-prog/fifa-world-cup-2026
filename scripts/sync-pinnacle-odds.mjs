@@ -7,7 +7,8 @@ const SUPABASE_TABLE = process.env.SUPABASE_TABLE || "wc2026_state";
 const SUPABASE_ROW_ID = process.env.SUPABASE_ROW_ID || "global";
 const DRY_RUN = process.env.DRY_RUN === "1";
 const PLAN_ONLY = process.env.ODDS_PLAN_ONLY === "1";
-const LOOKAHEAD_HOURS = Number(process.env.ODDS_LOOKAHEAD_HOURS || 48);
+const LOOKAHEAD_HOURS = Number(process.env.ODDS_LOOKAHEAD_HOURS || 120);
+const UPCOMING_MATCH_LIMIT = Number(process.env.ODDS_UPCOMING_MATCH_LIMIT || 3);
 const FORCE_ALL = process.env.FORCE_ALL === "1";
 const FORCE_SYNC = process.env.ODDS_FORCE_SYNC === "1" || process.env.ODDS_FORCE_SYNC === "true" || FORCE_ALL;
 const ALLOW_MATCHUPS_PARSE = process.env.PINNACLE_ALLOW_MATCHUPS_PARSE === "1";
@@ -19,9 +20,10 @@ const SCORE_PICK_COUNT = Number(process.env.SCORE_PICK_COUNT || 24);
 const SCORE_ODDS_MIN_COVERAGE = Number(process.env.SCORE_ODDS_MIN_COVERAGE || 0.8);
 const SCORE_ODDS_MIN_LINES = Math.max(4, Math.ceil(SCORE_PICK_COUNT * SCORE_ODDS_MIN_COVERAGE));
 const POST_KICKOFF_ODDS_GRACE_MINUTES = Number(process.env.POST_KICKOFF_ODDS_GRACE_MINUTES || 30);
-const HIGH_FREQ_LOOKAHEAD_MINUTES = Number(process.env.HIGH_FREQ_LOOKAHEAD_MINUTES || 720);
+const HIGH_FREQ_LOOKAHEAD_MINUTES = Number(process.env.HIGH_FREQ_LOOKAHEAD_MINUTES || 1440);
 const HIGH_FREQ_MISSING_RATIO = Number(process.env.HIGH_FREQ_MISSING_RATIO || 0.5);
-const HIGH_FREQ_CADENCE_MINUTES = Number(process.env.HIGH_FREQ_CADENCE_MINUTES || 30);
+const HIGH_FREQ_CADENCE_MINUTES = Number(process.env.HIGH_FREQ_CADENCE_MINUTES || 10);
+const SCORE_ODDS_MAX_AGE_MINUTES = Number(process.env.SCORE_ODDS_MAX_AGE_MINUTES || 30);
 
 const PINNACLE_MATCHUPS_URLS = [
   "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/",
@@ -69,6 +71,14 @@ function winnerNameFromResult(state, m){
   if(penalty[1] > penalty[0])return rawName(m.a);
   return "";
 }
+function loserNameFromResult(state, m){
+  const winner = winnerNameFromResult(state, m);
+  if(!winner)return "";
+  const home = rawName(m.h), away = rawName(m.a);
+  if(winner === home)return away;
+  if(winner === away)return home;
+  return "";
+}
 function resolveTeamRef(value, state, byNo){
   const ref = String(value || "").match(/^第(\d+)场胜者$/);
   if(!ref)return value;
@@ -86,6 +96,19 @@ function resolveKnockoutPlaceholders(matches, state){
       if(a !== rawName(m.a)){m.a = a; changed = true;}
     }
     if(!changed)break;
+  }
+  const semifinals = matches
+    .filter(m => /^半决赛\s*[12]$/.test(String(m.g || "")))
+    .sort((a,b) => romeKickoffUtc(a) - romeKickoffUtc(b));
+  const semifinalWinners = semifinals.map(m => winnerNameFromResult(state,m));
+  const semifinalLosers = semifinals.map(m => loserNameFromResult(state,m));
+  for(const m of matches){
+    const sides = ["h","a"];
+    for(let i = 0; i < sides.length; i += 1){
+      const side = sides[i], team = rawName(m[side]);
+      if(team === "半决赛胜者" && semifinalWinners[i])m[side] = semifinalWinners[i];
+      if(team === "半决赛负者" && semifinalLosers[i])m[side] = semifinalLosers[i];
+    }
   }
   return matches;
 }
@@ -114,15 +137,10 @@ function previousDay(dateStr){
 function matchDateKey(m){
   return `2026-${m.d}`;
 }
-function inBetWindow(m, now = new Date()){
-  const today = romeDateKey(now);
-  return [today, addDays(today,1)].includes(matchDateKey(m));
-}
 function isOddsCandidate(m, now = new Date()){
   if(m.s && !FORCE_ALL)return false;
   const home = rawName(m.h), away = rawName(m.a);
   if(!TEAM_EN[home] || !TEAM_EN[away])return false;
-  if(!FORCE_ALL && !inBetWindow(m, now))return false;
   if(!PINNACLE_URLS[matchId(m)] && !ALLOW_MATCHUPS_PARSE && !ESPN_ODDS_BACKUP)return false;
   const kick = romeKickoffUtc(m).getTime();
   const graceHours = Math.max(0, POST_KICKOFF_ODDS_GRACE_MINUTES) / 60;
@@ -132,8 +150,14 @@ function isOddsCandidate(m, now = new Date()){
 function syncCadenceMinutes(candidates, now = new Date(), health = null){
   if(!candidates.length)return {minutes:360, tier:"no-odds-candidate"};
   const nextMinutes = Math.min(...candidates.map(m => (romeKickoffUtc(m).getTime() - now.getTime()) / 60_000));
-  if(health?.widespreadMissing && health.nextMissingMinutes <= HIGH_FREQ_LOOKAHEAD_MINUTES){
+  if(health?.scoreMissing > 0 && health.nextMissingMinutes <= HIGH_FREQ_LOOKAHEAD_MINUTES){
     return {minutes:HIGH_FREQ_CADENCE_MINUTES, tier:"near-kickoff-widespread-missing"};
+  }
+  if(health?.scoreMissing > 0 && health.nextMissingMinutes <= 72 * 60){
+    return {minutes:30, tier:"upcoming-score-odds-missing"};
+  }
+  if(health?.scoreMissing > 0 && health.nextMissingMinutes <= LOOKAHEAD_HOURS * 60){
+    return {minutes:60, tier:"lookahead-score-odds-missing"};
   }
   const nextHours = nextMinutes / 60;
   if(nextHours <= 6)return {minutes:60, tier:"kickoff-within-6h"};
@@ -144,16 +168,19 @@ function hasUsableBookOdds(state, m){
   const o = state?.odds?.[matchId(m)] || state?.odds?.[oddsKey(m)];
   return Number(o?.h) > 1 && Number(o?.d) > 1 && Number(o?.a) > 1;
 }
-function hasUsableScoreOdds(state, m){
+function hasUsableScoreOdds(state, m, now = new Date()){
   if(!SCORE_ODDS_SYNC)return true;
   const o = state?.scoreOdds?.[matchId(m)] || state?.scoreOdds?.[oddsKey(m)];
-  return Object.values(o?.scores || o?.prices || o?.correctScores || {}).filter(v => Number(v) > 1).length >= SCORE_ODDS_MIN_LINES;
+  const enoughLines = Object.values(o?.scores || o?.prices || o?.correctScores || {}).filter(v => Number(v) > 1).length >= SCORE_ODDS_MIN_LINES;
+  const updatedAt = Date.parse(o?.updatedAt || o?.updated || "");
+  const fresh = Number.isFinite(updatedAt) && (now.getTime() - updatedAt) / 60_000 <= SCORE_ODDS_MAX_AGE_MINUTES;
+  return enoughLines && fresh;
 }
 function oddsHealth(state, candidates, now = new Date()){
   const checked = candidates.length;
   const bookMissing = candidates.filter(m => !hasUsableBookOdds(state, m)).length;
-  const scoreMissing = candidates.filter(m => !hasUsableScoreOdds(state, m)).length;
-  const missing = missingSnapshotMatches(state, candidates);
+  const scoreMissing = candidates.filter(m => !hasUsableScoreOdds(state, m, now)).length;
+  const missing = missingSnapshotMatches(state, candidates, now);
   const nextMissingMinutes = missing.length
     ? Math.min(...missing.map(m => (romeKickoffUtc(m).getTime() - now.getTime()) / 60_000))
     : Infinity;
@@ -170,15 +197,15 @@ function oddsHealth(state, candidates, now = new Date()){
        ratio(scoreMissing) >= HIGH_FREQ_MISSING_RATIO)
   };
 }
-function missingSnapshotMatches(state, candidates){
-  return candidates.filter(m => !hasUsableBookOdds(state, m) || !hasUsableScoreOdds(state, m));
+function missingSnapshotMatches(state, candidates, now = new Date()){
+  return candidates.filter(m => !hasUsableBookOdds(state, m) || !hasUsableScoreOdds(state, m, now));
 }
 function shouldFetchOdds(state, candidates, now = new Date()){
   const health = oddsHealth(state, candidates, now);
   const cadence = syncCadenceMinutes(candidates, now, health);
   if(FORCE_SYNC)return {...cadence, shouldFetch:true, reason:"forced"};
   if(!candidates.length)return {...cadence, shouldFetch:false, reason:"no odds candidate in lookahead window"};
-  const missing = missingSnapshotMatches(state, candidates);
+  const missing = missingSnapshotMatches(state, candidates, now);
   const last = Date.parse(state?.oddsSync?.lastCheckedAt || state?.oddsSync?.lastAttemptAt || "") || 0;
   const elapsedMinutes = (now.getTime() - last) / 60_000;
   if(missing.length && !last)return {...cadence, ...health, shouldFetch:true, reason:"missing odds snapshot and no previous odds sync", missingSnapshots:missing.length};
@@ -486,7 +513,12 @@ state.scoreOdds ||= {};
 state.scoreOddsSync ||= {};
 
 const matches = resolveKnockoutPlaceholders(loadMatches(), state);
-const candidates = matches.filter(m => isOddsCandidate(m));
+const eligibleCandidates = matches
+  .filter(m => isOddsCandidate(m))
+  .sort((a,b) => romeKickoffUtc(a) - romeKickoffUtc(b));
+const candidates = FORCE_ALL
+  ? eligibleCandidates
+  : eligibleCandidates.slice(0, Math.max(1, UPCOMING_MATCH_LIMIT));
 console.log(`Bookmaker odds candidate matches: ${candidates.length}`);
 
 const plan = shouldFetchOdds(state, candidates);
@@ -514,6 +546,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
       bookMissingRatio:plan.bookMissingRatio || 0,
       scoreMissingRatio:plan.scoreMissingRatio || 0,
       scoreOddsMinLines:SCORE_ODDS_MIN_LINES,
+      scoreOddsMaxAgeMinutes:SCORE_ODDS_MAX_AGE_MINUTES,
       cadenceMinutes:plan.minutes,
       cadenceTier:plan.tier,
       skipReason:plan.reason,
@@ -611,6 +644,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
     bookMissingRatio:plan.bookMissingRatio || 0,
     scoreMissingRatio:plan.scoreMissingRatio || 0,
     scoreOddsMinLines:SCORE_ODDS_MIN_LINES,
+    scoreOddsMaxAgeMinutes:SCORE_ODDS_MAX_AGE_MINUTES,
     updated,
     pinnacleUpdated,
     espnUpdated,
@@ -621,6 +655,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
     matchupsParse:ALLOW_MATCHUPS_PARSE,
     espnBackup:ESPN_ODDS_BACKUP,
     lookaheadHours:LOOKAHEAD_HOURS,
+    upcomingMatchLimit:UPCOMING_MATCH_LIMIT,
     scoreOddsSync:SCORE_ODDS_SYNC,
     sportsgamblerScoreBackup:SPORTSGAMBLER_SCORE_BACKUP,
     scoreChecked,
@@ -639,6 +674,7 @@ if(PLAN_ONLY || !plan.shouldFetch){
     scoreGrid:SCORE_GRID,
     minLines:SCORE_ODDS_MIN_LINES,
     minCoverage:SCORE_ODDS_MIN_COVERAGE,
+    maxAgeMinutes:SCORE_ODDS_MAX_AGE_MINUTES,
     note:"Correct-score odds prefer direct Pinnacle match pages and fall back to SportsGambler/BetMGM match pages.",
     warnings:warnings.filter(w => w.includes("correct-score")).slice(0,20)
   };
